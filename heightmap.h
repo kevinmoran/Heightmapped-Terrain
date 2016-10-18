@@ -48,7 +48,7 @@ bool read_height_pgm(const char* filename, unsigned char** image_data, int &widt
 }
 
 //Generates a square plane of n*n vertices spanning (2*size)*(2*size) world units (centered on origin)
-void gen_vert_plane(float **verts, int &point_count, int n, float size){
+void gen_height_field(float **verts, int &point_count, int n, float size){
     float cell_size = 2*size/(n-1);
     point_count = n*n;
 
@@ -71,7 +71,7 @@ void gen_vert_plane(float **verts, int &point_count, int n, float size){
 
 //Generates a square plane of n*n vertices spanning (2*size)*(2*size) world units (centered on origin)
 //Incorporates height from image_data array
-void gen_vert_plane(float **verts, int &point_count, const unsigned char* image_data, int n, float size){
+void gen_height_field(float **verts, int &point_count, const unsigned char* image_data, int n, float size){
     float cell_size = 2*size/(n-1);
     point_count = n*n;
 

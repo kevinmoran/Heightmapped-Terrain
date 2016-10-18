@@ -32,10 +32,10 @@ int main(){
     // free(image_data);
 
     float* vp;
-    int* indices;
+    int* indices; //TODO change to GL_UNSIGNED_BYTE OR GL_SHORT (2 bytes)
     int point_count, num_indices;
 
-    gen_vert_plane(&vp, point_count, image_data, heightmap_n, 10.0f);
+    gen_height_field(&vp, point_count, image_data, heightmap_n, 10.0f);
     gen_heightmap_indices(&indices, num_indices, heightmap_n);
 
 	GLuint points_vbo;
@@ -96,6 +96,7 @@ int main(){
 		else F_was_pressed = false;
 
         if (glfwGetKey(window, GLFW_KEY_R)) {
+            //Call this after altering image_data
             reload_height_data(&vp, image_data, heightmap_n, points_vbo);
         }
 
@@ -104,10 +105,13 @@ int main(){
             write_height_pgm("terrain.pgm", image_data, width, height);
         }
 
+        //Ray picking
         double mouse_xpos, mouse_ypos;
         glfwGetCursorPos(window, &mouse_xpos, &mouse_ypos);
         if(mouse_xpos>0 && mouse_xpos<gl_width && mouse_ypos>0 && mouse_ypos<gl_height) {
             //Mouse is within viewport
+            //Transform ray to world space
+            //March ray forward and check if it is below heightfield at each step
 
         }
 
