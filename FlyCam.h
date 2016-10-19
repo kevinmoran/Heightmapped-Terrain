@@ -101,3 +101,5 @@ void FlyCam::update(double dt){
     up = inverse(R)*vec4(0,1,0,0);  //R to calculate these??? I don't know anymore
     fwd = inverse(R)*vec4(0,0,-1,0);
 }
+
+FlyCam fly_cam;

@@ -1,15 +1,140 @@
 #pragma once
+
+#include <GLFW/glfw3.h>
+#include <stdio.h>
+#include <stdlib.h> //malloc
+#include <string.h> //memset
 #include <assert.h>
 
-const int heightmap_scale = 5.0f;
+#include "FlyCam.h"
+#include "maths_funcs.h"
+
+int heightmap_n = 8; //number of verts on x, z axes
+float heightmap_size = 10.0f; //world units
+int width, height; //in case we want non-square height map
+const int heightmap_scale = 5.0f; //y-axis range
+unsigned char* height_data;
+
+float* terrain_vp; //array of vertices
+int* terrain_indices; //TODO change to GL_UNSIGNED_BYTE OR GL_SHORT (2 bytes)
+int terrain_point_count, terrain_num_indices;
+int terrain_edit_speed = 5;
+
+GLuint terrain_vao;
+GLuint terrain_points_vbo;
+GLuint terrain_index_vbo;
+
+void init_terrain();
+int get_height_index(float x, float z);
+void gen_height_field(float **verts, int &point_count, int n, float size);
+void gen_height_field(float **verts, int &point_count, const unsigned char* image_data, int n, float size);
+void reload_height_data();
+void gen_heightmap_indices(int** indices, int &num_indices, int n);
+void write_height_pgm(const char* filename, const unsigned char* image_data, int width, int height);
+bool read_height_pgm(const char* filename, unsigned char** image_data, int &width, int &height);
+
+void init_terrain(){
+    if(!read_height_pgm("terrain.pgm", &height_data, width, height)){
+        width = heightmap_n, height = heightmap_n;
+        height_data = (unsigned char*)malloc(width*height*sizeof(unsigned char));
+        memset(height_data, 0, width*height);
+		write_height_pgm("terrain.pgm", height_data, width, height);
+    }
+
+    //TODO call this when done editing heightmap
+    // free(height_data);
+
+    gen_height_field(&terrain_vp, terrain_point_count, height_data, heightmap_n, heightmap_size);
+    gen_heightmap_indices(&terrain_indices, terrain_num_indices, heightmap_n);
+
+	glGenBuffers(1, &terrain_points_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, terrain_points_vbo);
+	glBufferData(GL_ARRAY_BUFFER, terrain_point_count*3*sizeof(float), terrain_vp, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &terrain_index_vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain_index_vbo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, terrain_num_indices*sizeof(int), terrain_indices, GL_STATIC_DRAW);
+
+	glGenVertexArrays(1, &terrain_vao);
+	glBindVertexArray(terrain_vao);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, terrain_points_vbo);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	//free(terrain_vp); //TODO should probably free this at some stage
+    free(terrain_indices);
+}
+
+void update_terrain(){
+    //Ray picking to raise/lower ground
+    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)){
+        double mouse_xpos, mouse_ypos;
+        glfwGetCursorPos(window, &mouse_xpos, &mouse_ypos);
+
+        float x_nds = (2*mouse_xpos/gl_width) - 1;
+        float y_nds = 1- (2*mouse_ypos)/gl_height;
+        //vec3 ray_nds = vec3(x_nds, y_nds, 1.0f);
+        vec4 ray_clip = vec4(x_nds, y_nds, -1.0f, 1.0f);
+        vec4 ray_eye = inverse(fly_cam.P)*ray_clip;
+        ray_eye = vec4(ray_eye.v[0], ray_eye.v[1], -1.0f, 0.0f);
+        vec3 ray_world = vec3(inverse(fly_cam.V)*ray_eye);
+        ray_world = normalise(ray_world);
+        
+        for (int i=0; i<500; i++) {
+            vec3 interval_pos = ray_world*(float)i;
+            interval_pos = fly_cam.pos+interval_pos;
+
+            int height_index = get_height_index(interval_pos.v[0], interval_pos.v[2]);
+            float ground_y = (height_index<0)? -INFINITY : heightmap_scale*height_data[height_index]/255.0f;
+            if(interval_pos.v[1]<ground_y) {
+                height_data[height_index] = MIN(height_data[height_index]+terrain_edit_speed, 255);
+                height_data[height_index+1] = MIN(height_data[height_index+1]+terrain_edit_speed, 255);
+                height_data[height_index+heightmap_n] = MIN(height_data[height_index+heightmap_n]+terrain_edit_speed, 255);
+                height_data[height_index+heightmap_n+1] = MIN(height_data[height_index+heightmap_n+1]+terrain_edit_speed, 255);
+                reload_height_data();
+                break;
+            }
+        }//endfor
+
+    }//end if mouse button 
+    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)){
+        double mouse_xpos, mouse_ypos;
+        glfwGetCursorPos(window, &mouse_xpos, &mouse_ypos);
+
+        float x_nds = (2*mouse_xpos/gl_width) - 1;
+        float y_nds = 1- (2*mouse_ypos)/gl_height;
+        //vec3 ray_nds = vec3(x_nds, y_nds, 1.0f);
+        vec4 ray_clip = vec4(x_nds, y_nds, -1.0f, 1.0f);
+        vec4 ray_eye = inverse(fly_cam.P)*ray_clip;
+        ray_eye = vec4(ray_eye.v[0], ray_eye.v[1], -1.0f, 0.0f);
+        vec3 ray_world = vec3(inverse(fly_cam.V)*ray_eye);
+        ray_world = normalise(ray_world);
+        
+        for (int i=0; i<500; i++) {
+            vec3 interval_pos = ray_world*(float)i;
+            interval_pos = fly_cam.pos+interval_pos;
+
+            int height_index = get_height_index(interval_pos.v[0], interval_pos.v[2]);
+            float ground_y = (height_index<0)? -INFINITY : heightmap_scale*height_data[height_index]/255.0f;
+            if(interval_pos.v[1]<ground_y) {
+                height_data[height_index] = MAX(height_data[height_index]-terrain_edit_speed, 0);
+                height_data[height_index+1] = MAX(height_data[height_index+1]-terrain_edit_speed, 0);
+                height_data[height_index+heightmap_n] = MAX(height_data[height_index+heightmap_n]-terrain_edit_speed, 0);
+                height_data[height_index+heightmap_n+1] = MAX(height_data[height_index+heightmap_n+1]-terrain_edit_speed, 0);
+                reload_height_data();
+                break;
+            }
+        }//endfor
+
+    }//end if mouse button 
+}
 
 //Returns index for height data array to get height at pos x,z
-int get_height_index(int n, float size, float x, float z){
-    if(x<-size || x>size || z<-size || z>size) return -1;
-    float cell_size = 2*size/(n-1);
-    int row = (z+size)/cell_size;
-    int col = (x+size)/cell_size;
-    int i = n*row+col;
+int get_height_index(float x, float z){
+    if(x<-heightmap_size || x>heightmap_size || z<-heightmap_size || z>heightmap_size) return -1;
+    float cell_size = 2*heightmap_size/(heightmap_n-1);
+    int row = (z+heightmap_size)/cell_size;
+    int col = (x+heightmap_size)/cell_size;
+    int i = heightmap_n*row+col;
     return i;
 }
 
@@ -59,15 +184,15 @@ void gen_height_field(float **verts, int &point_count, const unsigned char* imag
 }
 
 //Writes y-components of image_data into verts and buffers data to points_vbo
-void reload_height_data (float **verts, const unsigned char* image_data, int n, GLuint points_vbo){
+void reload_height_data (){
     int i=0;
-    for(int r=0; r<n; r++){
-        for(int c=0; c<n; c++, i++){
-            (*verts)[3*i + 1] = heightmap_scale*image_data[i]/255.0f;
+    for(int r=0; r<heightmap_n; r++){
+        for(int c=0; c<heightmap_n; c++, i++){
+            terrain_vp[3*i + 1] = heightmap_scale*height_data[i]/255.0f;
         }
     }
-    glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-	glBufferData(GL_ARRAY_BUFFER, n*n*3*sizeof(float), *verts, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, terrain_points_vbo);
+	glBufferData(GL_ARRAY_BUFFER, heightmap_n*heightmap_n*3*sizeof(float), terrain_vp, GL_STATIC_DRAW);
 }
 
 //Generates index buffer for n*n height field
