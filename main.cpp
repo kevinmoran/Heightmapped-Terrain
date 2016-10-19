@@ -27,7 +27,7 @@ int main(){
 
     fly_cam.init(vec3(0,12,15), vec3(0,0,0));
     glUniformMatrix4fv(pass_shader.P_loc, 1, GL_FALSE, fly_cam.P.m);
-    glUniform4fv(colour_loc, 1, vec4(0.2f,0.4f,0.1f,1).v);
+    glUniform4fv(colour_loc, 1, vec4(0.2f, 0.4f, 0.1f, 1).v);
     glUniformMatrix4fv(pass_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
 
     double curr_time = glfwGetTime(), prev_time, dt;
