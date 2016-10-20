@@ -17,6 +17,7 @@ float gl_aspect_ratio = (float)gl_width/gl_height;
 
 int main(){
 	if (!init_gl(window, gl_width, gl_height)){ return 1; }
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 
     init_terrain();
 

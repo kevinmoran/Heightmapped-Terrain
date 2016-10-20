@@ -66,12 +66,13 @@ void init_terrain(){
 
 void update_terrain(){
     //Ray picking to raise/lower ground
+    //TODO clean this up, hate having the same code for the two types of click!
     if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)){
         double mouse_xpos, mouse_ypos;
         glfwGetCursorPos(window, &mouse_xpos, &mouse_ypos);
 
-        float x_nds = (2*mouse_xpos/gl_width) - 1;
-        float y_nds = 1- (2*mouse_ypos)/gl_height;
+        float x_nds = 0;//(2*mouse_xpos/gl_width) - 1;
+        float y_nds = 0;//1- (2*mouse_ypos)/gl_height;
         //vec3 ray_nds = vec3(x_nds, y_nds, 1.0f);
         vec4 ray_clip = vec4(x_nds, y_nds, -1.0f, 1.0f);
         vec4 ray_eye = inverse(fly_cam.P)*ray_clip;
@@ -100,8 +101,8 @@ void update_terrain(){
         double mouse_xpos, mouse_ypos;
         glfwGetCursorPos(window, &mouse_xpos, &mouse_ypos);
 
-        float x_nds = (2*mouse_xpos/gl_width) - 1;
-        float y_nds = 1- (2*mouse_ypos)/gl_height;
+        float x_nds = 0;//(2*mouse_xpos/gl_width) - 1;
+        float y_nds = 0;//1- (2*mouse_ypos)/gl_height;
         //vec3 ray_nds = vec3(x_nds, y_nds, 1.0f);
         vec4 ray_clip = vec4(x_nds, y_nds, -1.0f, 1.0f);
         vec4 ray_eye = inverse(fly_cam.P)*ray_clip;
