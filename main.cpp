@@ -46,29 +46,54 @@ int main(){
 			glfwSetWindowShouldClose(window, GL_TRUE);
 			continue;
 		}
-		static bool fly_cam_enabled = true;
-		static bool F_was_pressed = false;
-		if (glfwGetKey(window, GLFW_KEY_F)) {
-			if(!F_was_pressed) {
-				fly_cam_enabled = !fly_cam_enabled;
-				F_was_pressed = true;
+		// static bool fly_cam_enabled = true;
+		// static bool F_was_pressed = false;
+		// if (glfwGetKey(window, GLFW_KEY_F)) {
+		// 	if(!F_was_pressed) {
+		// 		fly_cam_enabled = !fly_cam_enabled;
+		// 		F_was_pressed = true;
+		// 	}
+		// }
+		// else F_was_pressed = false;
+
+		static bool gravity_enabled = false;
+		static bool G_was_pressed = false;
+		if (glfwGetKey(window, GLFW_KEY_G)) {
+			if(!G_was_pressed) {
+				gravity_enabled = !gravity_enabled;
+				G_was_pressed = true;
 			}
 		}
-		else F_was_pressed = false;
+		else G_was_pressed = false;
 
        update_terrain();
 
-		if(fly_cam_enabled) fly_cam.update(dt);
-		else{
-			// if(g_input[MOVE_FORWARD]) {
-			// }
-			// if(g_input[MOVE_LEFT]) {
-			// }
-			// if(g_input[MOVE_BACK]) {		
-			// }
-			// if(g_input[MOVE_RIGHT]) {		
-			// }
+		if(gravity_enabled){
+			static float y_acceleration = 0.0f;
+			y_acceleration -= 10*9.81*dt;
+			fly_cam.pos.v[1] += y_acceleration*dt;
+			int height_index = get_height_index(fly_cam.pos.v[0], fly_cam.pos.v[2]);
+            float ground_y = (height_index<0)? -INFINITY : heightmap_scale*height_data[height_index]/255.0f;
+            
+			if(fly_cam.pos.v[1] - ground_y < 1) {
+				fly_cam.pos.v[1] = 1;
+				y_acceleration = 0.0f;
+			}
+			
+			if(fly_cam.pos.v[0] < -heightmap_size) {
+				fly_cam.pos.v[0] = -heightmap_size;
+			}
+			if(fly_cam.pos.v[0] > heightmap_size) {
+				fly_cam.pos.v[0] = heightmap_size;
+			}
+			if(fly_cam.pos.v[2] < -heightmap_size) {
+				fly_cam.pos.v[2] = -heightmap_size;
+			}
+			if(fly_cam.pos.v[2] > heightmap_size) {
+				fly_cam.pos.v[2] = heightmap_size;
+			}
 		}
+		fly_cam.update(dt);
 
 		static bool M_was_pressed = false;
 		if (glfwGetKey(window, GLFW_KEY_M)) {
