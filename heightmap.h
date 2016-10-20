@@ -18,7 +18,7 @@ unsigned char* height_data;
 float* terrain_vp; //array of vertices
 int* terrain_indices; //TODO change to GL_UNSIGNED_BYTE OR GL_SHORT (2 bytes)
 int terrain_point_count, terrain_num_indices;
-int terrain_edit_speed = 5;
+int terrain_edit_speed = 200;
 
 GLuint terrain_vao;
 GLuint terrain_points_vbo;
@@ -64,10 +64,14 @@ void init_terrain(){
     free(terrain_indices);
 }
 
-void update_terrain(){
+void update_terrain(double dt){
     //Ray picking to raise/lower ground
-    //TODO clean this up, hate having the same code for the two types of click!
-    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)){
+    static double mouse_repeat_timer = 0.0;
+    mouse_repeat_timer += dt;
+    
+    if(mouse_repeat_timer>1/60.0){
+        mouse_repeat_timer -= 1/60.0;
+
         double mouse_xpos, mouse_ypos;
         glfwGetCursorPos(window, &mouse_xpos, &mouse_ypos);
 
@@ -87,46 +91,25 @@ void update_terrain(){
             int height_index = get_height_index(interval_pos.v[0], interval_pos.v[2]);
             float ground_y = (height_index<0)? -INFINITY : heightmap_scale*height_data[height_index]/255.0f;
             if(interval_pos.v[1]<ground_y) {
-                height_data[height_index] = MIN(height_data[height_index]+terrain_edit_speed, 255);
-                height_data[height_index+1] = MIN(height_data[height_index+1]+terrain_edit_speed, 255);
-                height_data[height_index+heightmap_n] = MIN(height_data[height_index+heightmap_n]+terrain_edit_speed, 255);
-                height_data[height_index+heightmap_n+1] = MIN(height_data[height_index+heightmap_n+1]+terrain_edit_speed, 255);
+                if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)){
+                    height_data[height_index] = MIN(height_data[height_index]+terrain_edit_speed/60, 255);
+                    height_data[height_index+1] = MIN(height_data[height_index+1]+terrain_edit_speed/60, 255);
+                    height_data[height_index+heightmap_n] = MIN(height_data[height_index+heightmap_n]+terrain_edit_speed/60, 255);
+                    height_data[height_index+heightmap_n+1] = MIN(height_data[height_index+heightmap_n+1]+terrain_edit_speed/60, 255);
+                }
+                if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)){
+                    height_data[height_index] = MAX(height_data[height_index]-terrain_edit_speed/60, 0);
+                    height_data[height_index+1] = MAX(height_data[height_index+1]-terrain_edit_speed/60, 0);
+                    height_data[height_index+heightmap_n] = MAX(height_data[height_index+heightmap_n]-terrain_edit_speed/60, 0);
+                    height_data[height_index+heightmap_n+1] = MAX(height_data[height_index+heightmap_n+1]-terrain_edit_speed/60, 0);
+                }
                 reload_height_data();
                 break;
             }
         }//endfor
 
     }//end if mouse button 
-    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)){
-        double mouse_xpos, mouse_ypos;
-        glfwGetCursorPos(window, &mouse_xpos, &mouse_ypos);
-
-        float x_nds = 0;//(2*mouse_xpos/gl_width) - 1;
-        float y_nds = 0;//1- (2*mouse_ypos)/gl_height;
-        //vec3 ray_nds = vec3(x_nds, y_nds, 1.0f);
-        vec4 ray_clip = vec4(x_nds, y_nds, -1.0f, 1.0f);
-        vec4 ray_eye = inverse(fly_cam.P)*ray_clip;
-        ray_eye = vec4(ray_eye.v[0], ray_eye.v[1], -1.0f, 0.0f);
-        vec3 ray_world = vec3(inverse(fly_cam.V)*ray_eye);
-        ray_world = normalise(ray_world);
-        
-        for (int i=0; i<500; i++) {
-            vec3 interval_pos = ray_world*(float)i;
-            interval_pos = fly_cam.pos+interval_pos;
-
-            int height_index = get_height_index(interval_pos.v[0], interval_pos.v[2]);
-            float ground_y = (height_index<0)? -INFINITY : heightmap_scale*height_data[height_index]/255.0f;
-            if(interval_pos.v[1]<ground_y) {
-                height_data[height_index] = MAX(height_data[height_index]-terrain_edit_speed, 0);
-                height_data[height_index+1] = MAX(height_data[height_index+1]-terrain_edit_speed, 0);
-                height_data[height_index+heightmap_n] = MAX(height_data[height_index+heightmap_n]-terrain_edit_speed, 0);
-                height_data[height_index+heightmap_n+1] = MAX(height_data[height_index+heightmap_n+1]-terrain_edit_speed, 0);
-                reload_height_data();
-                break;
-            }
-        }//endfor
-
-    }//end if mouse button 
+    
 }
 
 //Returns index for height data array to get height at pos x,z

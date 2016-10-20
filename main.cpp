@@ -66,7 +66,7 @@ int main(){
 		}
 		else G_was_pressed = false;
 
-       update_terrain();
+       update_terrain(dt);
 
 		if(gravity_enabled){
 			static float y_acceleration = 0.0f;
