@@ -22,14 +22,12 @@ int main(){
     init_terrain();
 
     //Load shader
-	Shader pass_shader("MVP.vert", "uniform_colour.frag");
-	GLuint colour_loc = glGetUniformLocation(pass_shader.prog_id, "colour");
-	glUseProgram(pass_shader.prog_id);
+	Shader heightmap_shader("Heightmap.vert", "Heightmap.frag");
+	glUseProgram(heightmap_shader.prog_id);
 
     fly_cam.init(vec3(0,12,15), vec3(0,0,0));
-    glUniformMatrix4fv(pass_shader.P_loc, 1, GL_FALSE, fly_cam.P.m);
-    glUniform4fv(colour_loc, 1, vec4(0.2f, 0.4f, 0.1f, 1).v);
-    glUniformMatrix4fv(pass_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
+    glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, fly_cam.P.m);
+    glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
 
     double curr_time = glfwGetTime(), prev_time, dt;
 	//-------------------------------------------------------------------------------------//
@@ -72,16 +70,38 @@ int main(){
 			// }
 		}
 
+		static bool M_was_pressed = false;
+		if (glfwGetKey(window, GLFW_KEY_M)) {
+			if(!M_was_pressed) {
+				cam_mouse_controls = !cam_mouse_controls;
+				if(glfwGetInputMode(window, GLFW_CURSOR)==GLFW_CURSOR_NORMAL){
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+				}
+				else{
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
+				}
+				M_was_pressed = true;
+			}
+		}
+		else M_was_pressed = false;
+
+		if (glfwGetKey(window, GLFW_KEY_R)) {
+			heightmap_shader.reload_shader_program("Heightmap.vert", "Heightmap.frag");
+			glUseProgram(heightmap_shader.prog_id);
+			glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, fly_cam.P.m);
+			glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
+		}
+
 		//Rendering
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUseProgram(pass_shader.prog_id);
-		glUniformMatrix4fv(pass_shader.V_loc, 1, GL_FALSE, fly_cam.V.m);
+        glUseProgram(heightmap_shader.prog_id);
+		glUniformMatrix4fv(heightmap_shader.V_loc, 1, GL_FALSE, fly_cam.V.m);
 
 		//Draw terrain
 		glBindVertexArray(terrain_vao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain_index_vbo);
-        glDrawElements(GL_LINE_LOOP, terrain_num_indices, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_INT, 0);
 		glfwSwapBuffers(window);
 	}//end main loop
 

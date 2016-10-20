@@ -71,8 +71,8 @@ void update_terrain(){
         double mouse_xpos, mouse_ypos;
         glfwGetCursorPos(window, &mouse_xpos, &mouse_ypos);
 
-        float x_nds = 0;//(2*mouse_xpos/gl_width) - 1;
-        float y_nds = 0;//1- (2*mouse_ypos)/gl_height;
+        float x_nds = (cam_mouse_controls) ? 0 :(2*mouse_xpos/gl_width) - 1;
+        float y_nds = (cam_mouse_controls) ? 0 : 1- (2*mouse_ypos)/gl_height;
         //vec3 ray_nds = vec3(x_nds, y_nds, 1.0f);
         vec4 ray_clip = vec4(x_nds, y_nds, -1.0f, 1.0f);
         vec4 ray_eye = inverse(fly_cam.P)*ray_clip;

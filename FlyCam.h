@@ -14,6 +14,8 @@
 //IT'S FINE
 //EVERYTHING'S FINE
 
+bool cam_mouse_controls = true;
+
 struct FlyCam {
     vec3 pos;
 	vec3 fwd, up, rgt;
@@ -78,27 +80,30 @@ void FlyCam::update(double dt){
         pos.v[1] -= move_speed*dt;			
     }
     //Rotation
-    // if(g_input[TURN_CAM_LEFT]) {
-    //     yaw += turn_speed*dt;			
-    // }
-    // if(g_input[TURN_CAM_RIGHT]) {
-    //     yaw -= turn_speed*dt;			
-    // }
-    // if(g_input[TILT_CAM_UP]) {
-    //     pitch += turn_speed*dt;			
-    // }
-    // if(g_input[TILT_CAM_DOWN]) {
-    //     pitch -= turn_speed*dt;			
-    // }
-    static double prev_mouse_x, prev_mouse_y;
-    static float mouse_sensitivity = 0.4f;
-    double mouse_x, mouse_y;
-    glfwGetCursorPos(window, &mouse_x, &mouse_y);
-    yaw   += (prev_mouse_x-mouse_x) * mouse_sensitivity * turn_speed*dt;
-    pitch += (prev_mouse_y-mouse_y) * mouse_sensitivity * turn_speed*dt;
-    prev_mouse_x = mouse_x;
-    prev_mouse_y = mouse_y;
-
+    if(!cam_mouse_controls){
+        if(g_input[TURN_CAM_LEFT]) {
+            yaw += turn_speed*dt;			
+        }
+        if(g_input[TURN_CAM_RIGHT]) {
+            yaw -= turn_speed*dt;			
+        }
+        if(g_input[TILT_CAM_UP]) {
+            pitch += turn_speed*dt;			
+        }
+        if(g_input[TILT_CAM_DOWN]) {
+            pitch -= turn_speed*dt;			
+        }
+    }
+    else {
+        static double prev_mouse_x, prev_mouse_y;
+        static float mouse_sensitivity = 0.4f;
+        double mouse_x, mouse_y;
+        glfwGetCursorPos(window, &mouse_x, &mouse_y);
+        yaw   += (prev_mouse_x-mouse_x) * mouse_sensitivity * turn_speed*dt;
+        pitch += (prev_mouse_y-mouse_y) * mouse_sensitivity * turn_speed*dt;
+        prev_mouse_x = mouse_x;
+        prev_mouse_y = mouse_y;
+    }
     //Update matrices
     pitch = MIN(MAX(pitch, -89), 80); //Clamp pitch 
     V = translate(identity_mat4(), pos*(-1));
