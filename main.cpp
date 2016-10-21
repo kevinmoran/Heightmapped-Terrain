@@ -117,6 +117,10 @@ int main(){
 			glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
 		}
 
+		if(glfwGetKey(window, GLFW_KEY_H)){
+			write_height_pgm("terrain.pgm", height_data, width, height);
+		}
+
 		//Rendering
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
