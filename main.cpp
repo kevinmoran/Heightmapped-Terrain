@@ -98,13 +98,13 @@ int main(){
 		static bool M_was_pressed = false;
 		if (glfwGetKey(window, GLFW_KEY_M)) {
 			if(!M_was_pressed) {
-				cam_mouse_controls = !cam_mouse_controls;
-				if(glfwGetInputMode(window, GLFW_CURSOR)==GLFW_CURSOR_NORMAL){
+				if(!cam_mouse_controls){
 					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 				}
 				else{
 					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
 				}
+				cam_mouse_controls = !cam_mouse_controls;
 				M_was_pressed = true;
 			}
 		}
