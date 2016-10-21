@@ -9,10 +9,10 @@
 #include "FlyCam.h"
 #include "maths_funcs.h"
 
-int heightmap_n = 8; //number of verts on x, z axes
-float heightmap_size = 10.0f; //world units
+int heightmap_n = 16; //number of verts on x, z axes
+float heightmap_size = 20.0f; //world units
 int width, height; //in case we want non-square height map
-const int heightmap_scale = 5.0f; //y-axis range
+const int heightmap_scale = 10.0f; //y-axis range
 unsigned char* height_data;
 
 float* terrain_vp; //array of vertices

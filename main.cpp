@@ -76,7 +76,7 @@ int main(){
             float ground_y = (height_index<0)? -INFINITY : heightmap_scale*height_data[height_index]/255.0f;
             
 			if(fly_cam.pos.v[1] - ground_y < 1) {
-				fly_cam.pos.v[1] = 1;
+				fly_cam.pos.v[1] = ground_y + 1;
 				y_acceleration = 0.0f;
 			}
 			
