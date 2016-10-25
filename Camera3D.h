@@ -2,21 +2,9 @@
 #include "maths_funcs.h"
 #include "input.h"
 
-//This code is held together with hopes and dreams
-//I got it working by jigging things about till it gave
-//the desired behaviour, some parts don't make sense to me
-//No warranty is implied, this code is not recommended for reuse
-
-//IT'S FUCKED
-//NONE OF THIS SHOULD WORK
-//I HATE ROTATIONS
-//JUST GO WITH IT UNTIL IT BREAKS
-//IT'S FINE
-//EVERYTHING'S FINE
-
 bool cam_mouse_controls = true;
 
-struct FlyCam {
+struct Camera3D {
     vec3 pos;
 	vec3 fwd, up, rgt;
 	float pitch, yaw;
@@ -28,7 +16,7 @@ struct FlyCam {
     void update(double dt);
 };
 
-void FlyCam::init(){
+void Camera3D::init(){
     pos = vec3(0,1,5);
 	fwd = vec3(0,0,-1);
 	up = vec3(0,1,0);
@@ -41,20 +29,20 @@ void FlyCam::init(){
 	P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, 0.1f, 100.0f);
 }
 
-void FlyCam::init(vec3 cam_pos, vec3 target_pos){
+void Camera3D::init(vec3 cam_pos, vec3 target_pos){
     pos = cam_pos;
     V = look_at(cam_pos, target_pos, vec3(0,1,0));
 	P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, 0.1f, 100.0f);
 	rgt = vec3(V.m[0], V.m[4], V.m[8]);
 	up  = vec3(V.m[1], V.m[5], V.m[9]);
     fwd = vec3(-V.m[2], -V.m[6], -V.m[10]);
-    yaw = acos(V.m[0])*ONE_RAD_IN_DEG;
+    yaw   =  acos(V.m[0])*ONE_RAD_IN_DEG;
     pitch = -acos(V.m[5])*ONE_RAD_IN_DEG; //no idea why you negate this and not yaw, it just works
 	move_speed = 10;
 	turn_speed = 100;
 }
 
-void FlyCam::update(double dt){
+void Camera3D::update(double dt){
     //WASD Movement (constrained to the x-z plane)
     if(g_input[MOVE_FORWARD]) {
         vec3 xz_proj = normalise(vec3(fwd.v[0], 0, fwd.v[2]));
@@ -96,7 +84,7 @@ void FlyCam::update(double dt){
     }
     else {
         static double prev_mouse_x, prev_mouse_y;
-        static float mouse_sensitivity = 0.4f;
+        static float mouse_sensitivity = 0.4f; //TODO this shouldn't stay here
         double mouse_x, mouse_y;
         glfwGetCursorPos(window, &mouse_x, &mouse_y);
         yaw   += (prev_mouse_x-mouse_x) * mouse_sensitivity * turn_speed*dt;
@@ -112,8 +100,8 @@ void FlyCam::update(double dt){
     //Seems to work for now! ¯\_(ツ)_/¯
     V = R*V;
     rgt = inverse(R)*vec4(1,0,0,0); //I guess it makes sense that you have to invert
-    up = inverse(R)*vec4(0,1,0,0);  //R to calculate these??? I don't know anymore
+    up  = inverse(R)*vec4(0,1,0,0);  //R to calculate these??? I don't know anymore
     fwd = inverse(R)*vec4(0,0,-1,0);
 }
 
-FlyCam fly_cam;
+Camera3D g_camera;

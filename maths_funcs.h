@@ -179,6 +179,8 @@ otherwise we leave the cpp definition as is, but put a SECOND COPY with both
 keywords "extern inline" beforehand. thanks stallman */
 
 struct vec3 {
+	float v[3];
+	
 	vec3 () {}
 	vec3 (const vec4& vv);
 	// create from 3 scalars
@@ -282,9 +284,6 @@ struct vec3 {
 				v[1] == rhs.v[1] &&
 				v[2] == rhs.v[2]);
 	}
-
-	// internal data
-	float v[3];
 };
 
 struct vec4 {

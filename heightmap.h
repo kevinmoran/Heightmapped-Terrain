@@ -6,7 +6,7 @@
 #include <string.h> //memset
 #include <assert.h>
 
-#include "FlyCam.h"
+#include "Camera3D.h"
 #include "maths_funcs.h"
 
 int heightmap_n = 16; //number of verts on x, z axes
@@ -79,14 +79,14 @@ void update_terrain(double dt){
         float y_nds = (cam_mouse_controls) ? 0 : 1- (2*mouse_ypos)/gl_height;
         //vec3 ray_nds = vec3(x_nds, y_nds, 1.0f);
         vec4 ray_clip = vec4(x_nds, y_nds, -1.0f, 1.0f);
-        vec4 ray_eye = inverse(fly_cam.P)*ray_clip;
+        vec4 ray_eye = inverse(g_camera.P)*ray_clip;
         ray_eye = vec4(ray_eye.v[0], ray_eye.v[1], -1.0f, 0.0f);
-        vec3 ray_world = vec3(inverse(fly_cam.V)*ray_eye);
+        vec3 ray_world = vec3(inverse(g_camera.V)*ray_eye);
         ray_world = normalise(ray_world);
         
         for (int i=0; i<500; i++) {
             vec3 interval_pos = ray_world*(float)i;
-            interval_pos = fly_cam.pos+interval_pos;
+            interval_pos = g_camera.pos+interval_pos;
 
             int height_index = get_height_index(interval_pos.v[0], interval_pos.v[2]);
             float ground_y = (height_index<0)? -INFINITY : heightmap_scale*height_data[height_index]/255.0f;
@@ -112,7 +112,7 @@ void update_terrain(double dt){
     
 }
 
-//Returns index for height data array to get height at pos x,z
+//Returns index for height data array to get height at world pos x,z
 int get_height_index(float x, float z){
     if(x<-heightmap_size || x>heightmap_size || z<-heightmap_size || z>heightmap_size) return -1;
     float cell_size = 2*heightmap_size/(heightmap_n-1);
@@ -120,6 +120,60 @@ int get_height_index(float x, float z){
     int col = (x+heightmap_size)/cell_size;
     int i = heightmap_n*row+col;
     return i;
+}
+
+//Returns height at world pos x,z interpolated from closest verts in height field
+float get_height_interp(float x, float z){
+    if(x<-heightmap_size || x>heightmap_size || z<-heightmap_size || z>heightmap_size) return -INFINITY;
+
+    //Get index of top-left vert of quad containing x,z
+    float cell_size = 2*heightmap_size/(heightmap_n-1);
+    int row = (z+heightmap_size)/cell_size;
+    int col = (x+heightmap_size)/cell_size;
+    int i = heightmap_n*row+col; 
+
+    //Get heights of this quad's verts
+    float y_tl = heightmap_scale*height_data[i]/255.0f;
+    float y_tr = heightmap_scale*height_data[i+1]/255.0f;
+    float y_bl = heightmap_scale*height_data[i+heightmap_n]/255.0f;
+    float y_br = heightmap_scale*height_data[i+heightmap_n+1]/255.0f;
+
+    //Get x,z position of top-left vert
+    float x_tl = terrain_vp[3*i];
+    float z_tl = terrain_vp[3*i + 2];
+    float x_t = (x-x_tl)/cell_size;
+    float z_t = (z-z_tl)/cell_size;
+
+    //Construct quad abcd
+    vec3 a, b, c, d;
+    vec3 norm;
+    vec3 p = vec3(x,0,z);
+    a = vec3(x_tl, y_tl, z_tl);
+    b = vec3(x_tl, y_bl, z_tl + cell_size);
+    c = vec3(x_tl+ cell_size, y_br, z_tl + cell_size);
+    d = vec3(x_tl + cell_size, y_tr, z_tl);
+
+    //Check which triangle x,z is in
+    if(x_t + z_t < 1){
+        //In first triangle
+        // a *       * d
+        //      p
+        //
+        // b *
+        norm = normalise(cross((d-b), (a-b)));
+    }
+    else {
+        //In second triangle
+        //           * d
+        //
+        //        p
+        // b *       * c
+        norm = normalise(cross((c-b), (d-b)));
+    }
+
+    float y_final = fabs(dot(p, norm));
+    
+    return y_final;
 }
 
 //Generates a flat square plane of n*n vertices spanning (2*size)*(2*size) world units (centered on origin)
