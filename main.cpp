@@ -21,8 +21,6 @@ int main(){
 
     init_terrain();
 
-	float blah = get_height_interp(3,6);
-
     //Load shader
 	Shader heightmap_shader("Heightmap.vert", "Heightmap.frag");
 	glUseProgram(heightmap_shader.prog_id);
