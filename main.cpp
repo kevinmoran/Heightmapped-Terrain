@@ -88,29 +88,7 @@ int main(){
 		}
 		else {
 			//Update player
-			float player_mass = 10;
-			float g = 9.81f;
-			player_vel.v[1] -= player_mass*g*dt;
-			player_pos.v[1] += player_vel.v[1]*dt;
-			float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
 			
-			if(player_pos.v[1] - ground_y < 1) {
-				player_pos.v[1] = ground_y + 1;
-				player_vel.v[1] = 0.0f;
-			}
-			
-			if(player_pos.v[0] < -heightmap_size) {
-				player_pos.v[0] = -heightmap_size;
-			}
-			if(player_pos.v[0] > heightmap_size) {
-				player_pos.v[0] = heightmap_size;
-			}
-			if(player_pos.v[2] < -heightmap_size) {
-				player_pos.v[2] = -heightmap_size;
-			}
-			if(player_pos.v[2] > heightmap_size) {
-				player_pos.v[2] = heightmap_size;
-			}
 			//WASD Movement (constrained to the x-z plane)
 			if(g_input[MOVE_FORWARD]) {
 				vec3 xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
@@ -127,6 +105,29 @@ int main(){
 			if(g_input[MOVE_RIGHT]) {
 				vec3 xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
 				player_pos += xz_proj*g_camera.move_speed*dt;			
+			}
+			float player_mass = 10;
+			float g = 9.81f;
+			player_vel.v[1] -= player_mass*g*dt;
+			player_pos.v[1] += player_vel.v[1]*dt;
+			float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
+			
+			if(player_pos.v[1] - ground_y < 0.5f) {
+				player_pos.v[1] = ground_y + 0.5f;
+				player_vel.v[1] = 0.0f;
+			}
+			
+			if(player_pos.v[0] < -heightmap_size) {
+				player_pos.v[0] = -heightmap_size;
+			}
+			if(player_pos.v[0] > heightmap_size) {
+				player_pos.v[0] = heightmap_size;
+			}
+			if(player_pos.v[2] < -heightmap_size) {
+				player_pos.v[2] = -heightmap_size;
+			}
+			if(player_pos.v[2] > heightmap_size) {
+				player_pos.v[2] = heightmap_size;
 			}
 			
 			//Update matrices
