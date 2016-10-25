@@ -92,8 +92,7 @@ int main(){
 			float g = 9.81f;
 			player_vel.v[1] -= player_mass*g*dt;
 			player_pos.v[1] += player_vel.v[1]*dt;
-			int height_index = get_height_index(player_pos.v[0], player_pos.v[2]);
-			float ground_y = (height_index<0)? -INFINITY : heightmap_scale*height_data[height_index]/255.0f;
+			float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
 			
 			if(player_pos.v[1] - ground_y < 1) {
 				player_pos.v[1] = ground_y + 1;

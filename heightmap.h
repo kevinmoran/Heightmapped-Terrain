@@ -141,40 +141,14 @@ float get_height_interp(float x, float z){
     //Get x,z position of top-left vert
     float x_tl = terrain_vp[3*i];
     float z_tl = terrain_vp[3*i + 2];
-    float x_t = (x-x_tl)/cell_size;
-    float z_t = (z-z_tl)/cell_size;
+    float x_t = (x-x_tl)/cell_size; // % along cell point is on x-axis
+    float z_t = (z-z_tl)/cell_size; // % along cell point is on z-axis
 
-    //Construct quad abcd
-    vec3 a, b, c, d;
-    vec3 norm;
-    vec3 p = vec3(x,0,z);
-    a = vec3(x_tl, y_tl, z_tl);
-    b = vec3(x_tl, y_bl, z_tl + cell_size);
-    c = vec3(x_tl+ cell_size, y_br, z_tl + cell_size);
-    d = vec3(x_tl + cell_size, y_tr, z_tl);
-
-    //Check which triangle x,z is in
-    if(x_t + z_t < 1){
-        //In first triangle
-        // a *       * d
-        //      p
-        //
-        // b *
-        norm = normalise(cross((d-b), (a-b)));
-    }
-    else {
-        //In second triangle
-        //           * d
-        //
-        //        p
-        // b *       * c
-        norm = normalise(cross((c-b), (d-b)));
-    }
-
-    //TODO this is wrong! rethink the problem
-
-    float y_final = fabs(dot(p, norm));
-    
+    //Find height with bilinear interpolation
+    float y_top = x_t*y_tl + (1-x_t)*y_tr; //Lerp along top edge
+    float y_bottom = x_t*y_bl + (1-x_t)*y_br; //Lerp along bottom edge
+    float y_final = z_t*y_top + (1-z_t)*y_bottom; //Lerp between edges (on z-axis)
+    //^This looks confusing, check out image on wiki: https://en.wikipedia.org/wiki/Bilinear_interpolation
     return y_final;
 }
 
