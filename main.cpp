@@ -11,6 +11,7 @@ float gl_aspect_ratio = (float)gl_width/gl_height;
 
 #include "init_gl.h"
 #include "maths_funcs.h"
+#include "load_obj.h"
 #include "Shader.h"
 #include "Camera3D.h"
 #include "heightmap.h"
@@ -19,22 +20,37 @@ int main(){
 	if (!init_gl(window, gl_width, gl_height)){ return 1; }
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 
+	float* cube_vp = NULL;
+	int cube_point_count = 0;
+	load_obj("cube.obj", cube_vp, cube_point_count);
+
+	GLuint cube_vao;
+	GLuint cube_points_vbo;
+	glGenBuffers(1, &cube_points_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, cube_points_vbo);
+	glBufferData(GL_ARRAY_BUFFER, cube_point_count*3*sizeof(float), cube_vp, GL_STATIC_DRAW);
+
+	glGenVertexArrays(1, &cube_vao);
+	glBindVertexArray(cube_vao);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, cube_points_vbo);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	free(cube_vp);
+
     init_terrain();
 
-    //Load shader
+    //Load shaders
+	Shader box_shader("MVP.vert", "pass.frag");
 	Shader heightmap_shader("Heightmap.vert", "Heightmap.frag");
-	glUseProgram(heightmap_shader.prog_id);
-
+	
     g_camera.init(vec3(0,12,15), vec3(0,0,0));
+	glUseProgram(heightmap_shader.prog_id);
     glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
     glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
 
 	//Player data
-	//vec3 player_pos = g_camera.pos;
-	// vec3 player_fwd = g_camera.fwd;
-	// vec3 player_rgt = g_camera.rgt;
-	// vec3 player_up  = g_camera.up;
-	// mat4 player_M = identity_mat4();
+	vec3 player_pos = vec3(0,10,0);
+	mat4 player_M = translate(identity_mat4(), player_pos);
 	vec3 player_vel = vec3(0,0,0);
 
     double curr_time = glfwGetTime(), prev_time, dt;
@@ -75,87 +91,47 @@ int main(){
 			float player_mass = 10;
 			float g = 9.81f;
 			player_vel.v[1] -= player_mass*g*dt;
-			g_camera.pos.v[1] += player_vel.v[1]*dt;
-			int height_index = get_height_index(g_camera.pos.v[0], g_camera.pos.v[2]);
+			player_pos.v[1] += player_vel.v[1]*dt;
+			int height_index = get_height_index(player_pos.v[0], player_pos.v[2]);
 			float ground_y = (height_index<0)? -INFINITY : heightmap_scale*height_data[height_index]/255.0f;
 			
-			if(g_camera.pos.v[1] - ground_y < 1) {
-				g_camera.pos.v[1] = ground_y + 1;
+			if(player_pos.v[1] - ground_y < 1) {
+				player_pos.v[1] = ground_y + 1;
 				player_vel.v[1] = 0.0f;
 			}
 			
-			if(g_camera.pos.v[0] < -heightmap_size) {
-				g_camera.pos.v[0] = -heightmap_size;
+			if(player_pos.v[0] < -heightmap_size) {
+				player_pos.v[0] = -heightmap_size;
 			}
-			if(g_camera.pos.v[0] > heightmap_size) {
-				g_camera.pos.v[0] = heightmap_size;
+			if(player_pos.v[0] > heightmap_size) {
+				player_pos.v[0] = heightmap_size;
 			}
-			if(g_camera.pos.v[2] < -heightmap_size) {
-				g_camera.pos.v[2] = -heightmap_size;
+			if(player_pos.v[2] < -heightmap_size) {
+				player_pos.v[2] = -heightmap_size;
 			}
-			if(g_camera.pos.v[2] > heightmap_size) {
-				g_camera.pos.v[2] = heightmap_size;
+			if(player_pos.v[2] > heightmap_size) {
+				player_pos.v[2] = heightmap_size;
 			}
 			//WASD Movement (constrained to the x-z plane)
 			if(g_input[MOVE_FORWARD]) {
 				vec3 xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
-				g_camera.pos += xz_proj*g_camera.move_speed*dt;
+				player_pos += xz_proj*g_camera.move_speed*dt;
 			}
 			if(g_input[MOVE_LEFT]) {
 				vec3 xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
-				g_camera.pos -= xz_proj*g_camera.move_speed*dt;
+				player_pos -= xz_proj*g_camera.move_speed*dt;
 			}
 			if(g_input[MOVE_BACK]) {
 				vec3 xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
-				g_camera.pos -= xz_proj*g_camera.move_speed*dt;			
+				player_pos -= xz_proj*g_camera.move_speed*dt;			
 			}
 			if(g_input[MOVE_RIGHT]) {
 				vec3 xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
-				g_camera.pos += xz_proj*g_camera.move_speed*dt;			
+				player_pos += xz_proj*g_camera.move_speed*dt;			
 			}
-			//Increase/decrease elevation
-			if(g_input[RAISE_CAM]) {
-				g_camera.pos.v[1] += g_camera.move_speed*dt;			
-			}
-			if(g_input[LOWER_CAM]) {
-				g_camera.pos.v[1] -= g_camera.move_speed*dt;			
-			}
-			//Rotation
-			if(!cam_mouse_controls){
-				if(g_input[TURN_CAM_LEFT]) {
-					g_camera.yaw += g_camera.turn_speed*dt;			
-				}
-				if(g_input[TURN_CAM_RIGHT]) {
-					g_camera.yaw -= g_camera.turn_speed*dt;			
-				}
-				if(g_input[TILT_CAM_UP]) {
-					g_camera.pitch += g_camera.turn_speed*dt;			
-				}
-				if(g_input[TILT_CAM_DOWN]) {
-					g_camera.pitch -= g_camera.turn_speed*dt;			
-				}
-			}
-			else {
-				static double prev_mouse_x, prev_mouse_y;
-				static float mouse_sensitivity = 0.4f;
-				double mouse_x, mouse_y;
-				glfwGetCursorPos(window, &mouse_x, &mouse_y);
-				g_camera.yaw   += (prev_mouse_x-mouse_x) * mouse_sensitivity * g_camera.turn_speed*dt;
-				g_camera.pitch += (prev_mouse_y-mouse_y) * mouse_sensitivity * g_camera.turn_speed*dt;
-				prev_mouse_x = mouse_x;
-				prev_mouse_y = mouse_y;
-			}
+			
 			//Update matrices
-			g_camera.pitch = MIN(MAX(g_camera.pitch, -89), 80); //Clamp pitch 
-			g_camera.V = translate(identity_mat4(), -g_camera.pos);
-			print(g_camera.pos);
-			mat4 R = rotate_x_deg(rotate_y_deg(identity_mat4(), -g_camera.yaw), -g_camera.pitch); //how does this work? 
-			//Surely rotating by the yaw will misalign the x-axis for the pitch rotation and screw this up?
-			//Seems to work for now! ¯\_(ツ)_/¯
-			g_camera.V = R*g_camera.V;
-			g_camera.rgt = inverse(R)*vec4(1,0,0,0); //I guess it makes sense that you have to invert
-			g_camera.up = inverse(R)*vec4(0,1,0,0);  //R to calculate these??? I don't know anymore
-			g_camera.fwd = inverse(R)*vec4(0,0,-1,0);
+			player_M = translate(identity_mat4(), player_pos);
 		}
 
 		static bool M_was_pressed = false;
@@ -190,7 +166,17 @@ int main(){
 		glBindVertexArray(terrain_vao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain_index_vbo);
         glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_INT, 0);
+
+		//Draw player
+		glUseProgram(box_shader.prog_id);
+		glBindVertexArray(cube_vao);
+		glUniformMatrix4fv(box_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
+		glUniformMatrix4fv(box_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
+		glUniformMatrix4fv(box_shader.M_loc, 1, GL_FALSE, player_M.m);
+		glDrawArrays(GL_TRIANGLES, 0, cube_point_count);
+
 		glfwSwapBuffers(window);
+
 	}//end main loop
 
     return 0;

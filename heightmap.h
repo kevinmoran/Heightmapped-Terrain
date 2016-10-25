@@ -171,6 +171,8 @@ float get_height_interp(float x, float z){
         norm = normalise(cross((c-b), (d-b)));
     }
 
+    //TODO this is wrong! rethink the problem
+
     float y_final = fabs(dot(p, norm));
     
     return y_final;
