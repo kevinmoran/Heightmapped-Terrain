@@ -26,17 +26,17 @@ GLuint terrain_index_vbo;
 
 void init_terrain();
 int get_height_index(float x, float z);
-void gen_height_field(float** verts, int &point_count, int n, float size);
-void gen_height_field(float** verts, int &point_count, const unsigned char* image_data, int n, float size);
+void gen_height_field(float** verts, int* point_count, int n, float size);
+void gen_height_field(float** verts, int* point_count, const unsigned char* image_data, int n, float size);
 void reload_height_data();
-void gen_heightmap_indices(int** indices, int &num_indices, int n);
+void gen_heightmap_indices(int** indices, int* num_indices, int n);
 void write_height_pgm(const char* filename, const unsigned char* image_data, int width, int height);
 bool read_height_pgm(const char* filename, unsigned char** image_data, int width, int height);
 
 void init_terrain(){
     heightmap_n = 2*heightmap_size + 1;
     width = heightmap_n; height=heightmap_n;
-    
+
     if(!read_height_pgm("terrain.pgm", &height_data, width, height)){
         width = heightmap_n, height = heightmap_n;
         height_data = (unsigned char*)malloc(width*height*sizeof(unsigned char));
@@ -47,8 +47,8 @@ void init_terrain(){
     //TODO call this when done editing heightmap
     // free(height_data);
 
-    gen_height_field(&terrain_vp, terrain_point_count, height_data, heightmap_n, heightmap_size);
-    gen_heightmap_indices(&terrain_indices, terrain_num_indices, heightmap_n);
+    gen_height_field(&terrain_vp, &terrain_point_count, height_data, heightmap_n, heightmap_size);
+    gen_heightmap_indices(&terrain_indices, &terrain_num_indices, heightmap_n);
 
 	glGenBuffers(1, &terrain_points_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, terrain_points_vbo);
@@ -156,11 +156,11 @@ float get_height_interp(float x, float z){
 }
 
 //Generates a flat square plane of n*n vertices spanning (2*size)*(2*size) world units (centered on origin)
-void gen_height_field(float** verts, int &point_count, int n, float size){
+void gen_height_field(float** verts, int* point_count, int n, float size){
     float cell_size = 2*size/(n-1);
-    point_count = n*n;
+    *point_count = n*n;
 
-    *verts = (float*)malloc(3*point_count*sizeof(float));
+    *verts = (float*)malloc(3*(*point_count)*sizeof(float));
 
     int i=0;
     float z_pos =  -size;
@@ -179,11 +179,11 @@ void gen_height_field(float** verts, int &point_count, int n, float size){
 
 //Generates a square plane of n*n vertices spanning (2*size)*(2*size) world units (centered on origin)
 //Incorporates height from image_data array
-void gen_height_field(float** verts, int &point_count, const unsigned char* image_data, int n, float size){
+void gen_height_field(float** verts, int* point_count, const unsigned char* image_data, int n, float size){
     float cell_size = 2*size/(n-1);
-    point_count = n*n;
+    *point_count = n*n;
 
-    *verts = (float*)malloc(3*point_count*sizeof(float));
+    *verts = (float*)malloc(3*(*point_count)*sizeof(float));
 
     int i=0;
     float z_pos = -size;
@@ -213,10 +213,10 @@ void reload_height_data (){
 }
 
 //Generates index buffer for n*n height field
-void gen_heightmap_indices(int** indices, int &num_indices, int n){
+void gen_heightmap_indices(int** indices, int* num_indices, int n){
     int num_quads = (n-1)*(n-1);
-    num_indices = 3*2*num_quads; //3 verts per tri, 2 tris per quad
-    *indices = (int*)malloc(num_indices*sizeof(int));
+    *num_indices = 3*2*num_quads; //3 verts per tri, 2 tris per quad
+    *indices = (int*)malloc(*num_indices*sizeof(int));
 
     int i=0;
     for(int v=n; v<n*n; v++){ //Add two triangles per quad

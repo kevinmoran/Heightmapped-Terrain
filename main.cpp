@@ -22,7 +22,7 @@ int main(){
 
 	float* cube_vp = NULL;
 	int cube_point_count = 0;
-	load_obj("cube.obj", cube_vp, cube_point_count);
+	load_obj("cube.obj", &cube_vp, &cube_point_count);
 
 	GLuint cube_vao;
 	GLuint cube_points_vbo;
