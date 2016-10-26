@@ -9,10 +9,10 @@
 #include "Camera3D.h"
 #include "maths_funcs.h"
 
-int heightmap_n = 16; //number of verts on x, z axes
+int heightmap_n; //number of verts on x, z axes
 float heightmap_size = 20.0f; //world units
 int width, height; //in case we want non-square height map
-const int heightmap_scale = 10.0f; //y-axis range
+const int MAX_HEIGHT = 20.0f; //y-axis range
 unsigned char* height_data;
 
 float* terrain_vp; //array of vertices
@@ -31,9 +31,12 @@ void gen_height_field(float** verts, int &point_count, const unsigned char* imag
 void reload_height_data();
 void gen_heightmap_indices(int** indices, int &num_indices, int n);
 void write_height_pgm(const char* filename, const unsigned char* image_data, int width, int height);
-bool read_height_pgm(const char* filename, unsigned char** image_data, int &width, int &height);
+bool read_height_pgm(const char* filename, unsigned char** image_data, int width, int height);
 
 void init_terrain(){
+    heightmap_n = 2*heightmap_size + 1;
+    width = heightmap_n; height=heightmap_n;
+    
     if(!read_height_pgm("terrain.pgm", &height_data, width, height)){
         width = heightmap_n, height = heightmap_n;
         height_data = (unsigned char*)malloc(width*height*sizeof(unsigned char));
@@ -89,7 +92,7 @@ void update_terrain(double dt){
             interval_pos = g_camera.pos+interval_pos;
 
             int height_index = get_height_index(interval_pos.v[0], interval_pos.v[2]);
-            float ground_y = (height_index<0)? -INFINITY : heightmap_scale*height_data[height_index]/255.0f;
+            float ground_y = (height_index<0)? -INFINITY : MAX_HEIGHT*height_data[height_index]/255.0f;
             if(interval_pos.v[1]<ground_y) {
                 if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)){
                     height_data[height_index] = MIN(height_data[height_index]+terrain_edit_speed/60, 255);
@@ -133,10 +136,10 @@ float get_height_interp(float x, float z){
     int i = heightmap_n*row+col; 
 
     //Get heights of this quad's verts
-    float y_tl = heightmap_scale*height_data[i]/255.0f;
-    float y_tr = heightmap_scale*height_data[i+1]/255.0f;
-    float y_bl = heightmap_scale*height_data[i+heightmap_n]/255.0f;
-    float y_br = heightmap_scale*height_data[i+heightmap_n+1]/255.0f;
+    float y_tl = MAX_HEIGHT*height_data[i]/255.0f;
+    float y_tr = MAX_HEIGHT*height_data[i+1]/255.0f;
+    float y_bl = MAX_HEIGHT*height_data[i+heightmap_n]/255.0f;
+    float y_br = MAX_HEIGHT*height_data[i+heightmap_n+1]/255.0f;
 
     //Get x,z position of top-left vert
     float x_tl = terrain_vp[3*i];
@@ -183,13 +186,13 @@ void gen_height_field(float** verts, int &point_count, const unsigned char* imag
     *verts = (float*)malloc(3*point_count*sizeof(float));
 
     int i=0;
-    float z_pos =  -size;
+    float z_pos = -size;
     float x_pos;
     for(int r=0; r<n; r++){
         x_pos = -size;
         for(int c=0; c<n; c++, i++){
             (*verts)[3*i    ] = x_pos;
-            (*verts)[3*i + 1] = heightmap_scale*image_data[i]/255.0f;
+            (*verts)[3*i + 1] = MAX_HEIGHT*image_data[i]/255.0f;
             (*verts)[3*i + 2] = z_pos;
             x_pos+=cell_size;
         }
@@ -202,7 +205,7 @@ void reload_height_data (){
     int i=0;
     for(int r=0; r<heightmap_n; r++){
         for(int c=0; c<heightmap_n; c++, i++){
-            terrain_vp[3*i + 1] = heightmap_scale*height_data[i]/255.0f;
+            terrain_vp[3*i + 1] = MAX_HEIGHT*height_data[i]/255.0f;
         }
     }
     glBindBuffer(GL_ARRAY_BUFFER, terrain_points_vbo);
@@ -245,7 +248,7 @@ void write_height_pgm(const char* filename, const unsigned char* image_data, int
 }
 
 //Read height data from file
-bool read_height_pgm(const char* filename, unsigned char** image_data, int &width, int &height){
+bool read_height_pgm(const char* filename, unsigned char** image_data, int width, int height){
     FILE* fp = fopen(filename, "r");
     if(!fp){
         printf("Error reading %s, file does not exist\n", filename);
@@ -259,7 +262,12 @@ bool read_height_pgm(const char* filename, unsigned char** image_data, int &widt
         fgets(line, 1024, fp); 
         assert(line[0]=='P' && line[1]=='2');
         fgets(line, 1024, fp);
-        if(sscanf(line, "%d %d", &width, &height) != 2) printf("Error reading width, height from pgm file\n");
+        int w, h;
+        if(sscanf(line, "%d %d", &w, &h) != 2) printf("Error reading width, height from pgm file\n");
+        if(width!=w || height!=h) {
+            printf("Error reading pgm file; unexpected dimensions\n");
+            return false;
+        }
         fgets(line, 1024, fp);
         assert(line[0]=='2' && line[1]=='5' && line[2]=='5');
     }
