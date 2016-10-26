@@ -1,4 +1,4 @@
-BIN = terrain
+BIN = terrain.exe
 CC = g++
 FLAGS = -Wall -pedantic -g -mmacosx-version-min=10.9 -arch x86_64 -fmessage-length=0 -UGLFW_CDECL
 INC = -I common/include -I/sw/include -I/usr/local/include
