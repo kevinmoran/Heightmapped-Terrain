@@ -49,6 +49,7 @@ bool load_obj(const char* file_name, float** points, int* point_count){
 	*point_count = 3*num_faces;
 	float* vp_unsorted = (float*)malloc(num_vps*3*sizeof(float)); //temp
 	*points = (float*)malloc(*point_count*3*sizeof(float));
+	printf("Allocated %lu bytes for obj\n", (*point_count)*3*sizeof(float));
 
 	//Iterators
 	int vp_index = 0; //for unsorted points
@@ -127,6 +128,11 @@ bool load_obj(const char* file_name, float** points, float** tex_coords, float**
 	*points = (float*)malloc(*point_count*3*sizeof(float));
 	if(num_vts>0) *tex_coords = (float*)malloc(*point_count* 2*sizeof(float));
 	if(num_vns>0) *normals = (float*)malloc(*point_count* 3*sizeof(float));
+
+	unsigned long mem_alloced = *point_count* 2*sizeof(float);
+	if(num_vts>0) mem_alloced += *point_count* 2*sizeof(float);
+	if(num_vns>0) mem_alloced += *point_count* 3*sizeof(float);
+	printf("Allocated %lu bytes for obj\n", mem_alloced);
 
 	//Arrays to hold the unsorted data from the obj
 	float* vp_unsorted = (float*)malloc(num_vps*3*sizeof(float));
@@ -263,6 +269,7 @@ bool load_obj_indexed(const char* file_name, float** points, int** indices, int*
 	*point_count = 3*num_faces;
 	*points = (float*)malloc(num_vps*3*sizeof(float));
 	*indices = (int*)malloc(*point_count*sizeof(int));
+	printf("Allocated %lu bytes for obj\n", num_vps*3*sizeof(float) + (*point_count)*sizeof(int));
 
 	//Iterators
 	int vp_index = 0;
@@ -337,8 +344,13 @@ bool load_obj_indexed(const char* file_name, float** &points, float** tex_coords
 	*points = (float*)malloc(num_vps*3*sizeof(float));
 	*indices = (int*)malloc(*point_count*sizeof(int));
 	//vt and vn arrays that will be sorted based on index buffer
-	if(num_vts>0) *tex_coords = (float*)malloc(*point_count* 2*sizeof(float));
-	if(num_vns>0) *normals = (float*)malloc(*point_count* 3*sizeof(float));
+	if(num_vts>0) *tex_coords = (float*)malloc(*point_count * 2*sizeof(float));
+	if(num_vns>0) *normals = (float*)malloc(*point_count * 3*sizeof(float));
+	
+	unsigned long mem_alloced = num_vps*3*sizeof(float) + (*point_count)*sizeof(int);
+	if(num_vts>0) mem_alloced += *point_count * 2*sizeof(float);
+	if(num_vns>0) mem_alloced += *point_count * 3*sizeof(float);
+	printf("Allocated %lu bytes for obj\n", mem_alloced);
 
 	//Arrays to hold the unsorted data from the obj
 	float* vt_unsorted = (float*)malloc(2*num_vts*sizeof(float));
