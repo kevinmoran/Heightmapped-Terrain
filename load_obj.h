@@ -8,8 +8,8 @@
 bool load_obj(const char* file_name, float** points, int* point_count);
 bool load_obj(const char* file_name, float** points, float** tex_coords, float** normals, int* point_count);
 //indexed
-bool load_obj_indexed(const char* file_name, float** points, int** indices, int* point_count);
-bool load_obj_indexed(const char* file_name, float* &points, float** tex_coords, float** normals, int** indices, int* point_count);
+bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, int* point_count);
+bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* point_count);
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -234,7 +234,7 @@ bool load_obj(const char* file_name, float** points, float** tex_coords, float**
 }
 
 //Load vertex points with index buffer, ignore tex coords and normals if present
-bool load_obj_indexed(const char* file_name, float** points, int** indices, int* point_count){
+bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, int* point_count){
 	FILE* fp = fopen(file_name, "r");
 	if(!fp) {
 		printf("Error: Failed to open %s\n", file_name);
@@ -269,8 +269,8 @@ bool load_obj_indexed(const char* file_name, float** points, int** indices, int*
 
 	*point_count = 3*num_faces;
 	*points = (float*)malloc(num_vps*3*sizeof(float));
-	*indices = (int*)malloc(*point_count*sizeof(int));
-	printf("Allocated %lu bytes for obj\n", num_vps*3*sizeof(float) + (*point_count)*sizeof(int));
+	*indices = (unsigned short*)malloc(*point_count*sizeof(unsigned short));
+	printf("Allocated %lu bytes for obj\n", num_vps*3*sizeof(float) + (*point_count)*sizeof(unsigned short));
 
 	//Iterators
 	int vp_index = 0;
@@ -286,16 +286,16 @@ bool load_obj_indexed(const char* file_name, float** points, int** indices, int*
 		else if(line[0]=='f'){
 			//Scan the line depending on what parameters are included for faces
 			if(num_vts==0 && num_vns==0){ //Just vertex positions
-				sscanf(line, "f %i %i %i",  &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
+				sscanf(line, "f %hu %hu %hu",  &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
 			}
 			else if(num_vts==0){ //vertex positions and normals
-				sscanf(line, "f %i//%*i %i//%*i %i//%*i", &(*indices)[idxs_i],	&(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
+				sscanf(line, "f %hu//%*hu %hu//%*hu %hu//%*hu", &(*indices)[idxs_i],	&(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
 			}
 			else if(num_vns==0){ //vertex positions and tex coords
-				sscanf(line, "f %i/%*i %i/%*i %i/%*i", &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
+				sscanf(line, "f %hu/%*hu %hu/%*hu %hu/%*hu", &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
 			}
 			else{ //vertex positions and tex coords and normals
-				sscanf(line, "f %i/%*i/%*i %i/%*i/%*i %i/%*i/%*i", &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
+				sscanf(line, "f %hu/%*hu/%*hu %hu/%*hu/%*hu %hu/%*hu/%*hu", &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
 			}
 			for(int i=0; i<3; i++){
 				(*indices)[idxs_i+i]--; //wavefront obj doesn't use zero indexing
@@ -308,7 +308,7 @@ bool load_obj_indexed(const char* file_name, float** points, int** indices, int*
 }
 
 //Load points, tex coords and normals with index buffer
-bool load_obj_indexed(const char* file_name, float** &points, float** tex_coords, float** normals, int** indices, int* point_count){
+bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* point_count){
 	FILE* fp = fopen(file_name, "r");
 	if(!fp) {
 		printf("Error: Failed to open %s\n", file_name);
@@ -343,12 +343,12 @@ bool load_obj_indexed(const char* file_name, float** &points, float** tex_coords
 
 	*point_count = 3*num_faces;
 	*points = (float*)malloc(num_vps*3*sizeof(float));
-	*indices = (int*)malloc(*point_count*sizeof(int));
+	*indices = (unsigned short*)malloc(*point_count*sizeof(unsigned short));
 	//vt and vn arrays that will be sorted based on index buffer
 	if(num_vts>0) *tex_coords = (float*)malloc(*point_count * 2*sizeof(float));
 	if(num_vns>0) *normals = (float*)malloc(*point_count * 3*sizeof(float));
 	
-	unsigned long mem_alloced = num_vps*3*sizeof(float) + (*point_count)*sizeof(int);
+	unsigned long mem_alloced = num_vps*3*sizeof(float) + (*point_count)*sizeof(unsigned short);
 	if(num_vts>0) mem_alloced += *point_count * 2*sizeof(float);
 	if(num_vns>0) mem_alloced += *point_count * 3*sizeof(float);
 	printf("Allocated %lu bytes for obj\n", mem_alloced);
@@ -381,7 +381,7 @@ bool load_obj_indexed(const char* file_name, float** &points, float** tex_coords
 		else if(line[0]=='f'){
 			//Scan the line depending on what parameters are included for faces
 			if(num_vts==0 && num_vns==0){ //Just vertex positions
-				sscanf(line, "f %i %i %i",  &(*indices)[idxs_i],
+				sscanf(line, "f %hu %hu %hu",  &(*indices)[idxs_i],
 											&(*indices)[idxs_i+1],
 											&(*indices)[idxs_i+2]);
 				//wavefront doesn't use zero indexing
@@ -390,7 +390,7 @@ bool load_obj_indexed(const char* file_name, float** &points, float** tex_coords
 			}
 			else if(num_vts==0){ //vertex positions and normals
 				int vn[3];
-				sscanf(line, "f %i//%i %i//%i %i//%i",  &(*indices)[idxs_i],	&vn[0], 
+				sscanf(line, "f %hu//%i %hu//%i %hu//%i",  &(*indices)[idxs_i],	&vn[0], 
 														&(*indices)[idxs_i+1],	&vn[1], 
 														&(*indices)[idxs_i+2],	&vn[2]);
 				for(int i=0; i<3; i++){ //add normals for the 3 verts in this face
@@ -405,9 +405,9 @@ bool load_obj_indexed(const char* file_name, float** &points, float** tex_coords
 			}
 			else if(num_vns==0){ //vertex positions and tex coords
 				int vt[3];
-				sscanf(line, "f %i/%i %i/%i %i/%i",	&(*indices)[idxs_i], 	&vt[0], 
-													&(*indices)[idxs_i+1],	&vt[1], 
-													&(*indices)[idxs_i+2],	&vt[2]);
+				sscanf(line, "f %hu/%i %hu/%i %hu/%i",	&(*indices)[idxs_i], 	&vt[0], 
+														&(*indices)[idxs_i+1],	&vt[1], 
+														&(*indices)[idxs_i+2],	&vt[2]);
 				for(int i=0; i<3; i++){ //add tex coords for the 3 verts in this face
 					(*indices)[idxs_i+i]--; //wavefront doesn't use zero indexing
 					vt[i]--;
@@ -419,7 +419,7 @@ bool load_obj_indexed(const char* file_name, float** &points, float** tex_coords
 			}
 			else{ //vertex positions and tex coords and normals
 				int vt[3], vn[3];
-				sscanf(line, "f %i/%i/%i %i/%i/%i %i/%i/%i",	&(*indices)[idxs_i],	&vt[0], &vn[0], 
+				sscanf(line, "f %hu/%i/%i %hu/%i/%i %hu/%i/%i",	&(*indices)[idxs_i],	&vt[0], &vn[0], 
 																&(*indices)[idxs_i+1],	&vt[1], &vn[1], 
 																&(*indices)[idxs_i+2],	&vt[2], &vn[2]);
 				for(int i=0; i<3; i++){ //add normals and tex coords for the 3 verts in this face

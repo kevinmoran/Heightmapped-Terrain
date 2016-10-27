@@ -21,15 +21,20 @@ int main(){
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 
 	float* cube_vp = NULL;
+	unsigned short* cube_indices = NULL;
 	int cube_point_count = 0;
-	load_obj("cube.obj", &cube_vp, &cube_point_count);
+	load_obj_indexed("cube.obj", &cube_vp, &cube_indices, &cube_point_count);
 
 	GLuint cube_vao;
-	GLuint cube_points_vbo;
+	GLuint cube_points_vbo, cube_index_vbo;
 	glGenBuffers(1, &cube_points_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, cube_points_vbo);
 	glBufferData(GL_ARRAY_BUFFER, cube_point_count*3*sizeof(float), cube_vp, GL_STATIC_DRAW);
 
+	glGenBuffers(1, &cube_index_vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_point_count*sizeof(unsigned short), cube_indices, GL_STATIC_DRAW);
+	free(cube_indices);
 	glGenVertexArrays(1, &cube_vao);
 	glBindVertexArray(cube_vao);
 	glEnableVertexAttribArray(0);
@@ -181,7 +186,8 @@ int main(){
 		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
 		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player_M.m);
-		glDrawArrays(GL_TRIANGLES, 0, cube_point_count);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
+        glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glfwSwapBuffers(window);
 
