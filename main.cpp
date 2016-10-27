@@ -22,14 +22,14 @@ int main(){
 
 	float* cube_vp = NULL;
 	unsigned short* cube_indices = NULL;
-	int cube_point_count = 0;
-	load_obj_indexed("cube.obj", &cube_vp, &cube_indices, &cube_point_count);
+	int cube_point_count = 0, cube_vert_count = 0;
+	load_obj_indexed("cube.obj", &cube_vp, &cube_indices, &cube_point_count, &cube_vert_count);
 
 	GLuint cube_vao;
 	GLuint cube_points_vbo, cube_index_vbo;
 	glGenBuffers(1, &cube_points_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, cube_points_vbo);
-	glBufferData(GL_ARRAY_BUFFER, cube_point_count*3*sizeof(float), cube_vp, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, cube_vert_count*3*sizeof(float), cube_vp, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &cube_index_vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);

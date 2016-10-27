@@ -7,8 +7,10 @@
 bool load_obj(const char* file_name, float** points, int* point_count);
 bool load_obj(const char* file_name, float** points, float** tex_coords, float** normals, int* point_count);
 //indexed
-bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, int* point_count);
-bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* point_count);
+bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, 
+					int* point_count, int* vert_count);
+bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, 
+					unsigned short** indices, int* point_count, int* vert_count);
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -233,7 +235,8 @@ bool load_obj(const char* file_name, float** points, float** tex_coords, float**
 }
 
 //Load vertex points with index buffer, ignore tex coords and normals if present
-bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, int* point_count){
+bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, 
+					int* point_count, int* vert_count){
 	FILE* fp = fopen(file_name, "r");
 	if(!fp) {
 		printf("Error: Failed to open %s\n", file_name);
@@ -272,6 +275,7 @@ bool load_obj_indexed(const char* file_name, float** points, unsigned short** in
 	}
 
 	*point_count = 3*num_faces;
+	*vert_count = num_vps;
 	*points = (float*)malloc(num_vps*3*sizeof(float));
 	*indices = (unsigned short*)malloc(*point_count*sizeof(unsigned short));
 	printf("Allocated %lu bytes for obj\n", num_vps*3*sizeof(float) + (*point_count)*sizeof(unsigned short));
@@ -293,7 +297,7 @@ bool load_obj_indexed(const char* file_name, float** points, unsigned short** in
 				sscanf(line, "f %hu %hu %hu",  &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
 			}
 			else if(num_vts==0){ //vertex positions and normals
-				sscanf(line, "f %hu//%*hu %hu//%*hu %hu//%*hu", &(*indices)[idxs_i],	&(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
+				sscanf(line, "f %hu//%*hu %hu//%*hu %hu//%*hu", &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
 			}
 			else if(num_vns==0){ //vertex positions and tex coords
 				sscanf(line, "f %hu/%*hu %hu/%*hu %hu/%*hu", &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
@@ -312,7 +316,8 @@ bool load_obj_indexed(const char* file_name, float** points, unsigned short** in
 }
 
 //Load points, tex coords and normals with index buffer
-bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* point_count){
+bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, 
+				unsigned short** indices, int* point_count, int* vert_count){
 	FILE* fp = fopen(file_name, "r");
 	if(!fp) {
 		printf("Error: Failed to open %s\n", file_name);
@@ -351,6 +356,7 @@ bool load_obj_indexed(const char* file_name, float** points, float** tex_coords,
 	}
 	
 	*point_count = 3*num_faces;
+	*vert_count = num_vps;
 	*points = (float*)malloc(num_vps*3*sizeof(float));
 	*indices = (unsigned short*)malloc(*point_count*sizeof(unsigned short));
 	//vt and vn arrays that will be sorted based on index buffer
