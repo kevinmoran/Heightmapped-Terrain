@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 //Kevin's wavefront obj loading functions
-//TODO change index buffers from int to GL_SHORT (2 bytes)
 
 //unindexed
 bool load_obj(const char* file_name, float** points, int* point_count);
@@ -267,6 +266,11 @@ bool load_obj_indexed(const char* file_name, float** points, unsigned short** in
 	printf("Num vns: %i\n", num_vns);
 	printf("Num faces: %i\n", num_faces);
 
+	if(num_faces>(65536)/3){
+		printf("ERROR loading obj: Too many faces for index buffer of shorts\n");
+		return false;
+	}
+
 	*point_count = 3*num_faces;
 	*points = (float*)malloc(num_vps*3*sizeof(float));
 	*indices = (unsigned short*)malloc(*point_count*sizeof(unsigned short));
@@ -341,6 +345,11 @@ bool load_obj_indexed(const char* file_name, float** points, float** tex_coords,
 	printf("Num vns: %i\n", num_vns);
 	printf("Num faces: %i\n", num_faces);
 
+	if(num_faces>(65536)/3){
+		printf("ERROR loading obj: Too many faces for index buffer of shorts\n");
+		return false;
+	}
+	
 	*point_count = 3*num_faces;
 	*points = (float*)malloc(num_vps*3*sizeof(float));
 	*indices = (unsigned short*)malloc(*point_count*sizeof(unsigned short));
