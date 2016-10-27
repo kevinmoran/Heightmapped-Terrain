@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 //Kevin's wavefront obj loading functions
+//TODO change index buffers from int to GL_SHORT (2 bytes)
 
 //unindexed
 bool load_obj(const char* file_name, float** points, int* point_count);

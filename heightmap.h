@@ -16,7 +16,7 @@ const int MAX_HEIGHT = 20.0f; //y-axis range
 unsigned char* height_data;
 
 float* terrain_vp; //array of vertices
-int* terrain_indices; //TODO change to GL_UNSIGNED_BYTE OR GL_SHORT (2 bytes)
+uint16_t* terrain_indices; //TODO change to GL_UNSIGNED_BYTE OR GL_SHORT (2 bytes)
 int terrain_point_count, terrain_num_indices;
 int terrain_edit_speed = 200;
 
@@ -29,7 +29,7 @@ int get_height_index(float x, float z);
 void gen_height_field(float** verts, int* point_count, int n, float size);
 void gen_height_field(float** verts, int* point_count, const unsigned char* image_data, int n, float size);
 void reload_height_data();
-void gen_heightmap_indices(int** indices, int* num_indices, int n);
+void gen_heightmap_indices(uint16_t** indices, int* num_indices, int n);
 void write_height_pgm(const char* filename, const unsigned char* image_data, int width, int height);
 bool read_height_pgm(const char* filename, unsigned char** image_data, int width, int height);
 
@@ -56,7 +56,7 @@ void init_terrain(){
 
     glGenBuffers(1, &terrain_index_vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain_index_vbo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, terrain_num_indices*sizeof(int), terrain_indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, terrain_num_indices*sizeof(uint16_t), terrain_indices, GL_STATIC_DRAW);
 
 	glGenVertexArrays(1, &terrain_vao);
 	glBindVertexArray(terrain_vao);
@@ -213,10 +213,10 @@ void reload_height_data (){
 }
 
 //Generates index buffer for n*n height field
-void gen_heightmap_indices(int** indices, int* num_indices, int n){
+void gen_heightmap_indices(uint16_t** indices, int* num_indices, int n){
     int num_quads = (n-1)*(n-1);
     *num_indices = 3*2*num_quads; //3 verts per tri, 2 tris per quad
-    *indices = (int*)malloc(*num_indices*sizeof(int));
+    *indices = (uint16_t*)malloc(*num_indices*sizeof(uint16_t));
 
     int i=0;
     for(int v=n; v<n*n; v++){ //Add two triangles per quad

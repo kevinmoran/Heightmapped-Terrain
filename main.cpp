@@ -165,7 +165,7 @@ int main(){
 		//Draw terrain
 		glBindVertexArray(terrain_vao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain_index_vbo);
-        glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		//Draw player
 		glUseProgram(box_shader.prog_id);
