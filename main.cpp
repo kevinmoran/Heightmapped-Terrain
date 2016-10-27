@@ -40,13 +40,14 @@ int main(){
     init_terrain();
 
     //Load shaders
-	Shader box_shader("MVP.vert", "pass.frag");
+	Shader basic_shader("MVP.vert", "uniform_colour.frag");
 	Shader heightmap_shader("Heightmap.vert", "Heightmap.frag");
 	
     g_camera.init(vec3(0,12,15), vec3(0,0,0));
 	glUseProgram(heightmap_shader.prog_id);
     glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
     glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
+	GLuint colour_loc = glGetUniformLocation(basic_shader.prog_id, "colour");
 
 	//Player data
 	vec3 player_pos = vec3(0,10,0);
@@ -167,12 +168,19 @@ int main(){
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain_index_vbo);
         glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 
+		glUseProgram(basic_shader.prog_id);
+		//Draw terrain wireframe
+		glUniform4fv(colour_loc, 1, vec4(0,0,0,1).v);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(identity_mat4(), vec3(0,0.1f,0)).m);
+		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+		glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 		//Draw player
-		glUseProgram(box_shader.prog_id);
+		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		glBindVertexArray(cube_vao);
-		glUniformMatrix4fv(box_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
-		glUniformMatrix4fv(box_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
-		glUniformMatrix4fv(box_shader.M_loc, 1, GL_FALSE, player_M.m);
+		glUniform4fv(colour_loc, 1, vec4(0.8f, 0.1f, 0.2f, 1).v);
+		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
+		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player_M.m);
 		glDrawArrays(GL_TRIANGLES, 0, cube_point_count);
 
 		glfwSwapBuffers(window);
