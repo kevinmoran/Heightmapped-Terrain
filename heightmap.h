@@ -25,7 +25,9 @@ GLuint terrain_points_vbo;
 GLuint terrain_index_vbo;
 
 void init_terrain();
+void edit_terrain(double dt);
 int get_height_index(float x, float z);
+float get_height_interp(float x, float z);
 void gen_height_field(float** verts, int* point_count, int n, float size);
 void gen_height_field(float** verts, int* point_count, const unsigned char* image_data, int n, float size);
 void reload_height_data();
@@ -67,7 +69,7 @@ void init_terrain(){
     free(terrain_indices);
 }
 
-void update_terrain(double dt){
+void edit_terrain(double dt){
     //Ray picking to raise/lower ground
     static double mouse_repeat_timer = 0.0;
     mouse_repeat_timer += dt;

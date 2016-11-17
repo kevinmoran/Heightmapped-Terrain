@@ -89,7 +89,7 @@ int main(){
 		else G_was_pressed = false;
 
 		if(edit_mode){
-       		update_terrain(dt);
+       		edit_terrain(dt);
 			g_camera.update(dt);
 		}
 		else {
