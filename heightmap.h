@@ -16,7 +16,7 @@ const int MAX_HEIGHT = 20.0f; //y-axis range
 unsigned char* height_data;
 
 float* terrain_vp; //array of vertices
-uint16_t* terrain_indices; //TODO change to GL_UNSIGNED_BYTE OR GL_SHORT (2 bytes)
+uint16_t* terrain_indices;
 int terrain_point_count, terrain_num_indices;
 int terrain_edit_speed = 200;
 
