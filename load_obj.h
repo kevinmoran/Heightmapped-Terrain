@@ -51,7 +51,7 @@ bool load_obj(const char* file_name, float** points, int* point_count){
 	*point_count = 3*num_faces;
 	float* vp_unsorted = (float*)malloc(num_vps*3*sizeof(float)); //temp
 	*points = (float*)malloc(*point_count*3*sizeof(float));
-	printf("Allocated %lu bytes for obj\n", (*point_count)*3*sizeof(float));
+	printf("Allocated %u bytes for obj\n", (unsigned int)(*point_count)*3*sizeof(float));
 
 	//Iterators
 	int vp_index = 0; //for unsorted points
@@ -131,10 +131,10 @@ bool load_obj(const char* file_name, float** points, float** tex_coords, float**
 	if(num_vts>0) *tex_coords = (float*)malloc(*point_count* 2*sizeof(float));
 	if(num_vns>0) *normals = (float*)malloc(*point_count* 3*sizeof(float));
 
-	unsigned long mem_alloced = *point_count* 2*sizeof(float);
+	unsigned int mem_alloced = *point_count* 2*sizeof(float);
 	if(num_vts>0) mem_alloced += *point_count* 2*sizeof(float);
 	if(num_vns>0) mem_alloced += *point_count* 3*sizeof(float);
-	printf("Allocated %lu bytes for obj\n", mem_alloced);
+	printf("Allocated %u bytes for obj\n", mem_alloced);
 
 	//Arrays to hold the unsorted data from the obj
 	float* vp_unsorted = (float*)malloc(num_vps*3*sizeof(float));
@@ -278,7 +278,7 @@ bool load_obj_indexed(const char* file_name, float** points, unsigned short** in
 	*vert_count = num_vps;
 	*points = (float*)malloc(num_vps*3*sizeof(float));
 	*indices = (unsigned short*)malloc(*point_count*sizeof(unsigned short));
-	printf("Allocated %lu bytes for obj\n", num_vps*3*sizeof(float) + (*point_count)*sizeof(unsigned short));
+	printf("Allocated %u bytes for obj\n", (unsigned int)(num_vps*3*sizeof(float) + (*point_count)*sizeof(unsigned short)));
 
 	//Iterators
 	int vp_index = 0;
@@ -297,13 +297,13 @@ bool load_obj_indexed(const char* file_name, float** points, unsigned short** in
 				sscanf(line, "f %hu %hu %hu",  &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
 			}
 			else if(num_vts==0){ //vertex positions and normals
-				sscanf(line, "f %hu//%*hu %hu//%*hu %hu//%*hu", &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
+				sscanf(line, "f %hu//%*u %hu//%*u %hu//%*u", &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
 			}
 			else if(num_vns==0){ //vertex positions and tex coords
-				sscanf(line, "f %hu/%*hu %hu/%*hu %hu/%*hu", &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
+				sscanf(line, "f %hu/%*u %hu/%*u %hu/%*u", &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
 			}
 			else{ //vertex positions and tex coords and normals
-				sscanf(line, "f %hu/%*hu/%*hu %hu/%*hu/%*hu %hu/%*hu/%*hu", &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
+				sscanf(line, "f %hu/%*u/%*u %hu/%*u/%*u %hu/%*u/%*u", &(*indices)[idxs_i], &(*indices)[idxs_i+1], &(*indices)[idxs_i+2]);
 			}
 			for(int i=0; i<3; i++){
 				(*indices)[idxs_i+i]--; //wavefront obj doesn't use zero indexing
@@ -363,10 +363,10 @@ bool load_obj_indexed(const char* file_name, float** points, float** tex_coords,
 	if(num_vts>0) *tex_coords = (float*)malloc(*point_count * 2*sizeof(float));
 	if(num_vns>0) *normals = (float*)malloc(*point_count * 3*sizeof(float));
 	
-	unsigned long mem_alloced = num_vps*3*sizeof(float) + (*point_count)*sizeof(unsigned short);
+	unsigned int mem_alloced = num_vps*3*sizeof(float) + (*point_count)*sizeof(unsigned short);
 	if(num_vts>0) mem_alloced += *point_count * 2*sizeof(float);
 	if(num_vns>0) mem_alloced += *point_count * 3*sizeof(float);
-	printf("Allocated %lu bytes for obj\n", mem_alloced);
+	printf("Allocated %u bytes for obj\n", mem_alloced);
 
 	//Arrays to hold the unsorted data from the obj
 	float* vt_unsorted = (float*)malloc(2*num_vts*sizeof(float));
