@@ -15,6 +15,7 @@ float gl_aspect_ratio = (float)gl_width/gl_height;
 #include "Shader.h"
 #include "Camera3D.h"
 #include "heightmap.h"
+#include "editor.h"
 
 int main(){
 	if (!init_gl(window, gl_width, gl_height)){ return 1; }
@@ -45,14 +46,13 @@ int main(){
     init_terrain();
 
     //Load shaders
-	Shader basic_shader("MVP.vert", "uniform_colour.frag");
-	Shader heightmap_shader("Heightmap.vert", "Heightmap.frag");
+	Shader basic_shader = load_shader("MVP.vert", "uniform_colour.frag");
 	
     g_camera.init(vec3(0,12,15), vec3(0,0,0));
-	glUseProgram(heightmap_shader.prog_id);
+	glUseProgram(heightmap_shader.id);
     glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
     glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
-	GLuint colour_loc = glGetUniformLocation(basic_shader.prog_id, "colour");
+	GLuint colour_loc = glGetUniformLocation(basic_shader.id, "colour");
 
 	//Player data
 	vec3 player_pos = vec3(0,10,0);
@@ -89,8 +89,7 @@ int main(){
 		else G_was_pressed = false;
 
 		if(edit_mode){
-       		edit_terrain(dt);
-			g_camera.update(dt);
+       		editor_update(dt);
 		}
 		else {
 			//Update player
@@ -140,32 +139,10 @@ int main(){
 			player_M = translate(identity_mat4(), player_pos);
 		}
 
-		static bool M_was_pressed = false;
-		if (glfwGetKey(window, GLFW_KEY_M)) {
-			if(!M_was_pressed) {
-				if(!cam_mouse_controls){
-					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
-				}
-				else{
-					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
-				}
-				cam_mouse_controls = !cam_mouse_controls;
-				M_was_pressed = true;
-			}
-		}
-		else M_was_pressed = false;
-
-		if (glfwGetKey(window, GLFW_KEY_R)) {
-			heightmap_shader.reload_shader_program("Heightmap.vert", "Heightmap.frag");
-			glUseProgram(heightmap_shader.prog_id);
-			glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
-			glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
-		}
-
 		//Rendering
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUseProgram(heightmap_shader.prog_id);
+        glUseProgram(heightmap_shader.id);
 		glUniformMatrix4fv(heightmap_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
 
 		//Draw terrain
@@ -173,7 +150,7 @@ int main(){
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain_index_vbo);
         glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 
-		glUseProgram(basic_shader.prog_id);
+		glUseProgram(basic_shader.id);
 		//Draw terrain wireframe
 		glUniform4fv(colour_loc, 1, vec4(0,0,0,1).v);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(identity_mat4(), vec3(0,0.1f,0)).m);

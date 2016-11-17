@@ -24,6 +24,8 @@ GLuint terrain_vao;
 GLuint terrain_points_vbo;
 GLuint terrain_index_vbo;
 
+Shader heightmap_shader;
+
 void init_terrain();
 void edit_terrain(double dt);
 int get_height_index(float x, float z);
@@ -67,6 +69,9 @@ void init_terrain(){
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	//free(terrain_vp); //TODO should probably free this at some stage
     free(terrain_indices);
+
+    heightmap_shader = load_shader("Heightmap.vert", "Heightmap.frag");
+
 }
 
 void edit_terrain(double dt){
