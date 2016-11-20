@@ -56,7 +56,8 @@ int main(){
 
 	//Player data
 	vec3 player_pos = vec3(0,10,0);
-	mat4 player_M = translate(identity_mat4(), player_pos);
+	float player_scale = 0.1f;
+	mat4 player_M = translate(scale(identity_mat4(), player_scale), player_pos);
 	vec3 player_vel = vec3(0,0,0);
 
     double curr_time = glfwGetTime(), prev_time, dt;
@@ -117,8 +118,8 @@ int main(){
 			player_pos.v[1] += player_vel.v[1]*dt;
 			float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
 			
-			if(player_pos.v[1] - ground_y < 0.5f) {
-				player_pos.v[1] = ground_y + 0.5f;
+			if(player_pos.v[1] - ground_y < 0.5f*player_scale) {
+				player_pos.v[1] = ground_y + 0.5f*player_scale;
 				player_vel.v[1] = 0.0f;
 			}
 			
@@ -136,7 +137,7 @@ int main(){
 			}
 			
 			//Update matrices
-			player_M = translate(identity_mat4(), player_pos);
+			player_M = translate(scale(identity_mat4(), player_scale), player_pos);
 		}
 
 		//Rendering
@@ -166,6 +167,15 @@ int main(){
 		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player_M.m);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
+        glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
+		
+		//Hightlight triangle under player
+		glUniform4fv(colour_loc, 1, vec4(0.8f, 0.8f, 0.2f, 1).v);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), 0.1f), tri_under_player[0]).m);
+        glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), 0.1f), tri_under_player[1]).m);
+        glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), 0.1f), tri_under_player[2]).m);
         glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glfwSwapBuffers(window);

@@ -26,6 +26,8 @@ GLuint terrain_index_vbo;
 
 Shader heightmap_shader;
 
+vec3 tri_under_player[3];
+
 void init_terrain();
 void edit_terrain(double dt);
 int get_height_index(float x, float z);
@@ -154,11 +156,34 @@ float get_height_interp(float x, float z){
     float x_t = (x-x_tl)/cell_size; // % along cell point is on x-axis
     float z_t = (z-z_tl)/cell_size; // % along cell point is on z-axis
 
+    tri_under_player[0] = vec3(x_tl+cell_size, y_tr, z_tl);
+    tri_under_player[1] = vec3(x_tl, y_bl, z_tl+cell_size);
+
+    float y_top, y_bottom;
+    if(x_t+z_t > cell_size){
+        y_top = y_tr;
+        y_bottom = x_t*y_bl + (1-x_t)*y_br;
+        tri_under_player[2] = vec3(x_tl+cell_size, y_br, z_tl+cell_size);
+    }
+    else{
+        y_top = x_t*y_tl + (1-x_t)*y_tr;
+        y_bottom = y_bl;
+        tri_under_player[2] = vec3(x_tl, y_tl, z_tl);
+    }
     //Find height with bilinear interpolation
-    float y_top = x_t*y_tl + (1-x_t)*y_tr; //Lerp along top edge
-    float y_bottom = x_t*y_bl + (1-x_t)*y_br; //Lerp along bottom edge
+    // float y_top = x_t*y_tl + (1-x_t)*y_tr; //Lerp along top edge
+    // float y_bottom = x_t*y_bl + (1-x_t)*y_br; //Lerp along bottom edge
     float y_final = z_t*y_top + (1-z_t)*y_bottom; //Lerp between edges (on z-axis)
     //^This looks confusing, check out image on wiki: https://en.wikipedia.org/wiki/Bilinear_interpolation
+
+    print(tri_under_player[0]);
+    print(tri_under_player[1]);
+    print(tri_under_player[2]);
+
+    printf("Player pos: ");
+    print(vec3(x,y_final,z));
+    printf("\n");
+
     return y_final;
 }
 
