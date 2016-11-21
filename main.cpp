@@ -19,7 +19,6 @@ float gl_aspect_ratio = (float)gl_width/gl_height;
 
 int main(){
 	if (!init_gl(window, gl_width, gl_height)){ return 1; }
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 
 	float* cube_vp = NULL;
 	unsigned short* cube_indices = NULL;
@@ -59,6 +58,7 @@ int main(){
 	float player_scale = 1.0f;
 	mat4 player_M = translate(scale(identity_mat4(), player_scale), player_pos);
 	vec3 player_vel = vec3(0,0,0);
+	vec4 player_colour;
 
     double curr_time = glfwGetTime(), prev_time, dt;
 	//-------------------------------------------------------------------------------------//
@@ -112,10 +112,39 @@ int main(){
 				vec3 xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
 				player_pos += xz_proj*g_camera.move_speed*dt;			
 			}
+
+			float slope = ONE_RAD_IN_DEG*acos(dot(vec3(0,1,0), get_normal_interp(player_pos.v[0], player_pos.v[2])));
+			if(slope>45) {
+				player_colour = vec4(0.8f, 0.8f, 0.2f, 1);
+				int i = get_height_index(player_pos.v[0], player_pos.v[1]);
+				float cell_size = 2*heightmap_size/(heightmap_n-1);
+				float x_tl = terrain_vp[3*i];
+				float z_tl = terrain_vp[3*i + 2];
+				float x_t = (player_pos.v[0]-x_tl)/cell_size; // % along cell point is on x-axis
+				float z_t = (player_pos.v[1]-z_tl)/cell_size; // % along cell point is on z-axis
+
+				vec3 tri_v[3];
+				tri_v[0] = vec3(terrain_vp[3*(i+1)], terrain_vp[3*(i+1)+1], terrain_vp[3*(i+1)+2]);
+				tri_v[1] = vec3(terrain_vp[3*(i+heightmap_size_x)], terrain_vp[3*(i+heightmap_size_x)+1], terrain_vp[3*(i+heightmap_size_x)+2]);
+				if(x_t+z_t>1.0f) tri_v[2] = vec3(terrain_vp[3*(i+heightmap_size_x+1)], terrain_vp[3*(i+heightmap_size_x+1)+1], terrain_vp[3*(i+heightmap_size_x+1)+2]);
+				else tri_v[2] = vec3(terrain_vp[3*i], terrain_vp[3*i+1], terrain_vp[3*i+2]);
+
+				vec3 v_max = (tri_v[0].v[1]>tri_v[1].v[1]) ? tri_v[0] : tri_v[1];
+				v_max = (v_max.v[1]>tri_v[2].v[1]) ? v_max : tri_v[2];
+				vec3 v_min = (tri_v[0].v[1]<tri_v[1].v[1]) ? tri_v[0] : tri_v[1];
+				v_min = (v_min.v[1]<tri_v[2].v[1]) ? v_min : tri_v[2];
+
+				vec3 gradient = normalise(v_max - v_min);
+
+				player_vel -= gradient*10*9.81f*sinf(ONE_DEG_IN_RAD*slope)*dt;
+			}
+			else player_colour = vec4(0.8f, 0.1f, 0.2f, 1);
+
 			float player_mass = 10;
 			float g = 9.81f;
+			player_vel = player_vel*0.9f;
 			player_vel.v[1] -= player_mass*g*dt;
-			player_pos.v[1] += player_vel.v[1]*dt;
+			player_pos += player_vel*dt;
 			float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
 			
 			if(player_pos.v[1] - ground_y < 0.5f*player_scale) {
@@ -162,7 +191,7 @@ int main(){
 		//Draw player
 		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		glBindVertexArray(cube_vao);
-		glUniform4fv(colour_loc, 1, vec4(0.8f, 0.1f, 0.2f, 1).v);
+		glUniform4fv(colour_loc, 1, player_colour.v);
 		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
 		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player_M.m);

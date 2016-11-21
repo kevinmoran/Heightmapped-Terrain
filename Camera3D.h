@@ -2,7 +2,7 @@
 #include "maths_funcs.h"
 #include "input.h"
 
-bool cam_mouse_controls = true;
+bool cam_mouse_controls = false;
 
 struct Camera3D {
     vec3 pos;
@@ -27,6 +27,8 @@ void Camera3D::init(){
 	turn_speed = 100;
 	V = look_at(pos, pos+fwd, up);
 	P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, 0.1f, 100.0f);
+
+    if(cam_mouse_controls) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 }
 
 void Camera3D::init(vec3 cam_pos, vec3 target_pos){
@@ -40,6 +42,8 @@ void Camera3D::init(vec3 cam_pos, vec3 target_pos){
     pitch = -acos(V.m[5])*ONE_RAD_IN_DEG; //no idea why you negate this and not yaw, it just works
 	move_speed = 10;
 	turn_speed = 100;
+
+    if(cam_mouse_controls) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 }
 
 void Camera3D::update(double dt){

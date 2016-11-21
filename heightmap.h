@@ -180,6 +180,45 @@ float get_height_interp(float x, float z){
     return u*y_tr + v*y_bl + w*y_tl;
 }
 
+//Returns normal at world pos x,z interpolated from closest verts in height field
+vec3 get_normal_interp(float x, float z){
+    if(x<-heightmap_size || x>heightmap_size || z<-heightmap_size || z>heightmap_size) return vec3(-INFINITY, -INFINITY, -INFINITY);
+
+    //Get index of top-left vert of quad containing x,z
+    float cell_size = 2*heightmap_size/(heightmap_n-1);
+    int row = (z+heightmap_size)/cell_size;
+    int col = (x+heightmap_size)/cell_size;
+    int i = heightmap_n*row+col;
+
+    //Get x,z position of top-left vert
+    float x_tl = terrain_vp[3*i];
+    float z_tl = terrain_vp[3*i + 2];
+    float x_t = (x-x_tl)/cell_size; // % along cell point is on x-axis
+    float z_t = (z-z_tl)/cell_size; // % along cell point is on z-axis
+
+    // Get surrounding normals
+    vec3 norm_a = vec3(terrain_vn[3*(i+1)], terrain_vn[3*(i+1)+1], terrain_vn[3*(i+1)+2]); //tr
+    vec3 norm_b = vec3(terrain_vn[3*(i+heightmap_size_x)], terrain_vn[3*(i+heightmap_size_x)+1], terrain_vn[3*(i+heightmap_size_x)+2]); //bl
+    vec3 norm_c;
+    if(x_t+z_t > cell_size) norm_c = vec3(terrain_vn[3*(i+heightmap_size_x+1)], terrain_vn[3*(i+heightmap_size_x+1)+1], terrain_vn[3*(i+heightmap_size_x+1)+2]); //br
+    else vec3(terrain_vn[3*i], terrain_vn[3*i+1], terrain_vn[3*i+2]); //tl
+
+    //Barycentric Interpolation
+    vec3 a = vec3(x_tl+cell_size, 0, z_tl); //tr
+    vec3 b = vec3(x_tl, 0, z_tl+cell_size); //bl
+    vec3 c; //will be tl or br depending on x,z
+    vec3 p = vec3(x,0,z);
+    if(x_t+z_t > cell_size) c = vec3(x_tl+cell_size, 0, z_tl+cell_size); //br
+    else c = vec3(x_tl, 0, z_tl); //tl
+    float tri_area = cell_size/2;
+
+    float u = (length(cross(b-p,c-p))/2)/tri_area; //weight of a
+    float v = (length(cross(a-p,c-p))/2)/tri_area; //weight of b
+    float w = (length(cross(a-p,b-p))/2)/tri_area; //weight of c
+
+    return normalise(norm_a*u + norm_b*v + norm_c*w);
+}
+
 //Generates a flat square plane of n*n vertices spanning (2*size)*(2*size) world units (centered on origin)
 void gen_height_field(float** verts, int* point_count, int n, float size){
     float cell_size = 2*size/(n-1);
