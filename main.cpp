@@ -56,7 +56,7 @@ int main(){
 
 	//Player data
 	vec3 player_pos = vec3(0,10,0);
-	float player_scale = 0.1f;
+	float player_scale = 1.0f;
 	mat4 player_M = translate(scale(identity_mat4(), player_scale), player_pos);
 	vec3 player_vel = vec3(0,0,0);
 
@@ -83,7 +83,7 @@ int main(){
 		if (glfwGetKey(window, GLFW_KEY_TAB)) {
 			if(!G_was_pressed) {
 				edit_mode = !edit_mode;
-				write_height_pgm("terrain.pgm", height_data, width, height);
+				write_height_pgm("terrain.pgm", height_data, heightmap_size_x, heightmap_size_z);
 				G_was_pressed = true;
 			}
 		}

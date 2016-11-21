@@ -11,18 +11,17 @@
 
 int heightmap_n; //number of verts on x, z axes
 float heightmap_size = 20.0f; //world units
-int width, height; //in case we want non-square height map
+int heightmap_size_x, heightmap_size_z; //in case we want non-square height map
 const int MAX_HEIGHT = 20.0f; //y-axis range
 unsigned char* height_data;
 
 float* terrain_vp; //array of vertices
+float* terrain_vn;
 uint16_t* terrain_indices;
 int terrain_point_count, terrain_num_indices;
 int terrain_edit_speed = 200;
 
-GLuint terrain_vao;
-GLuint terrain_points_vbo;
-GLuint terrain_index_vbo;
+GLuint terrain_vao, terrain_points_vbo, terrain_normals_vbo, terrain_index_vbo;
 
 Shader heightmap_shader;
 
@@ -34,29 +33,35 @@ void gen_height_field(float** verts, int* point_count, int n, float size);
 void gen_height_field(float** verts, int* point_count, const unsigned char* image_data, int n, float size);
 void reload_height_data();
 void gen_heightmap_indices(uint16_t** indices, int* num_indices, int n);
+void gen_heightmap_normals(const float* vp, int num_verts, float** normals);
 void write_height_pgm(const char* filename, const unsigned char* image_data, int width, int height);
 bool read_height_pgm(const char* filename, unsigned char** image_data, int width, int height);
 
 void init_terrain(){
     heightmap_n = 2*heightmap_size + 1;
-    width = heightmap_n; height=heightmap_n;
+    heightmap_size_x = heightmap_n; heightmap_size_z=heightmap_n;
 
-    if(!read_height_pgm("terrain.pgm", &height_data, width, height)){
-        width = heightmap_n, height = heightmap_n;
-        height_data = (unsigned char*)malloc(width*height*sizeof(unsigned char));
-        memset(height_data, 0, width*height);
-		write_height_pgm("terrain.pgm", height_data, width, height);
+    if(!read_height_pgm("terrain.pgm", &height_data, heightmap_size_x, heightmap_size_z)){
+        heightmap_size_x = heightmap_n, heightmap_size_z = heightmap_n;
+        height_data = (unsigned char*)malloc(heightmap_size_x*heightmap_size_z*sizeof(unsigned char));
+        memset(height_data, 0, heightmap_size_x*heightmap_size_z);
+		write_height_pgm("terrain.pgm", height_data, heightmap_size_x, heightmap_size_x);
     }
 
     //TODO call this when done editing heightmap
     // free(height_data);
 
     gen_height_field(&terrain_vp, &terrain_point_count, height_data, heightmap_n, heightmap_size);
+    gen_heightmap_normals(terrain_vp, terrain_point_count, &terrain_vn);
     gen_heightmap_indices(&terrain_indices, &terrain_num_indices, heightmap_n);
 
 	glGenBuffers(1, &terrain_points_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, terrain_points_vbo);
 	glBufferData(GL_ARRAY_BUFFER, terrain_point_count*3*sizeof(float), terrain_vp, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &terrain_normals_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, terrain_normals_vbo);
+	glBufferData(GL_ARRAY_BUFFER, terrain_point_count*3*sizeof(float), terrain_vn, GL_STATIC_DRAW);
 
     glGenBuffers(1, &terrain_index_vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain_index_vbo);
@@ -64,14 +69,16 @@ void init_terrain(){
 
 	glGenVertexArrays(1, &terrain_vao);
 	glBindVertexArray(terrain_vao);
-	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(VP_ATTRIB_LOC);
 	glBindBuffer(GL_ARRAY_BUFFER, terrain_points_vbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(VP_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(VN_ATTRIB_LOC);
+	glBindBuffer(GL_ARRAY_BUFFER, terrain_normals_vbo);
+	glVertexAttribPointer(VN_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	//free(terrain_vp); //TODO should probably free this at some stage
     free(terrain_indices);
 
     heightmap_shader = load_shader("Heightmap.vert", "Heightmap.frag");
-
 }
 
 void edit_terrain(double dt){
@@ -247,6 +254,35 @@ void gen_heightmap_indices(uint16_t** indices, int* num_indices, int n){
             (*indices)[i++] = v+1;
             (*indices)[i++] = v-n+1;
         }
+    }
+}
+
+//Generate normals from set of heightmap verts
+void gen_heightmap_normals(const float* vp, int num_verts, float** normals){
+    *normals = (float*)malloc(num_verts*3*sizeof(float));
+
+    for(int i=0; i<num_verts; i++){
+        float l,r,t,b; // 4 surrounding height values
+        if(i%heightmap_size_x) 
+            l = vp[3*(i-1)+1];
+        else l = vp[3*i+1];
+        if((i+1)%heightmap_size_x) 
+            r = vp[3*(i+1)+1];
+        else r = vp[3*i+1];
+        if(i>heightmap_size_x) 
+            t = vp[3*(i-heightmap_size_x)+1];
+        else t = vp[3*i+1];
+        if(i+heightmap_size_x<num_verts) 
+            b = vp[3*(i+heightmap_size_x)+1];
+        else b = vp[3*i+1];
+
+        vec3 d_x = normalise(vec3(1, r-l, 0));
+        vec3 d_y = normalise(vec3(0, b-t, 1));
+        vec3 norm = cross(d_y,d_x);
+        assert(length(norm)-1<0.00001f);
+        (*normals)[3*i] = norm.v[0];
+        (*normals)[3*i + 1] = norm.v[1];
+        (*normals)[3*i + 2] = norm.v[2];
     }
 }
 
