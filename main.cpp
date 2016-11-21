@@ -153,12 +153,12 @@ int main(){
 
 		glUseProgram(basic_shader.id);
 		//Draw terrain wireframe
-		if(edit_mode){
+		//if(edit_mode){
 			glUniform4fv(colour_loc, 1, vec4(0,0,0,1).v);
 			glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(identity_mat4(), vec3(0,0.1f,0)).m);
 			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 			glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
-		}
+		//}
 		//Draw player
 		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		glBindVertexArray(cube_vao);

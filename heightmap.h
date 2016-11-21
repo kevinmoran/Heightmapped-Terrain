@@ -159,32 +159,23 @@ float get_height_interp(float x, float z){
     tri_under_player[0] = vec3(x_tl+cell_size, y_tr, z_tl);
     tri_under_player[1] = vec3(x_tl, y_bl, z_tl+cell_size);
 
-    float y_top, y_bottom;
-    if(x_t+z_t > cell_size){
-        y_top = y_tr;
-        y_bottom = x_t*y_bl + (1-x_t)*y_br;
-        tri_under_player[2] = vec3(x_tl+cell_size, y_br, z_tl+cell_size);
-    }
-    else{
-        y_top = x_t*y_tl + (1-x_t)*y_tr;
-        y_bottom = y_bl;
-        tri_under_player[2] = vec3(x_tl, y_tl, z_tl);
-    }
-    //Find height with bilinear interpolation
-    // float y_top = x_t*y_tl + (1-x_t)*y_tr; //Lerp along top edge
-    // float y_bottom = x_t*y_bl + (1-x_t)*y_br; //Lerp along bottom edge
-    float y_final = z_t*y_top + (1-z_t)*y_bottom; //Lerp between edges (on z-axis)
-    //^This looks confusing, check out image on wiki: https://en.wikipedia.org/wiki/Bilinear_interpolation
+    //Barycentric Interpolation
+    vec3 a = vec3(x_tl+cell_size, 0, z_tl); //tr
+    vec3 b = vec3(x_tl, 0, z_tl+cell_size); //bl
+    vec3 c; //will be tl or br depending on x,z
+    vec3 p = vec3(x,0,z);
+    if(x_t+z_t > cell_size) 
+        c = vec3(x_tl+cell_size, 0, z_tl+cell_size); //br
+    else c = vec3(x_tl, 0, z_tl); //tl
 
-    print(tri_under_player[0]);
-    print(tri_under_player[1]);
-    print(tri_under_player[2]);
+    float u = (length(cross(b-p,c-p))/2)/tri_area; //weight of a
+    float v = (length(cross(a-p,c-p))/2)/tri_area; //weight of b
+    float w = (length(cross(a-p,b-p))/2)/tri_area; //weight of c
 
-    printf("Player pos: ");
-    print(vec3(x,y_final,z));
-    printf("\n");
-
-    return y_final;
+    if(x_t+z_t > cell_size) 
+        return u*y_tr + v*y_bl + w*y_br;
+    else 
+        return u*y_tr + v*y_bl + w*y_tl;
 }
 
 //Generates a flat square plane of n*n vertices spanning (2*size)*(2*size) world units (centered on origin)
