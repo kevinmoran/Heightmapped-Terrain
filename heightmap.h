@@ -26,8 +26,6 @@ GLuint terrain_index_vbo;
 
 Shader heightmap_shader;
 
-vec3 tri_under_player[3];
-
 void init_terrain();
 void edit_terrain(double dt);
 int get_height_index(float x, float z);
@@ -156,17 +154,14 @@ float get_height_interp(float x, float z){
     float x_t = (x-x_tl)/cell_size; // % along cell point is on x-axis
     float z_t = (z-z_tl)/cell_size; // % along cell point is on z-axis
 
-    tri_under_player[0] = vec3(x_tl+cell_size, y_tr, z_tl);
-    tri_under_player[1] = vec3(x_tl, y_bl, z_tl+cell_size);
-
     //Barycentric Interpolation
     vec3 a = vec3(x_tl+cell_size, 0, z_tl); //tr
     vec3 b = vec3(x_tl, 0, z_tl+cell_size); //bl
     vec3 c; //will be tl or br depending on x,z
     vec3 p = vec3(x,0,z);
-    if(x_t+z_t > cell_size) 
-        c = vec3(x_tl+cell_size, 0, z_tl+cell_size); //br
+    if(x_t+z_t > cell_size) c = vec3(x_tl+cell_size, 0, z_tl+cell_size); //br
     else c = vec3(x_tl, 0, z_tl); //tl
+    float tri_area = cell_size/2;
 
     float u = (length(cross(b-p,c-p))/2)/tri_area; //weight of a
     float v = (length(cross(a-p,c-p))/2)/tri_area; //weight of b
@@ -174,8 +169,8 @@ float get_height_interp(float x, float z){
 
     if(x_t+z_t > cell_size) 
         return u*y_tr + v*y_bl + w*y_br;
-    else 
-        return u*y_tr + v*y_bl + w*y_tl;
+    
+    return u*y_tr + v*y_bl + w*y_tl;
 }
 
 //Generates a flat square plane of n*n vertices spanning (2*size)*(2*size) world units (centered on origin)

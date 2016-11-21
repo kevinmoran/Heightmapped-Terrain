@@ -168,15 +168,6 @@ int main(){
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player_M.m);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
         glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
-		
-		//Hightlight triangle under player
-		glUniform4fv(colour_loc, 1, vec4(0.8f, 0.8f, 0.2f, 1).v);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), 0.1f), tri_under_player[0]).m);
-        glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), 0.1f), tri_under_player[1]).m);
-        glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(), 0.1f), tri_under_player[2]).m);
-        glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glfwSwapBuffers(window);
 
