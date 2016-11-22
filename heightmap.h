@@ -82,6 +82,9 @@ void init_terrain(){
 }
 
 void edit_terrain(double dt){
+//TODO move mouse picking etc to editor.h
+//Just provide functions for editing ground here
+
     //Ray picking to raise/lower ground
     static double mouse_repeat_timer = 0.0;
     mouse_repeat_timer += dt;
@@ -101,24 +104,24 @@ void edit_terrain(double dt){
         vec3 ray_world = vec3(inverse(g_camera.V)*ray_eye);
         ray_world = normalise(ray_world);
         
-        for (int i=0; i<500; i++) {
+        for (int i=0; i<50; i++) {
             vec3 interval_pos = ray_world*(float)i;
             interval_pos = g_camera.pos+interval_pos;
 
             int height_index = get_height_index(interval_pos.v[0], interval_pos.v[2]);
             float ground_y = (height_index<0)? -INFINITY : MAX_HEIGHT*height_data[height_index]/255.0f;
             if(interval_pos.v[1]<ground_y) {
-                if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)){
-                    height_data[height_index] = MIN(height_data[height_index]+terrain_edit_speed/60, 255);
-                    height_data[height_index+1] = MIN(height_data[height_index+1]+terrain_edit_speed/60, 255);
-                    height_data[height_index+heightmap_n] = MIN(height_data[height_index+heightmap_n]+terrain_edit_speed/60, 255);
-                    height_data[height_index+heightmap_n+1] = MIN(height_data[height_index+heightmap_n+1]+terrain_edit_speed/60, 255);
-                }
-                if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)){
-                    height_data[height_index] = MAX(height_data[height_index]-terrain_edit_speed/60, 0);
-                    height_data[height_index+1] = MAX(height_data[height_index+1]-terrain_edit_speed/60, 0);
-                    height_data[height_index+heightmap_n] = MAX(height_data[height_index+heightmap_n]-terrain_edit_speed/60, 0);
-                    height_data[height_index+heightmap_n+1] = MAX(height_data[height_index+heightmap_n+1]-terrain_edit_speed/60, 0);
+                int draw_radius = 1;
+                for(int j= -draw_radius; j<=draw_radius; j++){
+                    for(int k= -draw_radius; k<=draw_radius; k++){
+                        int idx = height_index+k + j*heightmap_size_x;
+                        if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)){
+                            height_data[idx] = MIN(height_data[idx]+terrain_edit_speed/60, 255);
+                        }
+                        if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)){
+                            height_data[idx] = MAX(height_data[idx]-terrain_edit_speed/60, 0);
+                        }
+                    }
                 }
                 reload_height_data();
                 break;
