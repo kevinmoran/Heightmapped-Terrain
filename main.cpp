@@ -62,6 +62,9 @@ int main(){
 	bool player_is_on_ground = false;
 	float player_mass = 10;
 	float g = 9.81f;
+	float player_top_speed = 20.0f;
+	float player_acc = 30.0f;
+	float friction_factor = 0.7f; //higher is slippier
 
     double curr_time = glfwGetTime(), prev_time, dt;
 	//-------------------------------------------------------------------------------------//
@@ -98,30 +101,40 @@ int main(){
 		else { //Update player
 			
 			//WASD Movement (constrained to the x-z plane)
+			bool player_is_moving = false;
 			if(g_input[MOVE_FORWARD]) {
 				vec3 xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
-				player_pos += xz_proj*g_camera.move_speed*dt;
+				player_vel += xz_proj*player_acc*dt;
+				player_is_moving = true;
 			}
 			if(g_input[MOVE_LEFT]) {
 				vec3 xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
-				player_pos -= xz_proj*g_camera.move_speed*dt;
+				player_vel -= xz_proj*player_acc*dt;
+				player_is_moving = true;
 			}
 			if(g_input[MOVE_BACK]) {
 				vec3 xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
-				player_pos -= xz_proj*g_camera.move_speed*dt;			
+				player_vel -= xz_proj*player_acc*dt;
+				player_is_moving = true;			
 			}
 			if(g_input[MOVE_RIGHT]) {
 				vec3 xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
-				player_pos += xz_proj*g_camera.move_speed*dt;			
+				player_vel += xz_proj*player_acc*dt;	
+				player_is_moving = true;		
 			}
 
 			if(!player_is_on_ground){
 				player_vel.v[1] -= player_mass*g*dt;
 				//TODO: air steering?
 			}
+			//Clamp player speed
+			else if (length(player_vel) > player_top_speed) {
+				player_vel = normalise(player_vel);
+				player_vel *= player_top_speed;
+			}
 
 			//Deceleration
-			player_vel = player_vel*0.9f;
+			if(!player_is_moving) player_vel = player_vel*friction_factor;
 			
 			//Update player position
 			player_pos += player_vel*dt;

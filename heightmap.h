@@ -124,6 +124,7 @@ void edit_terrain(double dt){
                     }
                 }
                 reload_height_data();
+                //TODO recalculate normals
                 break;
             }
         }//endfor
