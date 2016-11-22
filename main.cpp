@@ -59,6 +59,9 @@ int main(){
 	mat4 player_M = translate(scale(identity_mat4(), player_scale), player_pos);
 	vec3 player_vel = vec3(0,0,0);
 	vec4 player_colour;
+	bool player_is_on_ground = false;
+	float player_mass = 10;
+	float g = 9.81f;
 
     double curr_time = glfwGetTime(), prev_time, dt;
 	//-------------------------------------------------------------------------------------//
@@ -79,21 +82,20 @@ int main(){
 		}
 
 		static bool edit_mode = true;
-		static bool G_was_pressed = false;
+		static bool tab_was_pressed = false;
 		if (glfwGetKey(window, GLFW_KEY_TAB)) {
-			if(!G_was_pressed) {
+			if(!tab_was_pressed) {
 				edit_mode = !edit_mode;
 				write_height_pgm("terrain.pgm", height_data, heightmap_size_x, heightmap_size_z);
-				G_was_pressed = true;
+				tab_was_pressed = true;
 			}
 		}
-		else G_was_pressed = false;
+		else tab_was_pressed = false;
 
 		if(edit_mode){
        		editor_update(dt);
 		}
-		else {
-			//Update player
+		else { //Update player
 			
 			//WASD Movement (constrained to the x-z plane)
 			if(g_input[MOVE_FORWARD]) {
@@ -113,8 +115,36 @@ int main(){
 				player_pos += xz_proj*g_camera.move_speed*dt;			
 			}
 
-			float slope = ONE_RAD_IN_DEG*acos(dot(vec3(0,1,0), get_normal_interp(player_pos.v[0], player_pos.v[2])));
+			if(!player_is_on_ground){
+				player_vel.v[1] -= player_mass*g*dt;
+				//TODO: air steering?
+			}
+
+			//Deceleration
+			player_vel = player_vel*0.9f;
+			
+			//Update player position
+			player_pos += player_vel*dt;
+
+			float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
+			vec3 ground_norm = get_normal_interp(player_pos.v[0], player_pos.v[2]);
+			//Collided into ground
+			if(player_pos.v[1] - ground_y < 0.5f*player_scale) {
+				//TODO: push player out of ground along normal?
+				//and update velocity by angle of ground?
+				player_pos.v[1] = ground_y + 0.5f*player_scale;
+				player_vel.v[1] = 0.0f;
+				player_is_on_ground = true;
+			}
+			else if(player_pos.v[1] - ground_y > 0.5f*player_scale){
+				//TODO if only slightly above ground just autosnap pos
+				player_is_on_ground = false;
+			}
+
+			float slope = ONE_RAD_IN_DEG*acos(dot(vec3(0,1,0), ground_norm));
+			
 			if(slope>45) {
+				//player_pos = prev_pos;
 				player_colour = vec4(0.8f, 0.8f, 0.2f, 1);
 				int i = get_height_index(player_pos.v[0], player_pos.v[1]);
 				float cell_size = 2*heightmap_size/(heightmap_n-1);
@@ -135,23 +165,12 @@ int main(){
 				v_min = (v_min.v[1]<tri_v[2].v[1]) ? v_min : tri_v[2];
 
 				vec3 gradient = normalise(v_max - v_min);
-
+				
 				player_vel -= gradient*10*9.81f*sinf(ONE_DEG_IN_RAD*slope)*dt;
 			}
 			else player_colour = vec4(0.8f, 0.1f, 0.2f, 1);
-
-			float player_mass = 10;
-			float g = 9.81f;
-			player_vel = player_vel*0.9f;
-			player_vel.v[1] -= player_mass*g*dt;
-			player_pos += player_vel*dt;
-			float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
 			
-			if(player_pos.v[1] - ground_y < 0.5f*player_scale) {
-				player_pos.v[1] = ground_y + 0.5f*player_scale;
-				player_vel.v[1] = 0.0f;
-			}
-			
+			//Constrain player_pos to map
 			if(player_pos.v[0] < -heightmap_size) {
 				player_pos.v[0] = -heightmap_size;
 			}
