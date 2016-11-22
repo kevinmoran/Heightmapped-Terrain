@@ -201,7 +201,7 @@ vec3 get_normal_interp(float x, float z){
     vec3 norm_b = vec3(terrain_vn[3*(i+heightmap_size_x)], terrain_vn[3*(i+heightmap_size_x)+1], terrain_vn[3*(i+heightmap_size_x)+2]); //bl
     vec3 norm_c;
     if(x_t+z_t > cell_size) norm_c = vec3(terrain_vn[3*(i+heightmap_size_x+1)], terrain_vn[3*(i+heightmap_size_x+1)+1], terrain_vn[3*(i+heightmap_size_x+1)+2]); //br
-    else vec3(terrain_vn[3*i], terrain_vn[3*i+1], terrain_vn[3*i+2]); //tl
+    else norm_c = vec3(terrain_vn[3*i], terrain_vn[3*i+1], terrain_vn[3*i+2]); //tl
 
     //Barycentric Interpolation
     vec3 a = vec3(x_tl+cell_size, 0, z_tl); //tr
