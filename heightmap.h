@@ -32,6 +32,7 @@ float get_height_interp(float x, float z);
 void gen_height_field(float** verts, int* point_count, int n, float size);
 void gen_height_field(float** verts, int* point_count, const unsigned char* image_data, int n, float size);
 void reload_height_data();
+void recalculate_normals();
 void gen_heightmap_indices(uint16_t** indices, int* num_indices, int n);
 void gen_heightmap_normals(const float* vp, int num_verts, float** normals);
 void write_height_pgm(const char* filename, const unsigned char* image_data, int width, int height);
@@ -124,7 +125,7 @@ void edit_terrain(double dt){
                     }
                 }
                 reload_height_data();
-                //TODO recalculate normals
+                recalculate_normals();
                 break;
             }
         }//endfor
@@ -278,6 +279,34 @@ void reload_height_data (){
     }
     glBindBuffer(GL_ARRAY_BUFFER, terrain_points_vbo);
 	glBufferData(GL_ARRAY_BUFFER, heightmap_n*heightmap_n*3*sizeof(float), terrain_vp, GL_STATIC_DRAW);
+}
+
+void recalculate_normals(){
+    for(int i=0; i<terrain_point_count; i++){
+        float l,r,t,b; // 4 surrounding height values
+        if(i%heightmap_size_x) 
+            l = terrain_vp[3*(i-1)+1];
+        else l = terrain_vp[3*i+1];
+        if((i+1)%heightmap_size_x) 
+            r = terrain_vp[3*(i+1)+1];
+        else r = terrain_vp[3*i+1];
+        if(i>heightmap_size_x) 
+            t = terrain_vp[3*(i-heightmap_size_x)+1];
+        else t = terrain_vp[3*i+1];
+        if(i+heightmap_size_x<terrain_point_count) 
+            b = terrain_vp[3*(i+heightmap_size_x)+1];
+        else b = terrain_vp[3*i+1];
+
+        vec3 d_x = normalise(vec3(1, r-l, 0));
+        vec3 d_y = normalise(vec3(0, b-t, 1));
+        vec3 norm = cross(d_y,d_x);
+        assert(length(norm)-1<0.00001f);
+        terrain_vn[3*i] = norm.v[0];
+        terrain_vn[3*i + 1] = norm.v[1];
+        terrain_vn[3*i + 2] = norm.v[2];
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, terrain_normals_vbo);
+	glBufferData(GL_ARRAY_BUFFER, terrain_point_count*3*sizeof(float), terrain_vn, GL_STATIC_DRAW);
 }
 
 //Generates index buffer for n*n height field

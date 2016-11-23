@@ -174,17 +174,25 @@ int main(){
 
 			float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
 			vec3 ground_norm = get_normal_interp(player_pos.v[0], player_pos.v[2]);
+			float player_h_above_ground = player_pos.v[1] - ground_y;
+
 			//Collided into ground
-			if(player_pos.v[1] - ground_y < 0.5f*player_scale) {
+			//TODO: move player's origin to base so code like this makes more sense
+			// (player_h_above_ground = (0.5f*player_scale) currently means we're on the ground)
+			if(player_h_above_ground< 0.5f*player_scale) {
 				//TODO: push player out of ground along normal?
 				//and update velocity by angle of ground?
 				player_pos.v[1] = ground_y + 0.5f*player_scale;
 				player_vel.v[1] = 0.0f;
 				player_is_on_ground = true;
+				printf("Hit ground\n");
 			}
-			else if(player_pos.v[1] - ground_y > 0.5f*player_scale){
-				//TODO if only slightly above ground just autosnap pos
+			else if(player_h_above_ground > 1.0f*player_scale){
 				player_is_on_ground = false;
+				printf("Falling\n");
+			}
+			else {//if(player_h_above_ground > 0.1f*player_scale){
+				player_pos.v[1] = ground_y + 0.5f*player_scale;
 			}
 
 			float slope = ONE_RAD_IN_DEG*acos(dot(vec3(0,1,0), ground_norm));
