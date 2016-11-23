@@ -7,6 +7,7 @@ enum INPUT_COMMANDS{
     MOVE_RIGHT,
     MOVE_FORWARD,
     MOVE_BACK,
+    JUMP,
     RAISE_CAM,
     LOWER_CAM,
     TILT_CAM_DOWN,
@@ -32,6 +33,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         case GLFW_KEY_A:        g_input[MOVE_LEFT]      = is_pressed; return;
         case GLFW_KEY_S:        g_input[MOVE_BACK]      = is_pressed; return;
         case GLFW_KEY_D:        g_input[MOVE_RIGHT]     = is_pressed; return;
+        case GLFW_KEY_SPACE:    g_input[JUMP]           = is_pressed; return;
         case GLFW_KEY_Q:        g_input[RAISE_CAM]      = is_pressed; return;
         case GLFW_KEY_E:        g_input[LOWER_CAM]      = is_pressed; return;
         case GLFW_KEY_UP:       g_input[TILT_CAM_UP]    = is_pressed; return;

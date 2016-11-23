@@ -66,6 +66,10 @@ int main(){
 	float player_time_till_top_speed = 0.25f; //Human reaction time?
 	float player_acc = player_top_speed/player_time_till_top_speed;
 	float friction_factor = 0.1f; //higher is slippier
+	float player_jump_height = 4.0f; 
+	//TODO: I calculate the necessary impulse to jump this height 
+	// based on kinetic energy (0.5*m*v^2)
+	// Result is not totally accurate, better to make jumping code explicit
 
     double curr_time = glfwGetTime(), prev_time, dt;
 	//-------------------------------------------------------------------------------------//
@@ -125,12 +129,28 @@ int main(){
 				player_is_moving = true;		
 			}
 
+			if(g_input[JUMP] && player_is_on_ground){
+				//TODO this is a terrible way to do jumping
+				//Instead set jump height and move up until you reach that height
+				float jump_factor = sqrtf(player_jump_height/(0.5f*player_mass*g));
+				player_vel.v[1] += jump_factor*player_mass*g;
+				player_is_on_ground = false;
+			}
 			if(!player_is_on_ground){
 				player_vel.v[1] -= player_mass*g*dt;
 				//TODO: air steering?
+
+				//Clamp player's xz speed
+				vec3 xz_vel = vec3(player_vel.v[0], 0, player_vel.v[2]);
+				if (length(xz_vel) > player_top_speed) {
+					xz_vel = normalise(xz_vel);
+					xz_vel *= player_top_speed;
+					player_vel.v[0] = xz_vel.v[0];
+					player_vel.v[2] = xz_vel.v[2];
+				}
 			}
 			else {//Player is on ground
-					//Clamp player speed
+				//Clamp player speed
 				if (length(player_vel) > player_top_speed) {
 					player_vel = normalise(player_vel);
 					player_vel *= player_top_speed;
