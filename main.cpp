@@ -65,7 +65,7 @@ int main(){
 	float player_top_speed = 20.0f;
 	float player_time_till_top_speed = 0.25f; //Human reaction time?
 	float player_acc = player_top_speed/player_time_till_top_speed;
-	float friction_factor = 0.1f; //higher is slippier
+	float friction_factor = 0.3f; //higher is slippier
 	float player_jump_height = 4.0f; 
 	//TODO: I calculate the necessary impulse to jump this height 
 	// based on kinetic energy (0.5*m*v^2)
@@ -111,21 +111,25 @@ int main(){
 			if(g_input[MOVE_FORWARD]) {
 				vec3 xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
 				player_vel += xz_proj*player_acc*dt;
+				if(dot(xz_proj,player_vel)<0) player_vel = player_vel*friction_factor;
 				player_is_moving = true;
 			}
 			if(g_input[MOVE_LEFT]) {
-				vec3 xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
-				player_vel -= xz_proj*player_acc*dt;
+				vec3 xz_proj = normalise(vec3(-g_camera.rgt.v[0], 0, -g_camera.rgt.v[2]));
+				player_vel += xz_proj*player_acc*dt;
+				if(dot(xz_proj,player_vel)<0) player_vel = player_vel*friction_factor;
 				player_is_moving = true;
 			}
 			if(g_input[MOVE_BACK]) {
-				vec3 xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
-				player_vel -= xz_proj*player_acc*dt;
+				vec3 xz_proj = normalise(vec3(-g_camera.fwd.v[0], 0, -g_camera.fwd.v[2]));
+				player_vel += xz_proj*player_acc*dt;
+				if(dot(xz_proj,player_vel)<0) player_vel = player_vel*friction_factor;
 				player_is_moving = true;			
 			}
 			if(g_input[MOVE_RIGHT]) {
 				vec3 xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
-				player_vel += xz_proj*player_acc*dt;	
+				player_vel += xz_proj*player_acc*dt;
+				if(dot(xz_proj,player_vel)<0) player_vel = player_vel*friction_factor;
 				player_is_moving = true;		
 			}
 
