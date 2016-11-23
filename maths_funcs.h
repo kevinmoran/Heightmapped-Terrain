@@ -417,10 +417,10 @@ struct mat4 {
 	mat4 operator* (const mat4& rhs) {
 		mat4 r = zero_mat4 ();
 		int r_index = 0;
-		for (int col = 0; col < 4; col++) {
-			for (int row = 0; row < 4; row++) {
+		for(int col = 0; col < 4; col++) {
+			for(int row = 0; row < 4; row++) {
 				float sum = 0.0f;
-				for (int i = 0; i < 4; i++) {
+				for(int i = 0; i < 4; i++) {
 					sum += rhs.m[i + col * 4] * m[row + i * 4];
 				}
 				r.m[r_index] = sum;
@@ -431,7 +431,7 @@ struct mat4 {
 	}
 
 	mat4& operator= (const mat4& rhs) {
-		for (int i = 0; i < 16; i++) {
+		for(int i = 0; i < 16; i++) {
 			m[i] = rhs.m[i];
 		}
 		return *this;
@@ -537,7 +537,7 @@ inline float length2(const vec2& v) {
 inline vec2 normalise(const vec2& v) {
 	vec2 vb;
 	float l = length(v);
-	if (0.0f == l) {
+	if(0.0f == l) {
 		return vec2(0.0f, 0.0f);
 	}
 	vb.v[0] = v.v[0] / l;
@@ -574,7 +574,7 @@ inline float length2 (const vec3& v) {
 inline vec3 normalise (const vec3& v) {
 	vec3 vb;
 	float l = length (v);
-	if (0.0f == l) {
+	if(0.0f == l) {
 		return vec3 (0.0f, 0.0f, 0.0f);
 	}
 	vb.v[0] = v.v[0] / l;
@@ -707,7 +707,7 @@ inline mat4 inverse (const mat4& mm) {
 	float det = determinant (mm);
 	/* there is no inverse if determinant is zero (not likely unless scale is
 	broken) */
-	if (0.0f == det) {
+	if(0.0f == det) {
 		fprintf (stderr, "WARNING. matrix has no determinant. can not invert\n");
 		return mm;
 	}
@@ -995,7 +995,7 @@ inline versor normalise (versor& q) {
 		q.q[2] * q.q[2] + q.q[3] * q.q[3];
 	// NB: floats have min 6 digits of precision
 	const float thresh = 0.0001f;
-	if (fabs (1.0f - sum) < thresh) {
+	if(fabs (1.0f - sum) < thresh) {
 		return q;
 	}
 	float mag = sqrt (sum);
@@ -1013,14 +1013,14 @@ inline versor slerp (versor& q, versor& r, float t) {
 	// if dot product is negative then one quaternion should be negated, to make
 	// it take the short way around, rather than the long way
 	// yeah! and furthermore Susan, I had to recalculate the d.p. after this
-	if (cos_half_theta < 0.0f) {
-		for (int i = 0; i < 4; i++) {
+	if(cos_half_theta < 0.0f) {
+		for(int i = 0; i < 4; i++) {
 			q.q[i] *= -1.0f;
 		}
 		cos_half_theta = dot (q, r);
 	}
 	// if qa=qb or qa=-qb then theta = 0 and we can return qa
-	if (fabs (cos_half_theta) >= 1.0f) {
+	if(fabs (cos_half_theta) >= 1.0f) {
 		return q;
 	}
 	// Calculate temporary values
@@ -1028,8 +1028,8 @@ inline versor slerp (versor& q, versor& r, float t) {
 	// if theta = 180 degrees then result is not fully defined
 	// we could rotate around any axis normal to qa or qb
 	versor result;
-	if (fabs (sin_half_theta) < 0.001f) {
-		for (int i = 0; i < 4; i++) {
+	if(fabs (sin_half_theta) < 0.001f) {
+		for(int i = 0; i < 4; i++) {
 			result.q[i] = (1.0f - t) * q.q[i] + t * r.q[i];
 		}
 		return result;
@@ -1037,7 +1037,7 @@ inline versor slerp (versor& q, versor& r, float t) {
 	float half_theta = acos (cos_half_theta);
 	float a = sin ((1.0f - t) * half_theta) / sin_half_theta;
 	float b = sin (t * half_theta) / sin_half_theta;
-	for (int i = 0; i < 4; i++) {
+	for(int i = 0; i < 4; i++) {
 		result.q[i] = q.q[i] * a + r.q[i] * b;
 	}
 	return result;

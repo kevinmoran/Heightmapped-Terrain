@@ -7,7 +7,7 @@
 bool init_gl(GLFWwindow* &window, int window_width, const int window_height) {
 
 	/* start GL context and O/S window using the GLFW helper library */
-	if (!glfwInit()) {
+	if(!glfwInit()) {
 		fprintf(stderr, "ERROR: could not start GLFW3\n");
 		getchar();
 		return false;
@@ -21,7 +21,7 @@ bool init_gl(GLFWwindow* &window, int window_width, const int window_height) {
 	#endif
 	
 	window = glfwCreateWindow(window_width, window_height, "Terrain", NULL, NULL);
-	if (!window) {
+	if(!window) {
 		fprintf(stderr, "ERROR: could not open window with GLFW3\n");
 		glfwTerminate();
 		getchar();

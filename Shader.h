@@ -154,7 +154,7 @@ static bool load_shader_program(const char* vert_file, const char* frag_file, GL
 
 bool reload_shader_program(const char* vert_file, const char* frag_file, Shader* s){
     delete_program(s);
-    if (!load_shader_program(vert_file, frag_file, &(s->id))) {
+    if(!load_shader_program(vert_file, frag_file, &(s->id))) {
         fprintf(stderr, "ERROR in reload_shader_program using vert shader %s and frag shader %s", vert_file, frag_file);
         return false;
     }
@@ -165,7 +165,7 @@ bool reload_shader_program(const char* vert_file, const char* frag_file, Shader*
 }
 
 void delete_program(Shader* s){
-    if (s->compiled) {
+    if(s->compiled) {
         glDeleteProgram(s->id);
 
         s->id = -1;

@@ -104,7 +104,7 @@ void edit_terrain(double dt){
         vec3 ray_world = vec3(inverse(g_camera.V)*ray_eye);
         ray_world = normalise(ray_world);
         
-        for (int i=0; i<50; i++) {
+        for(int i=0; i<50; i++) {
             vec3 interval_pos = ray_world*(float)i;
             interval_pos = g_camera.pos+interval_pos;
 

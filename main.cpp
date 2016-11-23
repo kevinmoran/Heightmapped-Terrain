@@ -18,7 +18,7 @@ float gl_aspect_ratio = (float)gl_width/gl_height;
 #include "editor.h"
 
 int main(){
-	if (!init_gl(window, gl_width, gl_height)){ return 1; }
+	if(!init_gl(window, gl_width, gl_height)){ return 1; }
 
 	float* cube_vp = NULL;
 	unsigned short* cube_indices = NULL;
@@ -75,23 +75,23 @@ int main(){
 	//-------------------------------------------------------------------------------------//
 	//-------------------------------------MAIN LOOP---------------------------------------//
 	//-------------------------------------------------------------------------------------//
-	while (!glfwWindowShouldClose(window)) {
+	while(!glfwWindowShouldClose(window)) {
 		//Get dt
 		prev_time = curr_time;
 		curr_time = glfwGetTime();
 		dt = curr_time - prev_time;
-		if (dt > 0.1) dt = 0.1;
+		if(dt > 0.1) dt = 0.1;
 
 		//Get Input
 		glfwPollEvents();
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE)) {
+		if(glfwGetKey(window, GLFW_KEY_ESCAPE)) {
 			glfwSetWindowShouldClose(window, GL_TRUE);
 			continue;
 		}
 
 		static bool edit_mode = true;
 		static bool tab_was_pressed = false;
-		if (glfwGetKey(window, GLFW_KEY_TAB)) {
+		if(glfwGetKey(window, GLFW_KEY_TAB)) {
 			if(!tab_was_pressed) {
 				edit_mode = !edit_mode;
 				write_height_pgm("terrain.pgm", height_data, heightmap_size_x, heightmap_size_z);
@@ -136,22 +136,9 @@ int main(){
 				player_vel.v[1] += jump_factor*player_mass*g;
 				player_is_on_ground = false;
 			}
-			if(!player_is_on_ground){
-				player_vel.v[1] -= player_mass*g*dt;
-				//TODO: air steering?
-
-				//Clamp player's xz speed
-				vec3 xz_vel = vec3(player_vel.v[0], 0, player_vel.v[2]);
-				if (length(xz_vel) > player_top_speed) {
-					xz_vel = normalise(xz_vel);
-					xz_vel *= player_top_speed;
-					player_vel.v[0] = xz_vel.v[0];
-					player_vel.v[2] = xz_vel.v[2];
-				}
-			}
-			else {//Player is on ground
+			if(player_is_on_ground){
 				//Clamp player speed
-				if (length(player_vel) > player_top_speed) {
+				if(length(player_vel) > player_top_speed) {
 					player_vel = normalise(player_vel);
 					player_vel *= player_top_speed;
 				}
@@ -161,6 +148,21 @@ int main(){
 				player_vel = player_vel*friction_factor;
 			}
 			
+			//TODO: else if(player_is_jumping)
+			else{ //(!player_is_on_ground)
+				player_vel.v[1] -= player_mass*g*dt;
+				//TODO: air steering?
+
+				//Clamp player's xz speed
+				vec3 xz_vel = vec3(player_vel.v[0], 0, player_vel.v[2]);
+				if(length(xz_vel) > player_top_speed) {
+					xz_vel = normalise(xz_vel);
+					xz_vel *= player_top_speed;
+					player_vel.v[0] = xz_vel.v[0];
+					player_vel.v[2] = xz_vel.v[2];
+				}
+			}
+
 			//Update player position
 			player_pos += player_vel*dt;
 

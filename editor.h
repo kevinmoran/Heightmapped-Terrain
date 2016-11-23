@@ -7,7 +7,7 @@ void editor_update(double dt){
 
     //Hotkeys
     static bool M_was_pressed = false;
-    if (glfwGetKey(window, GLFW_KEY_M)) {
+    if(glfwGetKey(window, GLFW_KEY_M)) {
         if(!M_was_pressed) {
             if(!cam_mouse_controls){
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
@@ -21,7 +21,7 @@ void editor_update(double dt){
     }
     else M_was_pressed = false;
 
-    if (glfwGetKey(window, GLFW_KEY_R)) {
+    if(glfwGetKey(window, GLFW_KEY_R)) {
         reload_shader_program("Heightmap.vert", "Heightmap.frag", &heightmap_shader);
         glUseProgram(heightmap_shader.id);
         glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);

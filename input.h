@@ -59,11 +59,11 @@ if(glfwJoystickPresent(GLFW_JOYSTICK_1) == GLFW_TRUE){
 //glfwSetJoystickCallback(joystick_callback);
 void joystick_callback(int joy, int event)
 {
-    if (event == GLFW_CONNECTED)
+    if(event == GLFW_CONNECTED)
     {
         controller_is_connected = true;
     }
-    else if (event == GLFW_DISCONNECTED)
+    else if(event == GLFW_DISCONNECTED)
     {
         controller_is_connected = false;
     }
@@ -114,7 +114,7 @@ glfwSetClipboardString(window, "A string with words in it");
 
 //PASTE
 const char* text = glfwGetClipboardString(window);
-if (text)
+if(text)
     insert_text(text);
 
 */
@@ -124,7 +124,7 @@ if (text)
 //glfwSetDropCallback(window, drop_callback);
 void drop_callback(GLFWwindow* window, int count, const char** paths)
 {
-    for (int i = 0;  i < count;  i++)
+    for(int i = 0;  i < count;  i++)
         handle_dropped_file(paths[i]);
 }
 */
