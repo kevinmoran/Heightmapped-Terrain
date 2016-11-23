@@ -26,21 +26,21 @@ int main(){
 	load_obj_indexed("cube.obj", &cube_vp, &cube_indices, &cube_point_count, &cube_vert_count);
 
 	GLuint cube_vao;
+	glGenVertexArrays(1, &cube_vao);
+	glBindVertexArray(cube_vao);
+
 	GLuint cube_points_vbo, cube_index_vbo;
 	glGenBuffers(1, &cube_points_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, cube_points_vbo);
 	glBufferData(GL_ARRAY_BUFFER, cube_vert_count*3*sizeof(float), cube_vp, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	free(cube_vp);
 
 	glGenBuffers(1, &cube_index_vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_point_count*sizeof(unsigned short), cube_indices, GL_STATIC_DRAW);
 	free(cube_indices);
-	glGenVertexArrays(1, &cube_vao);
-	glBindVertexArray(cube_vao);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, cube_points_vbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	free(cube_vp);
 
     init_terrain();
 
@@ -60,11 +60,12 @@ int main(){
 	vec3 player_vel = vec3(0,0,0);
 	vec4 player_colour;
 	bool player_is_on_ground = false;
-	float player_mass = 10;
+	float player_mass = 20;
 	float g = 9.81f;
 	float player_top_speed = 20.0f;
-	float player_acc = 30.0f;
-	float friction_factor = 0.7f; //higher is slippier
+	float player_time_till_top_speed = 0.25f; //Human reaction time?
+	float player_acc = player_top_speed/player_time_till_top_speed;
+	float friction_factor = 0.1f; //higher is slippier
 
     double curr_time = glfwGetTime(), prev_time, dt;
 	//-------------------------------------------------------------------------------------//
@@ -102,6 +103,7 @@ int main(){
 			
 			//WASD Movement (constrained to the x-z plane)
 			bool player_is_moving = false;
+			//TODO: Need to improve responsiveness when changing direction
 			if(g_input[MOVE_FORWARD]) {
 				vec3 xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
 				player_vel += xz_proj*player_acc*dt;
@@ -127,14 +129,17 @@ int main(){
 				player_vel.v[1] -= player_mass*g*dt;
 				//TODO: air steering?
 			}
-			//Clamp player speed
-			else if (length(player_vel) > player_top_speed) {
-				player_vel = normalise(player_vel);
-				player_vel *= player_top_speed;
-			}
+			else {//Player is on ground
+					//Clamp player speed
+				if (length(player_vel) > player_top_speed) {
+					player_vel = normalise(player_vel);
+					player_vel *= player_top_speed;
+				}
 
-			//Deceleration
-			if(!player_is_moving) player_vel = player_vel*friction_factor;
+				//Deceleration
+				if(!player_is_moving) 
+				player_vel = player_vel*friction_factor;
+			}
 			
 			//Update player position
 			player_pos += player_vel*dt;
@@ -159,27 +164,27 @@ int main(){
 			if(slope>45) {
 				//player_pos = prev_pos;
 				player_colour = vec4(0.8f, 0.8f, 0.2f, 1);
-				int i = get_height_index(player_pos.v[0], player_pos.v[1]);
-				float cell_size = 2*heightmap_size/(heightmap_n-1);
-				float x_tl = terrain_vp[3*i];
-				float z_tl = terrain_vp[3*i + 2];
-				float x_t = (player_pos.v[0]-x_tl)/cell_size; // % along cell point is on x-axis
-				float z_t = (player_pos.v[1]-z_tl)/cell_size; // % along cell point is on z-axis
+				// int i = get_height_index(player_pos.v[0], player_pos.v[1]);
+				// float cell_size = 2*heightmap_size/(heightmap_n-1);
+				// float x_tl = terrain_vp[3*i];
+				// float z_tl = terrain_vp[3*i + 2];
+				// float x_t = (player_pos.v[0]-x_tl)/cell_size; // % along cell point is on x-axis
+				// float z_t = (player_pos.v[1]-z_tl)/cell_size; // % along cell point is on z-axis
 
-				vec3 tri_v[3];
-				tri_v[0] = vec3(terrain_vp[3*(i+1)], terrain_vp[3*(i+1)+1], terrain_vp[3*(i+1)+2]);
-				tri_v[1] = vec3(terrain_vp[3*(i+heightmap_size_x)], terrain_vp[3*(i+heightmap_size_x)+1], terrain_vp[3*(i+heightmap_size_x)+2]);
-				if(x_t+z_t>1.0f) tri_v[2] = vec3(terrain_vp[3*(i+heightmap_size_x+1)], terrain_vp[3*(i+heightmap_size_x+1)+1], terrain_vp[3*(i+heightmap_size_x+1)+2]);
-				else tri_v[2] = vec3(terrain_vp[3*i], terrain_vp[3*i+1], terrain_vp[3*i+2]);
+				// vec3 tri_v[3];
+				// tri_v[0] = vec3(terrain_vp[3*(i+1)], terrain_vp[3*(i+1)+1], terrain_vp[3*(i+1)+2]);
+				// tri_v[1] = vec3(terrain_vp[3*(i+heightmap_size_x)], terrain_vp[3*(i+heightmap_size_x)+1], terrain_vp[3*(i+heightmap_size_x)+2]);
+				// if(x_t+z_t>1.0f) tri_v[2] = vec3(terrain_vp[3*(i+heightmap_size_x+1)], terrain_vp[3*(i+heightmap_size_x+1)+1], terrain_vp[3*(i+heightmap_size_x+1)+2]);
+				// else tri_v[2] = vec3(terrain_vp[3*i], terrain_vp[3*i+1], terrain_vp[3*i+2]);
 
-				vec3 v_max = (tri_v[0].v[1]>tri_v[1].v[1]) ? tri_v[0] : tri_v[1];
-				v_max = (v_max.v[1]>tri_v[2].v[1]) ? v_max : tri_v[2];
-				vec3 v_min = (tri_v[0].v[1]<tri_v[1].v[1]) ? tri_v[0] : tri_v[1];
-				v_min = (v_min.v[1]<tri_v[2].v[1]) ? v_min : tri_v[2];
+				// vec3 v_max = (tri_v[0].v[1]>tri_v[1].v[1]) ? tri_v[0] : tri_v[1];
+				// v_max = (v_max.v[1]>tri_v[2].v[1]) ? v_max : tri_v[2];
+				// vec3 v_min = (tri_v[0].v[1]<tri_v[1].v[1]) ? tri_v[0] : tri_v[1];
+				// v_min = (v_min.v[1]<tri_v[2].v[1]) ? v_min : tri_v[2];
 
-				vec3 gradient = normalise(v_max - v_min);
+				// vec3 gradient = normalise(v_max - v_min);
 				
-				player_vel -= gradient*10*9.81f*sinf(ONE_DEG_IN_RAD*slope)*dt;
+				// player_vel -= gradient*10*9.81f*sinf(ONE_DEG_IN_RAD*slope)*dt;
 			}
 			else player_colour = vec4(0.8f, 0.1f, 0.2f, 1);
 			
@@ -228,7 +233,7 @@ int main(){
 		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player_M.m);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
-        glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, cube_point_count, GL_UNSIGNED_SHORT, 0);
 
 		glfwSwapBuffers(window);
 
