@@ -107,29 +107,31 @@ int main(){
 			
 			//WASD Movement (constrained to the x-z plane)
 			bool player_is_moving = false;
-			//TODO: Need to improve responsiveness when changing direction
+			//TODO: If you hit top speed in a direction (e.g. left) and then release that button
+			// while trying to move in another (e.g. down) your direction of movement will slowly 
+			// blend from one to the other which is annoying, feels like you're drifting
 			if(g_input[MOVE_FORWARD]) {
 				vec3 xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
 				player_vel += xz_proj*player_acc*dt;
-				if(dot(xz_proj,player_vel)<0) player_vel = player_vel*friction_factor;
+				if(dot(xz_proj,player_vel)<0) player_vel += xz_proj*player_acc*dt;
 				player_is_moving = true;
 			}
 			if(g_input[MOVE_LEFT]) {
 				vec3 xz_proj = normalise(vec3(-g_camera.rgt.v[0], 0, -g_camera.rgt.v[2]));
 				player_vel += xz_proj*player_acc*dt;
-				if(dot(xz_proj,player_vel)<0) player_vel = player_vel*friction_factor;
+				if(dot(xz_proj,player_vel)<0) player_vel += xz_proj*player_acc*dt;
 				player_is_moving = true;
 			}
 			if(g_input[MOVE_BACK]) {
 				vec3 xz_proj = normalise(vec3(-g_camera.fwd.v[0], 0, -g_camera.fwd.v[2]));
 				player_vel += xz_proj*player_acc*dt;
-				if(dot(xz_proj,player_vel)<0) player_vel = player_vel*friction_factor;
+				if(dot(xz_proj,player_vel)<0) player_vel += xz_proj*player_acc*dt;
 				player_is_moving = true;			
 			}
 			if(g_input[MOVE_RIGHT]) {
 				vec3 xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
 				player_vel += xz_proj*player_acc*dt;
-				if(dot(xz_proj,player_vel)<0) player_vel = player_vel*friction_factor;
+				if(dot(xz_proj,player_vel)<0) player_vel += xz_proj*player_acc*dt;
 				player_is_moving = true;		
 			}
 
