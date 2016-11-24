@@ -52,6 +52,9 @@ void init_terrain(){
     //TODO call this when done editing heightmap
     // free(height_data);
 
+    glGenVertexArrays(1, &terrain_vao);
+	glBindVertexArray(terrain_vao);
+
     gen_height_field(&terrain_vp, &terrain_point_count, height_data, heightmap_n, heightmap_size);
     gen_heightmap_normals(terrain_vp, terrain_point_count, &terrain_vn);
     gen_heightmap_indices(&terrain_indices, &terrain_num_indices, heightmap_n);
@@ -68,8 +71,6 @@ void init_terrain(){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain_index_vbo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, terrain_num_indices*sizeof(uint16_t), terrain_indices, GL_STATIC_DRAW);
 
-	glGenVertexArrays(1, &terrain_vao);
-	glBindVertexArray(terrain_vao);
 	glEnableVertexAttribArray(VP_ATTRIB_LOC);
 	glBindBuffer(GL_ARRAY_BUFFER, terrain_points_vbo);
 	glVertexAttribPointer(VP_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, NULL);

@@ -68,7 +68,7 @@ int main(){
 	float friction_factor = 0.3f; //higher is slippier
 	float player_jump_height = 4.0f; 
 	//TODO: I calculate the necessary impulse to jump this height 
-	// based on kinetic energy (0.5*m*v^2)
+	// based on kinetic energy (0.5*m*v^2) I think
 	// Result is not totally accurate, better to make jumping code explicit
 
     double curr_time = glfwGetTime(), prev_time, dt;
@@ -107,10 +107,7 @@ int main(){
 			
 			//WASD Movement (constrained to the x-z plane)
 			bool player_is_moving = false;
-			//TODO: If you hit top speed in a direction (e.g. left) and then release that button
-			// while trying to move in another (e.g. down) your direction of movement will slowly 
-			// blend from one to the other which is annoying, feels like you're drifting
-
+			//Find player's forward and right movement directions
 			vec3 fwd_xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
 			vec3 rgt_xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
 
@@ -137,6 +134,10 @@ int main(){
 				player_is_moving = true;		
 			}
 			else if(dot(rgt_xz_proj,player_vel)>0) player_vel -= rgt_xz_proj*player_acc*dt;
+			// NOTE about the else statements above: Checks if we aren't pressing a button 
+			// but have velocity in that direction, if so slows us down faster w/ subtraction
+			// This improves responsiveness and tightens up the feel of moving
+			// Mult by friction_factor is good to kill speed when idle but feels drifty while moving
 
 			if(g_input[JUMP] && player_is_on_ground){
 				//TODO this is a terrible way to do jumping
@@ -178,28 +179,32 @@ int main(){
 			float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
 			vec3 ground_norm = get_normal_interp(player_pos.v[0], player_pos.v[2]);
 			float player_h_above_ground = player_pos.v[1] - ground_y;
+			//height to differentiate between walking down a slope and walking off an edge:
+			const float autosnap_height = 1.0f*player_scale;
 
-			//Collided into ground
 			//TODO: move player's origin to base so code like this makes more sense
 			// (player_h_above_ground = (0.5f*player_scale) currently means we're on the ground)
+
+			//Collided into ground
 			if(player_h_above_ground< 0.5f*player_scale) {
 				//TODO: push player out of ground along normal?
 				//and update velocity by angle of ground?
 				player_pos.v[1] = ground_y + 0.5f*player_scale;
 				player_vel.v[1] = 0.0f;
 				player_is_on_ground = true;
-				printf("Hit ground\n");
 			}
-			else if(player_h_above_ground > 1.0f*player_scale){
+			else if(player_h_above_ground > autosnap_height){
 				player_is_on_ground = false;
-				printf("Falling\n");
 			}
-			else {//if(player_h_above_ground > 0.1f*player_scale){
+			else {//We're not on ground but less than autosnap_height above it
+				//snap player to ground
+				//TODO: trying autosnapping along normal?
 				player_pos.v[1] = ground_y + 0.5f*player_scale;
+				player_is_on_ground = true;
 			}
 
+			//Slope checking
 			float slope = ONE_RAD_IN_DEG*acos(dot(vec3(0,1,0), ground_norm));
-			
 			if(slope>45) {
 				//player_pos = prev_pos;
 				player_colour = vec4(0.8f, 0.8f, 0.2f, 1);
@@ -227,7 +232,7 @@ int main(){
 			}
 			else player_colour = vec4(0.8f, 0.1f, 0.2f, 1);
 			
-			//Constrain player_pos to map
+			//Constrain player_pos to map bounds
 			if(player_pos.v[0] < -heightmap_size) {
 				player_pos.v[0] = -heightmap_size;
 			}
@@ -253,7 +258,7 @@ int main(){
 
 		//Draw terrain
 		glBindVertexArray(terrain_vao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain_index_vbo);
+        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain_index_vbo);
         glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glUseProgram(basic_shader.id);
@@ -261,17 +266,17 @@ int main(){
 		//if(edit_mode){
 			glUniform4fv(colour_loc, 1, vec4(0,0,0,1).v);
 			glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(identity_mat4(), vec3(0,0.1f,0)).m);
-			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE );
 			glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 		//}
 		//Draw player
-		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL );
 		glBindVertexArray(cube_vao);
 		glUniform4fv(colour_loc, 1, player_colour.v);
 		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
 		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player_M.m);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
         glDrawElements(GL_TRIANGLES, cube_point_count, GL_UNSIGNED_SHORT, 0);
 
 		glfwSwapBuffers(window);
