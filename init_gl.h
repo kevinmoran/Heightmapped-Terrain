@@ -3,8 +3,9 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include "input.h"
+#include "Camera3D.h"
 
-bool init_gl(GLFWwindow* &window, int window_width, const int window_height) {
+bool init_gl(GLFWwindow* &window, int window_width, int window_height) {
 
 	/* start GL context and O/S window using the GLFW helper library */
 	if(!glfwInit()) {
@@ -29,6 +30,7 @@ bool init_gl(GLFWwindow* &window, int window_width, const int window_height) {
 	}
 	glfwMakeContextCurrent(window);
 	glfwSetKeyCallback(window, key_callback);
+	glfwSetWindowSizeCallback(window, window_resize_callback);
 	
 	/* start GLEW extension handler */
 	glewExperimental = GL_TRUE;
@@ -40,6 +42,8 @@ bool init_gl(GLFWwindow* &window, int window_width, const int window_height) {
 	printf("Renderer: %s\n", renderer);
 	printf("OpenGL version supported %s\n", version);
 	printf("GLSL version supported: %s\n", glsl_version);
+
+	glViewport(0,0,window_width,window_height);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);

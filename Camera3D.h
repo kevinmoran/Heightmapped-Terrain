@@ -109,3 +109,11 @@ void Camera3D::update(double dt){
 }
 
 Camera3D g_camera;
+
+void window_resize_callback(GLFWwindow* window, int width, int height){
+    gl_width = width;
+    gl_height = height;
+    gl_aspect_ratio = (float)gl_width/gl_height;
+    g_camera.P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, 0.1f, 100.0f);
+    glViewport(0,0,gl_width,gl_height);
+}

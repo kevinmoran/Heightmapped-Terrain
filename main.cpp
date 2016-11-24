@@ -185,6 +185,8 @@ int main(){
 			//TODO: move player's origin to base so code like this makes more sense
 			// (player_h_above_ground = (0.5f*player_scale) currently means we're on the ground)
 
+			//TODO Don't autosnap while the player is jumping
+
 			//Collided into ground
 			if(player_h_above_ground< 0.5f*player_scale) {
 				//TODO: push player out of ground along normal?
@@ -255,6 +257,7 @@ int main(){
 
         glUseProgram(heightmap_shader.id);
 		glUniformMatrix4fv(heightmap_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
+		glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
 
 		//Draw terrain
 		glBindVertexArray(terrain_vao);
@@ -262,6 +265,8 @@ int main(){
         glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glUseProgram(basic_shader.id);
+		glUniformMatrix4fv(heightmap_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
+		glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
 		//Draw terrain wireframe
 		//if(edit_mode){
 			glUniform4fv(colour_loc, 1, vec4(0,0,0,1).v);
