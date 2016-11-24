@@ -110,30 +110,33 @@ int main(){
 			//TODO: If you hit top speed in a direction (e.g. left) and then release that button
 			// while trying to move in another (e.g. down) your direction of movement will slowly 
 			// blend from one to the other which is annoying, feels like you're drifting
+
+			vec3 fwd_xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
+			vec3 rgt_xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
+
 			if(g_input[MOVE_FORWARD]) {
-				vec3 xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
-				player_vel += xz_proj*player_acc*dt;
-				if(dot(xz_proj,player_vel)<0) player_vel += xz_proj*player_acc*dt;
+				player_vel += fwd_xz_proj*player_acc*dt;
 				player_is_moving = true;
 			}
+			else if(dot(fwd_xz_proj,player_vel)>0) player_vel -= fwd_xz_proj*player_acc*dt;
+
 			if(g_input[MOVE_LEFT]) {
-				vec3 xz_proj = normalise(vec3(-g_camera.rgt.v[0], 0, -g_camera.rgt.v[2]));
-				player_vel += xz_proj*player_acc*dt;
-				if(dot(xz_proj,player_vel)<0) player_vel += xz_proj*player_acc*dt;
+				player_vel += -rgt_xz_proj*player_acc*dt;
 				player_is_moving = true;
 			}
+			else if(dot(-rgt_xz_proj,player_vel)>0) player_vel += rgt_xz_proj*player_acc*dt;
+
 			if(g_input[MOVE_BACK]) {
-				vec3 xz_proj = normalise(vec3(-g_camera.fwd.v[0], 0, -g_camera.fwd.v[2]));
-				player_vel += xz_proj*player_acc*dt;
-				if(dot(xz_proj,player_vel)<0) player_vel += xz_proj*player_acc*dt;
+				player_vel += -fwd_xz_proj*player_acc*dt;
 				player_is_moving = true;			
 			}
+			else if(dot(-fwd_xz_proj,player_vel)>0) player_vel += fwd_xz_proj*player_acc*dt;
+
 			if(g_input[MOVE_RIGHT]) {
-				vec3 xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
-				player_vel += xz_proj*player_acc*dt;
-				if(dot(xz_proj,player_vel)<0) player_vel += xz_proj*player_acc*dt;
+				player_vel += rgt_xz_proj*player_acc*dt;
 				player_is_moving = true;		
 			}
+			else if(dot(rgt_xz_proj,player_vel)>0) player_vel -= rgt_xz_proj*player_acc*dt;
 
 			if(g_input[JUMP] && player_is_on_ground){
 				//TODO this is a terrible way to do jumping
@@ -144,7 +147,7 @@ int main(){
 			}
 			if(player_is_on_ground){
 				//Clamp player speed
-				if(length(player_vel) > player_top_speed) {
+				if(length2(player_vel) > player_top_speed*player_top_speed) {
 					player_vel = normalise(player_vel);
 					player_vel *= player_top_speed;
 				}
