@@ -71,6 +71,8 @@ int main(){
 	// based on kinetic energy (0.5*m*v^2) I think
 	// Result is not totally accurate, better to make jumping code explicit
 
+	check_gl_error();
+
     double curr_time = glfwGetTime(), prev_time, dt;
 	//-------------------------------------------------------------------------------------//
 	//-------------------------------------MAIN LOOP---------------------------------------//
@@ -265,8 +267,9 @@ int main(){
         glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glUseProgram(basic_shader.id);
-		glUniformMatrix4fv(heightmap_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
-		glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
+		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
+		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
+
 		//Draw terrain wireframe
 		//if(edit_mode){
 			glUniform4fv(colour_loc, 1, vec4(0,0,0,1).v);
@@ -286,6 +289,7 @@ int main(){
 
 		glfwSwapBuffers(window);
 
+		check_gl_error();
 	}//end main loop
 
     return 0;

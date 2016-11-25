@@ -5,6 +5,11 @@
 #include "input.h"
 #include "Camera3D.h"
 
+#define check_gl_error() checkOglError(__FILE__, __LINE__)
+static int checkOglError(const char *file, int line);
+// void APIENTRY openglCallbackFunction(GLenum source,  GLenum type, GLuint id, GLenum severity, 
+// 										GLsizei length, const GLchar* message, void* userParam);
+
 bool init_gl(GLFWwindow* &window, int window_width, int window_height) {
 
 	/* start GL context and O/S window using the GLFW helper library */
@@ -35,6 +40,7 @@ bool init_gl(GLFWwindow* &window, int window_width, int window_height) {
 	/* start GLEW extension handler */
 	glewExperimental = GL_TRUE;
 	glewInit();
+	glGetError();
 
 	const GLubyte* renderer = glGetString(GL_RENDERER);
 	const GLubyte* version = glGetString(GL_VERSION);
@@ -42,6 +48,16 @@ bool init_gl(GLFWwindow* &window, int window_width, int window_height) {
 	printf("Renderer: %s\n", renderer);
 	printf("OpenGL version supported %s\n", version);
 	printf("GLSL version supported: %s\n", glsl_version);
+
+	// unsigned char v_major = *(unsigned char*)version;
+	// unsigned char v_minor = *(unsigned char*)(version+2);
+
+	// if(v_major>3 && v_minor>2){
+	// 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	// 	glDebugMessageCallback(openglCallbackFunction, (void*)NULL);
+	// 	GLuint unusedIds = 0;
+	// 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unusedIds, true);
+	// }
 
 	glViewport(0,0,window_width,window_height);
 
@@ -55,3 +71,69 @@ bool init_gl(GLFWwindow* &window, int window_width, int window_height) {
 
 	return true;
 }
+
+static int checkOglError(const char *file, int line){
+    GLenum glErr = glGetError();
+    if (glErr != GL_NO_ERROR) {
+        printf("glError in file %s @ line %d:\n%d - ", file, line, glErr);
+		switch(glErr) {
+			case GL_INVALID_OPERATION:				printf("INVALID_OPERATION\n");				return 1;
+			case GL_INVALID_ENUM:					printf("INVALID_ENUM\n");					return 1;
+			case GL_INVALID_VALUE:					printf("INVALID_VALUE\n");      			return 1;
+			case GL_OUT_OF_MEMORY:					printf("OUT_OF_MEMORY\n");      			return 1;
+			case GL_INVALID_FRAMEBUFFER_OPERATION:	printf("INVALID_FRAMEBUFFER_OPERATION\n");	return 1;
+        }
+    }
+    return 0;
+}
+
+//OpenGL error callback: Core in 4.3
+// void APIENTRY openglCallbackFunction(GLenum source,
+//                                            GLenum type,
+//                                            GLuint id,
+//                                            GLenum severity,
+//                                            GLsizei length,
+//                                            const GLchar* message,
+//                                            void* userParam){
+ 
+//     printf("---------------------opengl-callback-start------------");;
+//     printf("message: %s\n", message);
+//     printf("type: ");
+//     switch (type) {
+//     case GL_DEBUG_TYPE_ERROR:
+//         printf("ERROR");
+//         break;
+//     case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+//         printf("DEPRECATED_BEHAVIOR");
+//         break;
+//     case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+//         printf("UNDEFINED_BEHAVIOR");
+//         break;
+//     case GL_DEBUG_TYPE_PORTABILITY:
+//         printf("PORTABILITY");
+//         break;
+//     case GL_DEBUG_TYPE_PERFORMANCE:
+//         printf("PERFORMANCE");
+//         break;
+//     case GL_DEBUG_TYPE_OTHER:
+//         printf("OTHER");
+//         break;
+//     }
+//     printf("\n");
+ 
+//     printf("id: %u", id);
+//     printf("severity: ");
+//     switch (severity){
+//     case GL_DEBUG_SEVERITY_LOW:
+//         printf("LOW");
+//         break;
+//     case GL_DEBUG_SEVERITY_MEDIUM:
+//         printf("MEDIUM");
+//         break;
+//     case GL_DEBUG_SEVERITY_HIGH:
+//         printf("HIGH");
+//         break;
+//     }
+//     printf("\n");
+//     printf("---------------------opengl-callback-end--------------");
+// }
