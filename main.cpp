@@ -45,7 +45,7 @@ int main(){
     init_terrain();
 
     //Load shaders
-	Shader basic_shader = load_shader("MVP.vert", "uniform_colour.frag");
+	Shader basic_shader = init_shader("MVP.vert", "uniform_colour.frag");
 	
     g_camera.init(vec3(0,12,15), vec3(0,0,0));
 	glUseProgram(heightmap_shader.id);

@@ -51,7 +51,7 @@ bool init_gl(GLFWwindow* &window, int window_width, int window_height) {
 
 	// unsigned char v_major = *(unsigned char*)version;
 	// unsigned char v_minor = *(unsigned char*)(version+2);
-	// if(v_major>3 && v_minor>2){
+	// if(v_major=='4' && v_minor>='3'){
 	// 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	// 	glDebugMessageCallback(openglCallbackFunction, (void*)NULL);
 	// 	GLuint unusedIds = 0;
@@ -85,6 +85,7 @@ static int checkOglError(const char *file, int line){
 			case GL_INVALID_VALUE:					printf("INVALID_VALUE\n");      			return 1;
 			case GL_OUT_OF_MEMORY:					printf("OUT_OF_MEMORY\n");      			return 1;
 			case GL_INVALID_FRAMEBUFFER_OPERATION:	printf("INVALID_FRAMEBUFFER_OPERATION\n");	return 1;
+			default:								printf("UNRECOGNISED ERROR\n");				return 1;
         }
     }
     return 0;

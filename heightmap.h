@@ -80,7 +80,7 @@ void init_terrain(){
 	//free(terrain_vp); //TODO should probably free this at some stage
     free(terrain_indices);
 
-    heightmap_shader = load_shader("Heightmap.vert", "Heightmap.frag");
+    heightmap_shader = init_shader("Heightmap.vert", "Heightmap.frag");
 }
 
 void edit_terrain(double dt){

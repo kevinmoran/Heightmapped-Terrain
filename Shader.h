@@ -13,12 +13,12 @@ struct Shader {
     GLuint M_loc, V_loc, P_loc;
     bool compiled;
 };
-Shader load_shader(const char* vert_file, const char* frag_file);
+Shader init_shader(const char* vert_file, const char* frag_file);
 static bool load_shader_program(const char* vert_file, const char* frag_file, GLuint* id);
 bool reload_shader_program(const char* vert_file, const char* frag_file, Shader* s);
 void delete_program(Shader* s);
 
-Shader load_shader(const char* vert_file, const char* frag_file){
+Shader init_shader(const char* vert_file, const char* frag_file){
     Shader temp;
     if(!load_shader_program(vert_file, frag_file, &temp.id)){
         //handle failure? default shader program?
