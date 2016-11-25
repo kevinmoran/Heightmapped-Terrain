@@ -51,7 +51,6 @@ bool init_gl(GLFWwindow* &window, int window_width, int window_height) {
 
 	// unsigned char v_major = *(unsigned char*)version;
 	// unsigned char v_minor = *(unsigned char*)(version+2);
-
 	// if(v_major>3 && v_minor>2){
 	// 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	// 	glDebugMessageCallback(openglCallbackFunction, (void*)NULL);
@@ -59,7 +58,11 @@ bool init_gl(GLFWwindow* &window, int window_width, int window_height) {
 	// 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unusedIds, true);
 	// }
 
-	glViewport(0,0,window_width,window_height);
+	//NOTE: For certain displays (e.g. Retina) window coords != pixels
+	//http://stackoverflow.com/questions/25230841/how-to-find-display-scaling-factor-on-retina-4k-displays
+	int fb_w, fb_h;
+	glfwGetFramebufferSize(window,&fb_w,&fb_h);
+	glViewport(0,0,fb_w,fb_h);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);

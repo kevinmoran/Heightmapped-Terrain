@@ -115,5 +115,7 @@ void window_resize_callback(GLFWwindow* window, int width, int height){
     gl_height = height;
     gl_aspect_ratio = (float)gl_width/gl_height;
     g_camera.P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, 0.1f, 100.0f);
-    glViewport(0,0,gl_width,gl_height);
+    int fb_w, fb_h;
+	glfwGetFramebufferSize(window,&fb_w,&fb_h);
+	glViewport(0,0,fb_w,fb_h);
 }

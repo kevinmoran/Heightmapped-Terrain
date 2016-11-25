@@ -272,6 +272,7 @@ int main(){
 
 		//Draw terrain wireframe
 		//if(edit_mode){
+			//glBindVertexArray(terrain_vao); //Assumed to be still bound from above
 			glUniform4fv(colour_loc, 1, vec4(0,0,0,1).v);
 			glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(identity_mat4(), vec3(0,0.1f,0)).m);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE );
@@ -281,8 +282,6 @@ int main(){
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL );
 		glBindVertexArray(cube_vao);
 		glUniform4fv(colour_loc, 1, player_colour.v);
-		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
-		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player_M.m);
 		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
         glDrawElements(GL_TRIANGLES, cube_point_count, GL_UNSIGNED_SHORT, 0);
