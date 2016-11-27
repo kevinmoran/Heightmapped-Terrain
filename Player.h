@@ -7,6 +7,7 @@ mat4 player_M = translate(scale(identity_mat4(), player_scale), player_pos);
 vec3 player_vel = vec3(0,0,0);
 vec4 player_colour;
 bool player_is_on_ground = false;
+bool player_is_jumping = false;
 float player_mass = 20;
 float g = 9.81f;
 float player_top_speed = 20.0f;
@@ -20,50 +21,41 @@ float player_jump_height = 4.0f;
 
 void player_update(double dt){
 
+    bool player_moved = false;
+    //Find player's forward and right movement directions
+    vec3 fwd_xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
+    vec3 rgt_xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
+
     //WASD Movement (constrained to the x-z plane)
-    bool player_is_moving = false;
-    {
-        //Find player's forward and right movement directions
-        vec3 fwd_xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
-        vec3 rgt_xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
-
-        if(g_input[MOVE_FORWARD]) {
-            player_vel += fwd_xz_proj*player_acc*dt;
-            player_is_moving = true;
-        }
-        else if(dot(fwd_xz_proj,player_vel)>0) player_vel -= fwd_xz_proj*player_acc*dt;
-
-        if(g_input[MOVE_LEFT]) {
-            player_vel += -rgt_xz_proj*player_acc*dt;
-            player_is_moving = true;
-        }
-        else if(dot(-rgt_xz_proj,player_vel)>0) player_vel += rgt_xz_proj*player_acc*dt;
-
-        if(g_input[MOVE_BACK]) {
-            player_vel += -fwd_xz_proj*player_acc*dt;
-            player_is_moving = true;			
-        }
-        else if(dot(-fwd_xz_proj,player_vel)>0) player_vel += fwd_xz_proj*player_acc*dt;
-
-        if(g_input[MOVE_RIGHT]) {
-            player_vel += rgt_xz_proj*player_acc*dt;
-            player_is_moving = true;		
-        }
-        else if(dot(rgt_xz_proj,player_vel)>0) player_vel -= rgt_xz_proj*player_acc*dt;
-        // NOTE about the else statements above: Checks if we aren't pressing a button 
-        // but have velocity in that direction, if so slows us down faster w/ subtraction
-        // This improves responsiveness and tightens up the feel of moving
-        // Mult by friction_factor is good to kill speed when idle but feels drifty while moving
+    if(g_input[MOVE_FORWARD]) {
+        player_vel += fwd_xz_proj*player_acc*dt;
+        player_moved = true;
     }
+    else if(dot(fwd_xz_proj,player_vel)>0) player_vel -= fwd_xz_proj*player_acc*dt;
 
-    if(g_input[JUMP] && player_is_on_ground){
-        //TODO this is a terrible way to do jumping
-        //Instead set jump height and move up until you reach that height
-        float jump_factor = sqrtf(player_jump_height/(0.5f*player_mass*g));
-        player_vel.v[1] += jump_factor*player_mass*g;
-        player_is_on_ground = false;
+    if(g_input[MOVE_LEFT]) {
+        player_vel += -rgt_xz_proj*player_acc*dt;
+        player_moved = true;
     }
+    else if(dot(-rgt_xz_proj,player_vel)>0) player_vel += rgt_xz_proj*player_acc*dt;
 
+    if(g_input[MOVE_BACK]) {
+        player_vel += -fwd_xz_proj*player_acc*dt;
+        player_moved = true;			
+    }
+    else if(dot(-fwd_xz_proj,player_vel)>0) player_vel += fwd_xz_proj*player_acc*dt;
+
+    if(g_input[MOVE_RIGHT]) {
+        player_vel += rgt_xz_proj*player_acc*dt;
+        player_moved = true;		
+    }
+    else if(dot(rgt_xz_proj,player_vel)>0) player_vel -= rgt_xz_proj*player_acc*dt;
+    // NOTE about the else statements above: Checks if we aren't pressing a button 
+    // but have velocity in that direction, if so slows us down faster w/ subtraction
+    // This improves responsiveness and tightens up the feel of moving
+    // Mult by friction_factor is good to kill speed when idle but feels drifty while moving
+        
+    static bool jump_button_was_pressed = false;
     if(player_is_on_ground){
         //Clamp player speed
         if(length2(player_vel) > player_top_speed*player_top_speed) {
@@ -72,14 +64,28 @@ void player_update(double dt){
         }
 
         //Deceleration
-        if(!player_is_moving) 
+        if(!player_moved) 
         player_vel = player_vel*friction_factor;
+
+        if(g_input[JUMP]){
+            if(!jump_button_was_pressed){
+                //TODO this is a terrible way to do jumping
+                //Instead set jump height and move up until you reach that height
+                //player_jump_initial_y = player_pos.y
+                float jump_factor = sqrtf(player_jump_height/(0.5f*player_mass*g));
+                player_vel.v[1] += jump_factor*player_mass*g;
+                player_is_on_ground = false;
+                player_is_jumping = true;
+                jump_button_was_pressed = true;
+            }
+        }
+        else jump_button_was_pressed = false;
     }
-    
-    //TODO: else if(player_is_jumping)
-    else{ //(!player_is_on_ground)
-        player_vel.v[1] -= player_mass*g*dt;
+
+    else { //Player is not on ground
+
         //TODO: air steering?
+        player_vel.v[1] -= player_mass*g*dt;
 
         //Clamp player's xz speed
         vec3 xz_vel = vec3(player_vel.v[0], 0, player_vel.v[2]);
@@ -88,6 +94,8 @@ void player_update(double dt){
             xz_vel *= player_top_speed;
             player_vel.v[0] = xz_vel.v[0];
             player_vel.v[2] = xz_vel.v[2];
+        }
+        if(player_is_jumping){
         }
     }
 
@@ -103,8 +111,6 @@ void player_update(double dt){
     //TODO: move player's origin to base so code like this makes more sense
     // (player_h_above_ground = (0.5f*player_scale) currently means we're on the ground)
 
-    //TODO Don't autosnap while the player is jumping
-
     //Collided into ground
     if(player_h_above_ground< 0.5f*player_scale) {
         //TODO: push player out of ground along normal?
@@ -112,15 +118,15 @@ void player_update(double dt){
         player_pos.v[1] = ground_y + 0.5f*player_scale;
         player_vel.v[1] = 0.0f;
         player_is_on_ground = true;
+        player_is_jumping = false;
     }
     else if(player_h_above_ground > autosnap_height){
         player_is_on_ground = false;
     }
-    else {//We're not on ground but less than autosnap_height above it
+    else if(player_is_on_ground){//We're not on ground but less than autosnap_height above it
         //snap player to ground
         //TODO: trying autosnapping along normal?
         player_pos.v[1] = ground_y + 0.5f*player_scale;
-        player_is_on_ground = true;
     }
 
     //Slope checking
