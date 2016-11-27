@@ -24,6 +24,8 @@
 #define ONE_RAD_IN_DEG 360.0 / (2.0 * M_PI) //57.2957795
 #define MIN(a,b) (((a)<(b)) ? a : b)
 #define MAX(a,b) (((a)>(b)) ? a : b)
+float lerp(float a, float b, float t){ return (a * (1.0f - t)) + (b * t);}
+
 
 // data structures
 struct vec2;
