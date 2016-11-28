@@ -16,11 +16,7 @@ float player_mass = 20;
 float g = 9.81f;
 float player_jump_height = 4.0f; 
 float player_jump_initial_y = -1.0f;
-<<<<<<< HEAD
 float player_jump_duration = 0.3f;
-=======
-float player_jump_duration = 0.3f;;
->>>>>>> c4502dab523b258f9800f453900784f69f207d3b
 float player_jump_timer = 0.0f;
 
 void player_update(double dt){
