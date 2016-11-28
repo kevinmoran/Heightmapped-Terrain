@@ -15,8 +15,8 @@ float friction_factor = 0.3f; //higher is slippier
 float player_mass = 20;
 float g = 9.81f;
 float player_jump_height = 4.0f; 
-float player_jump_initial_y = -1.0f;
-float player_jump_duration = 0.3f;
+float player_jump_target_y = -1.0f;
+float player_jump_duration = 1.0f;
 float player_jump_timer = 0.0f;
 
 void player_update(double dt){
@@ -69,7 +69,7 @@ void player_update(double dt){
 
         if(g_input[JUMP]){
             if(!jump_button_was_pressed){
-                player_jump_initial_y = player_pos.v[1];
+                player_jump_target_y = player_pos.v[1] + player_jump_height;
                 player_jump_timer = 0.0f;
                 player_vel.v[1] = 0.0f;
                 player_is_on_ground = false;
@@ -98,7 +98,7 @@ void player_update(double dt){
                 player_jump_timer = player_jump_duration;
                 player_is_jumping = false;
             }
-            player_pos.v[1] = lerp(player_jump_initial_y, player_jump_initial_y+player_jump_height, player_jump_timer/player_jump_duration);
+            player_pos.v[1] = lerp(player_pos.v[1], player_jump_target_y, player_jump_timer/player_jump_duration);
         }
         else {//Player is falling
             player_vel.v[1] -= player_mass*g*dt;
