@@ -14,10 +14,12 @@ float player_top_speed = 20.0f;
 float player_time_till_top_speed = 0.25f; //Human reaction time?
 float player_acc = player_top_speed/player_time_till_top_speed;
 float friction_factor = 0.3f; //higher is slippier
-float player_jump_height = 4.0f; 
-//TODO: I calculate the necessary impulse to jump this height 
-// based on kinetic energy (0.5*m*v^2) I think
-// Result is not totally accurate, better to make jumping code explicit
+float player_jump_height = 2.0f;
+float jump_vel = sqrtf(2*g*player_mass*(player_jump_height+0.5f*player_scale));
+//m*g*h = 0.5*m*v^2
+//2gh = v^2
+// Result is not totally accurate, (peak height will be slightly 
+// higher than desired) not sure why
 
 void player_update(double dt){
 
@@ -72,8 +74,8 @@ void player_update(double dt){
                 //TODO this is a terrible way to do jumping
                 //Instead set jump height and move up until you reach that height
                 //player_jump_initial_y = player_pos.y
-                float jump_factor = sqrtf(player_jump_height/(0.5f*player_mass*g));
-                player_vel.v[1] += jump_factor*player_mass*g;
+                //float jump_factor = sqrtf(player_jump_height/(0.5f*player_mass*g));
+                player_vel.v[1] += jump_vel;
                 player_is_on_ground = false;
                 player_is_jumping = true;
                 jump_button_was_pressed = true;

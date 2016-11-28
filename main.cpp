@@ -126,6 +126,10 @@ int main(){
 		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
         glDrawElements(GL_TRIANGLES, cube_point_count, GL_UNSIGNED_SHORT, 0);
 
+		glUniform4fv(colour_loc, 1, vec4(0.8, 0.1, 0.9, 1).v);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(),vec3(1,2,1)),vec3(2,1,0)).m);
+        glDrawElements(GL_TRIANGLES, cube_point_count, GL_UNSIGNED_SHORT, 0);
+
 		glfwSwapBuffers(window);
 
 		check_gl_error();
