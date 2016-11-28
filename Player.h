@@ -8,16 +8,16 @@ vec3 player_vel = vec3(0,0,0);
 vec4 player_colour;
 bool player_is_on_ground = false;
 bool player_is_jumping = false;
+float player_mass = 20;
+float g = 9.81f;
 float player_top_speed = 20.0f;
 float player_time_till_top_speed = 0.25f; //Human reaction time?
 float player_acc = player_top_speed/player_time_till_top_speed;
 float friction_factor = 0.3f; //higher is slippier
-float player_mass = 20;
-float g = 9.81f;
 float player_jump_height = 4.0f; 
-float player_jump_target_y = -1.0f;
-float player_jump_duration = 1.0f;
-float player_jump_timer = 0.0f;
+//TODO: I calculate the necessary impulse to jump this height 
+// based on kinetic energy (0.5*m*v^2) I think
+// Result is not totally accurate, better to make jumping code explicit
 
 void player_update(double dt){
 
@@ -69,9 +69,11 @@ void player_update(double dt){
 
         if(g_input[JUMP]){
             if(!jump_button_was_pressed){
-                player_jump_target_y = player_pos.v[1] + player_jump_height;
-                player_jump_timer = 0.0f;
-                player_vel.v[1] = 0.0f;
+                //TODO this is a terrible way to do jumping
+                //Instead set jump height and move up until you reach that height
+                //player_jump_initial_y = player_pos.y
+                float jump_factor = sqrtf(player_jump_height/(0.5f*player_mass*g));
+                player_vel.v[1] += jump_factor*player_mass*g;
                 player_is_on_ground = false;
                 player_is_jumping = true;
                 jump_button_was_pressed = true;
@@ -83,6 +85,7 @@ void player_update(double dt){
     else { //Player is not on ground
 
         //TODO: air steering?
+        player_vel.v[1] -= player_mass*g*dt;
 
         //Clamp player's xz speed
         vec3 xz_vel = vec3(player_vel.v[0], 0, player_vel.v[2]);
@@ -93,15 +96,6 @@ void player_update(double dt){
             player_vel.v[2] = xz_vel.v[2];
         }
         if(player_is_jumping){
-            player_jump_timer += dt;
-            if(player_jump_timer>player_jump_duration){
-                player_jump_timer = player_jump_duration;
-                player_is_jumping = false;
-            }
-            player_pos.v[1] = lerp(player_pos.v[1], player_jump_target_y, player_jump_timer/player_jump_duration);
-        }
-        else {//Player is falling
-            player_vel.v[1] -= player_mass*g*dt;
         }
     }
 
@@ -129,11 +123,10 @@ void player_update(double dt){
     else if(player_h_above_ground > autosnap_height){
         player_is_on_ground = false;
     }
-    else{ //We're not on ground but less than autosnap_height above it
-        if(player_is_on_ground){//snap player to ground if we're not jumping or falling
-            //TODO: trying autosnapping along normal?
-            player_pos.v[1] = ground_y + 0.5f*player_scale;
-        }
+    else if(player_is_on_ground){//We're not on ground but less than autosnap_height above it
+        //snap player to ground
+        //TODO: trying autosnapping along normal?
+        player_pos.v[1] = ground_y + 0.5f*player_scale;
     }
 
     //Slope checking
