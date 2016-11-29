@@ -1,25 +1,23 @@
 #pragma once
 
 //Player data
-vec3 player_pos = vec3(0,10,0);
+vec3 player_pos = vec3(0,0,0);
 float player_scale = 1.0f;
 mat4 player_M = translate(scale(identity_mat4(), player_scale), player_pos);
 vec3 player_vel = vec3(0,0,0);
 vec4 player_colour;
 bool player_is_on_ground = false;
 bool player_is_jumping = false;
-float player_mass = 20;
-float g = 9.81f;
-float player_top_speed = 20.0f;
+//float player_mass = 20;
+float g = 70; //screw reality!
+float player_top_speed = 15.0f;
 float player_time_till_top_speed = 0.25f; //Human reaction time?
 float player_acc = player_top_speed/player_time_till_top_speed;
 float friction_factor = 0.3f; //higher is slippier
 float player_jump_height = 2.0f;
-float jump_vel = sqrtf(2*g*player_mass*(player_jump_height+0.5f*player_scale));
+float jump_vel = sqrtf(2*g*(player_jump_height+0.5f*player_scale));
 //m*g*h = 0.5*m*v^2
 //2gh = v^2
-// Result is not totally accurate, (peak height will be slightly 
-// higher than desired) not sure why
 
 void player_update(double dt){
 
@@ -71,10 +69,6 @@ void player_update(double dt){
 
         if(g_input[JUMP]){
             if(!jump_button_was_pressed){
-                //TODO this is a terrible way to do jumping
-                //Instead set jump height and move up until you reach that height
-                //player_jump_initial_y = player_pos.y
-                //float jump_factor = sqrtf(player_jump_height/(0.5f*player_mass*g));
                 player_vel.v[1] += jump_vel;
                 player_is_on_ground = false;
                 player_is_jumping = true;
@@ -87,7 +81,7 @@ void player_update(double dt){
     else { //Player is not on ground
 
         //TODO: air steering?
-        player_vel.v[1] -= player_mass*g*dt;
+        player_vel.v[1] -= g*dt;
 
         //Clamp player's xz speed
         vec3 xz_vel = vec3(player_vel.v[0], 0, player_vel.v[2]);

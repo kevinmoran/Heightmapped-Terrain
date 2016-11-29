@@ -48,7 +48,7 @@ int main(){
     //Load shaders
 	Shader basic_shader = init_shader("MVP.vert", "uniform_colour.frag");
 	
-    g_camera.init(vec3(0,12,15), vec3(0,0,0));
+    g_camera.init(vec3(0,2,5), vec3(0,2,0));
 	glUseProgram(heightmap_shader.id);
     glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
     glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
@@ -76,7 +76,7 @@ int main(){
 			continue;
 		}
 
-		static bool edit_mode = true;
+		static bool edit_mode = false;
 		static bool tab_was_pressed = false;
 		if(glfwGetKey(window, GLFW_KEY_TAB)) {
 			if(!tab_was_pressed) {
