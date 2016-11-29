@@ -19,7 +19,7 @@ float gl_aspect_ratio = (float)gl_width/gl_height;
 #include "Player.h"
 
 int main(){
-	if(!init_gl(window, gl_width, gl_height)){ return 1; }
+	if(!init_gl(window, "Terrain", gl_width, gl_height)){ return 1; }
 
 	float* cube_vp = NULL;
 	unsigned short* cube_indices = NULL;
@@ -27,21 +27,23 @@ int main(){
 	load_obj_indexed("cube.obj", &cube_vp, &cube_indices, &cube_num_indices, &cube_num_verts);
 
 	GLuint cube_vao;
-	glGenVertexArrays(1, &cube_vao);
-	glBindVertexArray(cube_vao);
+	{ //Setup cube geometry
+		glGenVertexArrays(1, &cube_vao);
+		glBindVertexArray(cube_vao);
 
-	GLuint cube_points_vbo, cube_index_vbo;
-	glGenBuffers(1, &cube_points_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, cube_points_vbo);
-	glBufferData(GL_ARRAY_BUFFER, cube_num_verts*3*sizeof(float), cube_vp, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	free(cube_vp);
+		GLuint cube_points_vbo, cube_index_vbo;
+		glGenBuffers(1, &cube_points_vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, cube_points_vbo);
+		glBufferData(GL_ARRAY_BUFFER, cube_num_verts*3*sizeof(float), cube_vp, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+		free(cube_vp);
 
-	glGenBuffers(1, &cube_index_vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_num_indices*sizeof(unsigned short), cube_indices, GL_STATIC_DRAW);
-	free(cube_indices);
+		glGenBuffers(1, &cube_index_vbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_num_indices*sizeof(unsigned short), cube_indices, GL_STATIC_DRAW);
+		free(cube_indices);
+	}
 
     g_camera.init(vec3(0,2,5));
 
@@ -100,7 +102,6 @@ int main(){
 
 		//Draw terrain
 		glBindVertexArray(terrain_vao);
-        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrain_index_vbo);
         glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glUseProgram(basic_shader.id);
@@ -112,15 +113,14 @@ int main(){
 			//glBindVertexArray(terrain_vao); //Assumed to be still bound from above
 			glUniform4fv(colour_loc, 1, vec4(0,0,0,1).v);
 			glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(identity_mat4(), vec3(0,0.1f,0)).m);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE );
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 		//}
 		//Draw player
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL );
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glBindVertexArray(cube_vao);
 		glUniform4fv(colour_loc, 1, player_colour.v);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player_M.m);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glUniform4fv(colour_loc, 1, vec4(0.8, 0.1, 0.9, 1).v);

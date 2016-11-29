@@ -10,7 +10,7 @@ static int checkOglError(const char *file, int line);
 // void APIENTRY openglCallbackFunction(GLenum source,  GLenum type, GLuint id, GLenum severity, 
 // 										GLsizei length, const GLchar* message, void* userParam);
 
-bool init_gl(GLFWwindow* &window, int window_width, int window_height) {
+bool init_gl(GLFWwindow* &window, const char* title, int window_width, int window_height) {
 
 	/* start GL context and O/S window using the GLFW helper library */
 	if(!glfwInit()) {
@@ -26,7 +26,7 @@ bool init_gl(GLFWwindow* &window, int window_width, int window_height) {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	#endif
 	
-	window = glfwCreateWindow(window_width, window_height, "Terrain", NULL, NULL);
+	window = glfwCreateWindow(window_width, window_height, title, NULL, NULL);
 	if(!window) {
 		fprintf(stderr, "ERROR: could not open window with GLFW3\n");
 		glfwTerminate();
