@@ -12,6 +12,7 @@ struct Camera3D {
 	mat4 V, P;
 
     void init();
+    void init(vec3 cam_pos);
     void init(vec3 cam_pos, vec3 target_pos);
     void update(double dt);
 };
@@ -27,6 +28,21 @@ void Camera3D::init(){
 	turn_speed = 100;
 	V = look_at(pos, pos+fwd, up);
 	P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, 0.1f, 100.0f);
+
+    if(cam_mouse_controls) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+}
+
+void Camera3D::init(vec3 cam_pos){
+    pos = cam_pos;
+    V = look_at(cam_pos, cam_pos+vec3(0,0,-1), vec3(0,1,0));
+	P = perspective(90/gl_aspect_ratio, gl_aspect_ratio, 0.1f, 100.0f);
+	rgt = vec3(V.m[0], V.m[4], V.m[8]);
+	up  = vec3(V.m[1], V.m[5], V.m[9]);
+    fwd = vec3(-V.m[2], -V.m[6], -V.m[10]);
+    yaw   =  acos(V.m[0])*ONE_RAD_IN_DEG;
+    pitch = -acos(V.m[5])*ONE_RAD_IN_DEG; //no idea why you negate this and not yaw, it just works
+	move_speed = 10;
+	turn_speed = 100;
 
     if(cam_mouse_controls) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 }

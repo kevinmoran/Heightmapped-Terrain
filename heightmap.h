@@ -81,6 +81,9 @@ void init_terrain(){
     free(terrain_indices);
 
     heightmap_shader = init_shader("Heightmap.vert", "Heightmap.frag");
+    glUseProgram(heightmap_shader.id);
+    glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
+    glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
 }
 
 void edit_terrain(double dt){

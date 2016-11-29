@@ -7,10 +7,8 @@
 bool load_obj(const char* file_name, float** points, int* point_count);
 bool load_obj(const char* file_name, float** points, float** tex_coords, float** normals, int* point_count);
 //indexed
-bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, 
-					int* point_count, int* vert_count);
-bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, 
-					unsigned short** indices, int* point_count, int* vert_count);
+bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, int* index_count, int* vert_count);
+bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* pindex_count, int* vert_count);
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -43,15 +41,15 @@ bool load_obj(const char* file_name, float** points, int* point_count){
 	}
 	rewind(fp);
 
-	printf("Num vps: %i\n", num_vps);
-	printf("Num vts: %i\n", num_vts);
-	printf("Num vns: %i\n", num_vns);
-	printf("Num faces: %i\n", num_faces);
+	printf("%i vps, ", num_vps);
+	printf("%i vts, ", num_vts);
+	printf("%i vns, ", num_vns);
+	printf("%i faces ", num_faces);
 
 	*point_count = 3*num_faces;
 	float* vp_unsorted = (float*)malloc(num_vps*3*sizeof(float)); //temp
 	*points = (float*)malloc(*point_count*3*sizeof(float));
-	printf("Allocated %u bytes for obj\n", (unsigned int)(*point_count*3*sizeof(float)));
+	printf("(Allocated %u bytes)\n", (unsigned int)(*point_count*3*sizeof(float)));
 
 	//Iterators
 	int vp_index = 0; //for unsorted points
@@ -120,10 +118,10 @@ bool load_obj(const char* file_name, float** points, float** tex_coords, float**
 	}
 	rewind(fp);
 
-	printf("Num vps: %i\n", num_vps);
-	printf("Num vts: %i\n", num_vts);
-	printf("Num vns: %i\n", num_vns);
-	printf("Num faces: %i\n", num_faces);
+	printf("%i vps, ", num_vps);
+	printf("%i vts, ", num_vts);
+	printf("%i vns, ", num_vns);
+	printf("%i faces ", num_faces);
 
 	*point_count = 3*num_faces;
 	//points, tex coords and normals arrays that will be sorted based on indices in file
@@ -134,7 +132,7 @@ bool load_obj(const char* file_name, float** points, float** tex_coords, float**
 	unsigned int mem_alloced = *point_count* 2*sizeof(float);
 	if(num_vts>0) mem_alloced += *point_count* 2*sizeof(float);
 	if(num_vns>0) mem_alloced += *point_count* 3*sizeof(float);
-	printf("Allocated %u bytes for obj\n", mem_alloced);
+	printf("(Allocated %u bytes)\n", mem_alloced);
 
 	//Arrays to hold the unsorted data from the obj
 	float* vp_unsorted = (float*)malloc(num_vps*3*sizeof(float));
@@ -235,8 +233,7 @@ bool load_obj(const char* file_name, float** points, float** tex_coords, float**
 }
 
 //Load vertex points with index buffer, ignore tex coords and normals if present
-bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, 
-					int* point_count, int* vert_count){
+bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, int* index_count, int* vert_count){
 	FILE* fp = fopen(file_name, "r");
 	if(!fp) {
 		printf("Error: Failed to open %s\n", file_name);
@@ -264,21 +261,21 @@ bool load_obj_indexed(const char* file_name, float** points, unsigned short** in
 	}
 	rewind(fp);
 
-	printf("Num vps: %i\n", num_vps);
-	printf("Num vts: %i\n", num_vts);
-	printf("Num vns: %i\n", num_vns);
-	printf("Num faces: %i\n", num_faces);
+	printf("%i vps, ", num_vps);
+	printf("%i vts, ", num_vts);
+	printf("%i vns, ", num_vns);
+	printf("%i faces ", num_faces);
 
 	if(num_faces>(65536)/3){
 		printf("ERROR loading obj: Too many faces for index buffer of shorts\n");
 		return false;
 	}
 
-	*point_count = 3*num_faces;
+	*index_count = 3*num_faces;
 	*vert_count = num_vps;
 	*points = (float*)malloc(num_vps*3*sizeof(float));
-	*indices = (unsigned short*)malloc(*point_count*sizeof(unsigned short));
-	printf("Allocated %u bytes for obj\n", (unsigned int)(num_vps*3*sizeof(float) + (*point_count)*sizeof(unsigned short)));
+	*indices = (unsigned short*)malloc(*index_count*sizeof(unsigned short));
+	printf("(Allocated %u bytes)\n", (unsigned int)(num_vps*3*sizeof(float) + (*index_count)*sizeof(unsigned short)));
 
 	//Iterators
 	int vp_index = 0;
@@ -316,8 +313,7 @@ bool load_obj_indexed(const char* file_name, float** points, unsigned short** in
 }
 
 //Load points, tex coords and normals with index buffer
-bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, 
-				unsigned short** indices, int* point_count, int* vert_count){
+bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* index_count, int* vert_count){
 	FILE* fp = fopen(file_name, "r");
 	if(!fp) {
 		printf("Error: Failed to open %s\n", file_name);
@@ -345,28 +341,28 @@ bool load_obj_indexed(const char* file_name, float** points, float** tex_coords,
 	}
 	rewind(fp);
 
-	printf("Num vps: %i\n", num_vps);
-	printf("Num vts: %i\n", num_vts);
-	printf("Num vns: %i\n", num_vns);
-	printf("Num faces: %i\n", num_faces);
+	printf("%i vps, ", num_vps);
+	printf("%i vts, ", num_vts);
+	printf("%i vns, ", num_vns);
+	printf("%i faces ", num_faces);
 
 	if(num_faces>(65536)/3){
 		printf("ERROR loading obj: Too many faces for index buffer of shorts\n");
 		return false;
 	}
 	
-	*point_count = 3*num_faces;
+	*index_count = 3*num_faces;
 	*vert_count = num_vps;
 	*points = (float*)malloc(num_vps*3*sizeof(float));
-	*indices = (unsigned short*)malloc(*point_count*sizeof(unsigned short));
+	*indices = (unsigned short*)malloc(*index_count*sizeof(unsigned short));
 	//vt and vn arrays that will be sorted based on index buffer
-	if(num_vts>0) *tex_coords = (float*)malloc(*point_count * 2*sizeof(float));
-	if(num_vns>0) *normals = (float*)malloc(*point_count * 3*sizeof(float));
+	if(num_vts>0) *tex_coords = (float*)malloc(*index_count * 2*sizeof(float));
+	if(num_vns>0) *normals = (float*)malloc(*index_count * 3*sizeof(float));
 	
-	unsigned int mem_alloced = num_vps*3*sizeof(float) + (*point_count)*sizeof(unsigned short);
-	if(num_vts>0) mem_alloced += *point_count * 2*sizeof(float);
-	if(num_vns>0) mem_alloced += *point_count * 3*sizeof(float);
-	printf("Allocated %u bytes for obj\n", mem_alloced);
+	unsigned int mem_alloced = num_vps*3*sizeof(float) + (*index_count)*sizeof(unsigned short);
+	if(num_vts>0) mem_alloced += *index_count * 2*sizeof(float);
+	if(num_vns>0) mem_alloced += *index_count * 3*sizeof(float);
+	printf("(Allocated %u bytes)\n", mem_alloced);
 
 	//Arrays to hold the unsorted data from the obj
 	float* vt_unsorted = (float*)malloc(2*num_vts*sizeof(float));

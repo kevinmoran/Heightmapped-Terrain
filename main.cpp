@@ -23,8 +23,8 @@ int main(){
 
 	float* cube_vp = NULL;
 	unsigned short* cube_indices = NULL;
-	int cube_point_count = 0, cube_vert_count = 0;
-	load_obj_indexed("cube.obj", &cube_vp, &cube_indices, &cube_point_count, &cube_vert_count);
+	int cube_num_indices = 0, cube_num_verts = 0;
+	load_obj_indexed("cube.obj", &cube_vp, &cube_indices, &cube_num_indices, &cube_num_verts);
 
 	GLuint cube_vao;
 	glGenVertexArrays(1, &cube_vao);
@@ -33,25 +33,22 @@ int main(){
 	GLuint cube_points_vbo, cube_index_vbo;
 	glGenBuffers(1, &cube_points_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, cube_points_vbo);
-	glBufferData(GL_ARRAY_BUFFER, cube_vert_count*3*sizeof(float), cube_vp, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, cube_num_verts*3*sizeof(float), cube_vp, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	free(cube_vp);
 
 	glGenBuffers(1, &cube_index_vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_point_count*sizeof(unsigned short), cube_indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_num_indices*sizeof(unsigned short), cube_indices, GL_STATIC_DRAW);
 	free(cube_indices);
+
+    g_camera.init(vec3(0,2,5));
 
     init_terrain();
 
     //Load shaders
 	Shader basic_shader = init_shader("MVP.vert", "uniform_colour.frag");
-	
-    g_camera.init(vec3(0,2,5), vec3(0,2,0));
-	glUseProgram(heightmap_shader.id);
-    glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
-    glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
 	GLuint colour_loc = glGetUniformLocation(basic_shader.id, "colour");
 
 	//TODO: player_init();
@@ -124,11 +121,11 @@ int main(){
 		glUniform4fv(colour_loc, 1, player_colour.v);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, player_M.m);
 		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
-        glDrawElements(GL_TRIANGLES, cube_point_count, GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glUniform4fv(colour_loc, 1, vec4(0.8, 0.1, 0.9, 1).v);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(),vec3(1,2,1)),vec3(2,1,0)).m);
-        glDrawElements(GL_TRIANGLES, cube_point_count, GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glfwSwapBuffers(window);
 
