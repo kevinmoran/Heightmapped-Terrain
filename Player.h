@@ -101,6 +101,9 @@ void player_update(double dt){
 
     float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
     vec3 ground_norm = get_normal_interp(player_pos.v[0], player_pos.v[2]);
+    player_colour = vec4(ground_norm, 1.0f);
+    vec3 displacement = get_displacement(player_pos.v[0], player_pos.v[1]-0.5f*player_scale, player_pos.v[2]);
+
     float player_h_above_ground = player_pos.v[1] - ground_y;
     //height to differentiate between walking down a slope and walking off an edge:
     const float autosnap_height = 1.0f*player_scale;
@@ -128,10 +131,10 @@ void player_update(double dt){
 
     //Slope checking
     {
-        float slope = ONE_RAD_IN_DEG*acos(dot(vec3(0,1,0), ground_norm));
-        if(slope>45) {
+        // float slope = ONE_RAD_IN_DEG*acos(dot(vec3(0,1,0), ground_norm));
+        // if(slope>45) {
             //player_pos = prev_pos;
-            player_colour = vec4(0.8f, 0.8f, 0.2f, 1);
+            // player_colour = vec4(0.8f, 0.8f, 0.2f, 1);
             // int i = get_height_index(player_pos.v[0], player_pos.v[1]);
             // float cell_size = 2*heightmap_size/(heightmap_n-1);
             // float x_tl = terrain_vp[3*i];
@@ -153,8 +156,8 @@ void player_update(double dt){
             // vec3 gradient = normalise(v_max - v_min);
             
             // player_vel -= gradient*10*9.81f*sinf(ONE_DEG_IN_RAD*slope)*dt;
-        }
-        else player_colour = vec4(0.8f, 0.1f, 0.2f, 1);
+        // }
+        // else player_colour = vec4(0.8f, 0.1f, 0.2f, 1);
     }
     
     //Constrain player_pos to map bounds
