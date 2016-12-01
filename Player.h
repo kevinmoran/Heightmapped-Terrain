@@ -8,16 +8,17 @@ vec3 player_vel = vec3(0,0,0);
 vec4 player_colour;
 bool player_is_on_ground = false;
 bool player_is_jumping = false;
-//float player_mass = 20;
-float g = 70; //screw reality!
+//Physics stuff
+//Thanks to Kyle Pittman for his GDC talk:
+// http://www.gdcvault.com/play/1023559/Math-for-Game-Programmers-Building
 float player_top_speed = 15.0f;
 float player_time_till_top_speed = 0.25f; //Human reaction time?
 float player_acc = player_top_speed/player_time_till_top_speed;
 float friction_factor = 0.3f; //higher is slippier
-float player_jump_height = 2.0f;
-float jump_vel = sqrtf(2*g*(player_jump_height+0.5f*player_scale));
-//m*g*h = 0.5*m*v^2
-//2gh = v^2
+float player_jump_height = 3.0f;
+float player_jump_dist_to_peak = 3.0f; //how far on xz p moves before reaching peak jump height
+float g = -2*player_jump_height*player_top_speed*player_top_speed/(player_jump_dist_to_peak*player_jump_dist_to_peak);
+float jump_vel = 2*player_jump_height*player_top_speed/player_jump_dist_to_peak;
 
 void player_update(double dt){
 
@@ -81,7 +82,7 @@ void player_update(double dt){
     else { //Player is not on ground
 
         //TODO: air steering?
-        player_vel.v[1] -= g*dt;
+        player_vel.v[1] += g*dt;
 
         //Clamp player's xz speed
         vec3 xz_vel = vec3(player_vel.v[0], 0, player_vel.v[2]);
