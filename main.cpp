@@ -124,7 +124,7 @@ int main(){
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glUniform4fv(colour_loc, 1, vec4(0.8, 0.1, 0.9, 1).v);
-		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(),vec3(1,2,1)),vec3(2,1,0)).m);
+		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(),vec3(1,2,1)),vec3(2,0,0)).m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glfwSwapBuffers(window);

@@ -102,20 +102,20 @@ void player_update(double dt){
     float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
     vec3 ground_norm = get_normal_interp(player_pos.v[0], player_pos.v[2]);
     player_colour = vec4(ground_norm, 1.0f);
-    vec3 displacement = get_displacement(player_pos.v[0], player_pos.v[1]-0.5f*player_scale, player_pos.v[2]);
+    vec3 displacement = get_displacement(player_pos.v[0], player_pos.v[1], player_pos.v[2]);
 
     float player_h_above_ground = player_pos.v[1] - ground_y;
     //height to differentiate between walking down a slope and walking off an edge:
-    const float autosnap_height = 1.0f*player_scale;
+    const float autosnap_height = 0.5f*player_scale;
 
     //TODO: move player's origin to base so code like this makes more sense
     // (player_h_above_ground = (0.5f*player_scale) currently means we're on the ground)
 
     //Collided into ground
-    if(player_h_above_ground< 0.5f*player_scale) {
+    if(player_h_above_ground< 0) {
         //TODO: push player out of ground along normal?
         //and update velocity by angle of ground?
-        player_pos.v[1] = ground_y + 0.5f*player_scale;
+        player_pos.v[1] = ground_y;
         player_vel.v[1] = 0.0f;
         player_is_on_ground = true;
         player_is_jumping = false;
@@ -126,7 +126,7 @@ void player_update(double dt){
     else if(player_is_on_ground){//We're not on ground but less than autosnap_height above it
         //snap player to ground
         //TODO: trying autosnapping along normal?
-        player_pos.v[1] = ground_y + 0.5f*player_scale;
+        player_pos.v[1] = ground_y;
     }
 
     //Slope checking
