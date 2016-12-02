@@ -82,7 +82,10 @@ void player_update(double dt){
     else { //Player is not on ground
 
         //TODO: air steering?
-        player_vel.v[1] += g*dt;
+        if(player_is_jumping){
+            //If you don't hold jump you don't jump as high
+            if(!g_input[JUMP] && player_vel.v[1]>0) player_vel.v[1] += 5*g*dt;
+        }
 
         //Clamp player's xz speed
         vec3 xz_vel = vec3(player_vel.v[0], 0, player_vel.v[2]);
@@ -92,8 +95,7 @@ void player_update(double dt){
             player_vel.v[0] = xz_vel.v[0];
             player_vel.v[2] = xz_vel.v[2];
         }
-        if(player_is_jumping){
-        }
+        player_vel.v[1] += g*dt;
     }
 
     //Update player position
