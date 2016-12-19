@@ -69,6 +69,8 @@ mat4 translate (const mat4& m, const vec3& v);
 mat4 rotate_x_deg (const mat4& m, float deg);
 mat4 rotate_y_deg (const mat4& m, float deg);
 mat4 rotate_z_deg (const mat4& m, float deg);
+mat4 rotate_axis_deg(const vec3& v, float a);
+mat4 rotate_align(const vec3& v1, const vec3& v2);
 mat4 scale (const mat4& m, const vec3& v);
 mat4 scale(const mat4& m, float s);
 
@@ -851,6 +853,58 @@ inline mat4 rotate_z_deg (const mat4& m, float deg) {
 	m_r.m[1] = sin (rad);
 	m_r.m[5] = cos (rad);
 	return m_r * m;
+}
+
+//Returns rotation matrix to rotate around axis v by a degrees
+//from http://www.iquilezles.org/www/articles/noacos/noacos.htm
+inline mat4 rotate_axis_deg(const vec3& v, float a){
+	//Convert to radians
+	float rad = a * ONE_DEG_IN_RAD;
+
+	float sin_a = sinf(rad);
+	float cos_a = cosf(rad);
+	float inv_cos_a = 1.0f - cos_a;
+
+	return mat4(
+		v.v[0]*v.v[0]*inv_cos_a + cos_a,
+		v.v[0]*v.v[1]*inv_cos_a + sin_a*v.v[2],
+		v.v[0]*v.v[2]*inv_cos_a - sin_a*v.v[1],
+		0,
+		v.v[1]*v.v[0]*inv_cos_a - sin_a*v.v[2],
+		v.v[1]*v.v[1]*inv_cos_a + cos_a,
+		v.v[1]*v.v[2]*inv_cos_a + sin_a*v.v[0],
+		0,
+		v.v[2]*v.v[0]*inv_cos_a + sin_a*v.v[1],
+		v.v[2]*v.v[1]*inv_cos_a - sin_a*v.v[0],
+		v.v[2]*v.v[2]*inv_cos_a + cos_a,
+		0,
+		0, 0, 0, 1
+	);
+
+}
+
+//Returns rotation matrix to align v1 with v2
+//from http://www.iquilezles.org/www/articles/noacos/noacos.htm
+inline mat4 rotate_align(const vec3& v1, const vec3& v2){
+	vec3 axis = cross(v1,v2);
+	float cos_a = dot(v1,v2);
+    float k = 1.0f/(1.0f+cos_a);
+
+	return mat4(
+		axis.v[0]*axis.v[0]*k + cos_a,
+		axis.v[0]*axis.v[1]*k + axis.v[2],
+		axis.v[0]*axis.v[2]*k - axis.v[1],
+		0,
+		axis.v[1]*axis.v[0]*k - axis.v[2],
+		axis.v[1]*axis.v[1]*k + cos_a,
+		axis.v[1]*axis.v[2]*k + axis.v[0],
+		0,
+		axis.v[2]*axis.v[0]*k + axis.v[1],
+		axis.v[2]*axis.v[1]*k - axis.v[0],
+		axis.v[2]*axis.v[2]*k + cos_a,
+		0,
+		0, 0, 0, 1
+	);
 }
 
 // scale a matrix by [x, y, z]
