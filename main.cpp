@@ -17,6 +17,7 @@ float gl_aspect_ratio = (float)gl_width/gl_height;
 #include "heightmap.h"
 #include "editor.h"
 #include "Player.h"
+#include "DebugDrawing.h"
 
 int main(){
 	if(!init_gl(window, "Terrain", gl_width, gl_height)){ return 1; }
@@ -48,6 +49,8 @@ int main(){
     g_camera.init(vec3(0,2,5));
 
     init_terrain();
+
+	init_debug_draw();
 
     //Load shaders
 	Shader basic_shader = init_shader("MVP.vert", "uniform_colour.frag");
@@ -126,6 +129,10 @@ int main(){
 		glUniform4fv(colour_loc, 1, vec4(0.8, 0.1, 0.9, 1).v);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(),vec3(1,2,1)),vec3(2,0,0)).m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
+
+		draw_vec(player_pos, vec3(3,0,0), vec4(0.8f, 0, 0, 1));
+		draw_vec(player_pos, vec3(0,3,0), vec4(0, 0.8f, 0, 1));
+		draw_vec(player_pos, vec3(0,0,3), vec4(0, 0, 0.8f, 1));
 
 		glfwSwapBuffers(window);
 
