@@ -883,12 +883,15 @@ inline mat4 rotate_axis_deg(const vec3& v, float a){
 
 }
 
-//Returns rotation matrix to align v1 with v2
+//Returns rotation matrix to align u1 with u2 (MUST BE UNIT VECTORS)
 //from http://www.iquilezles.org/www/articles/noacos/noacos.htm
-inline mat4 rotate_align(const vec3& v1, const vec3& v2){
-	vec3 axis = cross(v1,v2);
-	float cos_a = dot(v1,v2);
+inline mat4 rotate_align(const vec3& u1, const vec3& u2){
+	vec3 axis = cross(u1,u2);
+	float cos_a = dot(u1,u2);
     float k = 1.0f/(1.0f+cos_a);
+
+	if(cos_a+1 < 0.000001f) //vectors are opposite
+		return scale(identity_mat4(),-1);
 
 	return mat4(
 		axis.v[0]*axis.v[0]*k + cos_a,
