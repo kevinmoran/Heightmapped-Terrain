@@ -57,7 +57,7 @@ void draw_point(vec3 pos, float size, vec4 colour){
 void draw_vec(vec3 origin, vec3 dir, vec4 colour){
     mat4 M = translate(identity_mat4(), vec3(0,0.5f,0)); //move base of quad to origin
     float dist = length(dir);
-    M = scale(M, vec3(0.1f,dist,0.1f));
+    M = scale(M, vec3(0.05f,dist,0.05f));
 
     //First rotate quad so its 'up' vector is dir
     mat4 R = rotate_align(vec3(0,1,0), normalise(dir));
@@ -70,7 +70,7 @@ void draw_vec(vec3 origin, vec3 dir, vec4 colour){
 
     //Cool trick to project vector onto a plane: project it onto plane's normal
     //and subtract that projection from the original vector
-    vec3 rot_sweep_plane_norm = R*vec4(0,-1,0,0); //normal of plane swept by rotating billboard's normal
+    vec3 rot_sweep_plane_norm = R*vec4(0,-1,0,0); //normal of plane swept by rotating billboard's normal around dir
     vec3 billboard_center = origin + dir*0.5f;
     vec3 v_to_cam = g_camera.pos - billboard_center;
     float norm_proj = dot(v_to_cam, rot_sweep_plane_norm); //project vec onto norm
@@ -93,5 +93,5 @@ void draw_vec(vec3 origin, vec3 dir, vec4 colour){
     glBindVertexArray(quad_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    draw_point(origin+dir, 0.5f, colour);
+    draw_point(origin+dir, 0.15f, colour);
 }
