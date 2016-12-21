@@ -104,7 +104,11 @@ void player_update(double dt){
     float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
     vec3 ground_norm = get_normal_interp(player_pos.v[0], player_pos.v[2]);
     player_colour = vec4(ground_norm, 1.0f);
-    //vec3 displacement = get_displacement(player_pos.v[0], player_pos.v[1], player_pos.v[2]);
+    vec3 displacement = get_displacement(player_pos.v[0], player_pos.v[1], player_pos.v[2]);
+
+    //draw_vec(player_pos, ground_norm, vec4(ground_norm,1));
+    //draw_vec(player_pos, displacement, vec4(0.8f,0,0,1));
+    //print(displacement);
 
     float player_h_above_ground = player_pos.v[1] - ground_y;
     //height to differentiate between walking down a slope and walking off an edge:
@@ -117,7 +121,9 @@ void player_update(double dt){
     if(player_h_above_ground< 0) {
         //TODO: push player out of ground along normal?
         //and update velocity by angle of ground?
-        player_pos.v[1] = ground_y;
+         player_pos.v[1] = ground_y;
+        //if(glfwGetKey(window, GLFW_KEY_P)) 
+        //player_pos -= displacement;
         player_vel.v[1] = 0.0f;
         player_is_on_ground = true;
         player_is_jumping = false;

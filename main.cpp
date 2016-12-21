@@ -14,10 +14,10 @@ float gl_aspect_ratio = (float)gl_width/gl_height;
 #include "load_obj.h"
 #include "Shader.h"
 #include "Camera3D.h"
+#include "DebugDrawing.h"
 #include "heightmap.h"
 #include "editor.h"
 #include "Player.h"
-#include "DebugDrawing.h"
 
 int main(){
 	if(!init_gl(window, "Terrain", gl_width, gl_height)){ return 1; }
@@ -65,6 +65,8 @@ int main(){
 	//-------------------------------------MAIN LOOP---------------------------------------//
 	//-------------------------------------------------------------------------------------//
 	while(!glfwWindowShouldClose(window)) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		//Get dt
 		prev_time = curr_time;
 		curr_time = glfwGetTime();
@@ -97,14 +99,13 @@ int main(){
 		}
 
 		//Rendering
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glUseProgram(heightmap_shader.id);
 		glUniformMatrix4fv(heightmap_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
 		glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
 
 		//Draw terrain
 		glBindVertexArray(terrain_vao);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glUseProgram(basic_shader.id);
@@ -129,10 +130,6 @@ int main(){
 		glUniform4fv(colour_loc, 1, vec4(0.8, 0.1, 0.9, 1).v);
 		glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(scale(identity_mat4(),vec3(1,2,1)),vec3(2,0,0)).m);
         glDrawElements(GL_TRIANGLES, cube_num_indices, GL_UNSIGNED_SHORT, 0);
-
-		draw_vec(player_pos, vec3(3,0,0), vec4(0.8f, 0, 0, 1));
-		draw_vec(player_pos, vec3(0,3,0), vec4(0, 0.8f, 0, 1));
-		draw_vec(player_pos, vec3(0,0,3), vec4(0, 0, 0.8f, 1));
 
 		glfwSwapBuffers(window);
 

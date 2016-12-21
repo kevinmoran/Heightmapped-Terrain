@@ -268,6 +268,17 @@ vec3 get_displacement(float x, float y, float z){
     vec3 top_rgt = a;
     top_rgt.v[1] = terrain_vp[3*(i+1)+1];
     float disp = dot(vec3(x,y,z)-top_rgt, norm);
+
+    //DEBUG: Draw tri's normals
+    // a.v[1] = terrain_vp[3*(i+1) + 1];
+    // b.v[1] = terrain_vp[3*(i+heightmap_size_x) + 1];
+    // if(x_t+z_t > cell_size) c.v[1] = terrain_vp[3*(i+heightmap_size_x+1) + 1]; //br
+    // else c.v[1] = terrain_vp[3*i + 1];; //tl
+
+    // draw_vec(a, norm_a, vec4(0.8f, 0.7f, 0.1f, 1));
+    // draw_vec(b, norm_b, vec4(0.8f, 0.7f, 0.1f, 1));
+    // draw_vec(c, norm_c, vec4(0.8f, 0.7f, 0.1f, 1));
+
     return norm*disp;
 }
 
