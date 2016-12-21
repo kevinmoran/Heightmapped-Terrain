@@ -104,7 +104,7 @@ void player_update(double dt){
     float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
     vec3 ground_norm = get_normal_interp(player_pos.v[0], player_pos.v[2]);
     player_colour = vec4(ground_norm, 1.0f);
-    vec3 displacement = get_displacement(player_pos.v[0], player_pos.v[1], player_pos.v[2]);
+    //vec3 displacement = get_displacement(player_pos.v[0], player_pos.v[1], player_pos.v[2]);
 
     //draw_vec(player_pos, ground_norm, vec4(ground_norm,1));
     //draw_vec(player_pos, displacement, vec4(0.8f,0,0,1));
