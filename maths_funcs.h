@@ -28,7 +28,8 @@
 #define MIN(a,b) (((a)<(b)) ? a : b)
 #define MAX(a,b) (((a)>(b)) ? a : b)
 #define CLAMP(x ,lo, hi) (MIN (hi, MAX (lo, x)))
-#define CMPF(a,b) (fabs(a-b) < 0.0000001f) //NB using fixed epsilon not ideal. Prob ok for cmp with 0
+//Compare two floats for equality
+#define CMPF(a,b) (fabs(a-b) < 0.000001f) //NB using fixed epsilon not ideal. Prob ok for cmp with 0
 
 // data structures
 struct vec2;
@@ -843,7 +844,7 @@ inline mat4 rotate_align(const vec3& u1, const vec3& u2){
 	float cos_a = dot(u1,u2);
     float k = 1.0f/(1.0f+cos_a);
 
-	if(cos_a+1 < 0.000001f) //vectors are opposite
+	if(CMPF(cos_a,-1)) //vectors are opposite
 		return scale(identity_mat4(),-1);
 
 	return mat4(

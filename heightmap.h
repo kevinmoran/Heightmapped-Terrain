@@ -325,7 +325,7 @@ void recalculate_normals(){
         vec3 d_x = normalise(vec3(1, r-l, 0));
         vec3 d_y = normalise(vec3(0, b-t, 1));
         vec3 norm = cross(d_y,d_x);
-        assert(length(norm)-1<0.00001f);
+        assert(CMPF(length(norm),1));
         terrain_vn[3*i] = norm.v[0];
         terrain_vn[3*i + 1] = norm.v[1];
         terrain_vn[3*i + 2] = norm.v[2];
@@ -376,7 +376,7 @@ void gen_heightmap_normals(const float* vp, int num_verts, float** normals){
         vec3 d_x = normalise(vec3(1, r-l, 0));
         vec3 d_y = normalise(vec3(0, b-t, 1));
         vec3 norm = cross(d_y,d_x);
-        assert(length(norm)-1<0.00001f);
+        assert(CMPF(length(norm),1));
         (*normals)[3*i] = norm.v[0];
         (*normals)[3*i + 1] = norm.v[1];
         (*normals)[3*i + 2] = norm.v[2];
