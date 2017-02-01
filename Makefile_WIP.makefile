@@ -76,7 +76,7 @@ RELEASE: prebuild
 	${CXX} ${FLAGS} ${RELEASE_FLAGS} -o $(BUILD_DIR)${BIN}${BIN_EXT} ${SRC} ${INCLUDE_DIRS} ${LIBS} ${SYS_LIBS}
 
 TIMED_DEBUG: prebuild
-	${CXX} ${FLAGS} -ftime-report ${RELEASE_FLAGS} -o $(BUILD_DIR)${BIN}${BIN_EXT} ${SRC} ${INCLUDE_DIRS} ${LIBS} ${SYS_LIBS}
+	${CXX} ${FLAGS} -ftime-report ${DEBUG_FLAGS} -o $(BUILD_DIR)${BIN}${BIN_EXT} ${SRC} ${INCLUDE_DIRS} ${LIBS} ${SYS_LIBS}
 
 TIMED_RELEASE: prebuild
-	${CXX} ${FLAGS} ${RELEASE_FLAGS} -ftime-report ${FRAMEWORKS} -o $(BUILD_DIR)${BIN}${BIN_EXT} ${SRC} ${INCLUDE_DIRS} ${LOC_LIB}
+	${CXX} ${FLAGS} -ftime-report ${RELEASE_FLAGS} -o $(BUILD_DIR)${BIN}${BIN_EXT} ${SRC} ${INCLUDE_DIRS} ${LIBS} ${SYS_LIBS}
