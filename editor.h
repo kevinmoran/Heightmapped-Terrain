@@ -58,7 +58,7 @@ void editor_update(double dt){
         {
             vec3 ray_pos = g_camera.pos + ray_world * (float)i * ray_step_size;
 
-            int height_index = get_height_index(g_terrain, ray_pos.v[0], ray_pos.v[2]);
+            int height_index = get_terrain_index(g_terrain, ray_pos.v[0], ray_pos.v[2]);
             //float ground_y = (height_index<0)? -INFINITY : g_terrain.height*g_terrain.vp[3*height_index+1]/255.0f; 
             float ground_y = get_height_interp(g_terrain, ray_pos.v[0], ray_pos.v[2]);
 

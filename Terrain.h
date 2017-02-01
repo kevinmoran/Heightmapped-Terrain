@@ -147,13 +147,22 @@ void edit_terrain(Terrain* t, int height_index, float edit_speed, float paint_ra
     recalculate_normals(t);
 }
 
-//Returns index for height data array to get height at world pos x,z
-int get_height_index(Terrain &t, float x, float z)
+//Returns index for closest terrain point to world pos x,z
+int get_terrain_index(Terrain &t, float x, float z)
 {
     if(x<-t.width/2 || x>t.width/2 || z<-t.length/2 || z>t.length/2) return -1;
     int row = (z+t.length/2)/t.cell_size;
     int col = (x+t.width/2)/t.cell_size;
     int i = t.num_verts_x*row+col;
+
+    float x_tl = t.vp[3*i];
+    float z_tl = t.vp[3*i + 2];
+    float x_t = (x-x_tl)/t.cell_size; // % along cell point is on x-axis
+    float z_t = (z-z_tl)/t.cell_size; // % along cell point is on z-axis
+
+    if(x_t>0.5) i+=1;
+    if(z_t>0.5) i+=t.num_verts_x;
+
     return i;
 }
 
