@@ -85,9 +85,9 @@ void editor_update(double dt){
 
             //if we've gone "underground" without entering the terrain's xz perimeter, break
             //avoids the case where you arrive underground without ever hitting the surface:
-            // \  ___ground___
+            /* \  ___ground___
             //   \
-            //     \  <- Like this
+            //     \  <- Like this */
             if(ray_pos.v[1]<0)
             {
                 if(ray_pos.v[0] < -g_terrain.width/2)  break;
