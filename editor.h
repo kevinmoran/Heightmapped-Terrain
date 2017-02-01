@@ -100,7 +100,7 @@ void editor_update(double dt){
             if(ray_pos.v[1]<ground_y)
             {
                 edit_terrain(&g_terrain, height_index, edit_speed, paint_radius, dt);
-                draw_vec(ray_pos, vec3(0,3,0), vec4(1,0,0,1));
+                //draw_vec(ray_pos, vec3(0,3,0), vec4(1,0,0,1));
                 break;
             }
         }//endfor

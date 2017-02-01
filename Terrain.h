@@ -139,7 +139,10 @@ void edit_terrain(Terrain* t, int height_index, float edit_speed, float paint_ra
             }
 
             //Draw vertices
-            draw_point(vec3(t->vp[3*idx], t->vp[3*idx+1], t->vp[3*idx+2]), 0.05f, vec4(0.8,0.8,0,1));
+            float x = float(paint_radius-abs(j))/paint_radius;
+            float z = float(paint_radius-abs(k))/paint_radius;
+            float factor = (x+z)/2;
+            draw_point(vec3(t->vp[3*idx], t->vp[3*idx+1], t->vp[3*idx+2]), (1+factor)*0.05f, vec4(0.8,factor*0.8,0,1));
         }
     }
     glBindBuffer(GL_ARRAY_BUFFER, t->points_vbo);
