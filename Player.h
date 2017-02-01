@@ -101,8 +101,8 @@ void player_update(double dt){
     //Update player position
     player_pos += player_vel*dt;
 
-    float ground_y = get_height_interp(player_pos.v[0], player_pos.v[2]);
-    vec3 ground_norm = get_normal_interp(player_pos.v[0], player_pos.v[2]);
+    float ground_y = get_height_interp(g_terrain, player_pos.v[0], player_pos.v[2]);
+    vec3 ground_norm = get_normal_interp(g_terrain, player_pos.v[0], player_pos.v[2]);
     player_colour = vec4(ground_norm, 1.0f);
     //vec3 displacement = get_displacement(player_pos.v[0], player_pos.v[1], player_pos.v[2]);
 
@@ -170,17 +170,17 @@ void player_update(double dt){
     
     //Constrain player_pos to map bounds
     {
-        if(player_pos.v[0] < -heightmap_size) {
-            player_pos.v[0] = -heightmap_size;
+        if(player_pos.v[0] < -g_terrain.width/2) {
+            player_pos.v[0] = -g_terrain.width/2;
         }
-        if(player_pos.v[0] > heightmap_size) {
-            player_pos.v[0] = heightmap_size;
+        if(player_pos.v[0] > g_terrain.width/2) {
+            player_pos.v[0] = g_terrain.width/2;
         }
-        if(player_pos.v[2] < -heightmap_size) {
-            player_pos.v[2] = -heightmap_size;
+        if(player_pos.v[2] < -g_terrain.length/2) {
+            player_pos.v[2] = -g_terrain.length/2;
         }
-        if(player_pos.v[2] > heightmap_size) {
-            player_pos.v[2] = heightmap_size;
+        if(player_pos.v[2] > g_terrain.length/2) {
+            player_pos.v[2] = g_terrain.length/2;
         }
     }
 

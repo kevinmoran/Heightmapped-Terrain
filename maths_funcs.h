@@ -914,6 +914,7 @@ inline mat4 look_at(const vec3& cam_pos, vec3 targ_pos, const vec3& up) {
 			1 0 0 -Px 
 			0 1 0 -Py
 			0 0 1 -Pz
+			0 0 0  1
 		}
 	*/
 	return ori * p;//p * ori;

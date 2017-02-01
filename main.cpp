@@ -5,8 +5,8 @@
 #include <string.h>
 
 GLFWwindow* window = NULL;
-int gl_width = 360;
-int gl_height = 240;
+int gl_width = 800;
+int gl_height = 600;
 float gl_aspect_ratio = (float)gl_width/gl_height;
 
 #include "init_gl.h"
@@ -15,7 +15,7 @@ float gl_aspect_ratio = (float)gl_width/gl_height;
 #include "Shader.h"
 #include "Camera3D.h"
 #include "DebugDrawing.h"
-#include "heightmap.h"
+#include "Terrain.h"
 #include "editor.h"
 #include "Player.h"
 
@@ -48,8 +48,7 @@ int main(){
 
     g_camera.init(vec3(0,2,5));
 
-    init_terrain();
-
+	init_terrain(&g_terrain, "terrain.pgm");
 	init_debug_draw();
 
     //Load shaders
@@ -85,14 +84,14 @@ int main(){
 		if(glfwGetKey(window, GLFW_KEY_TAB)) {
 			if(!tab_was_pressed) {
 				edit_mode = !edit_mode;
-				write_height_pgm("terrain.pgm", height_data, heightmap_size_x, heightmap_size_z);
+				save_terrain(g_terrain);
 				tab_was_pressed = true;
 			}
 		}
 		else tab_was_pressed = false;
 
 		if(edit_mode){
-       		editor_update(dt);
+       	editor_update(dt);
 		}
 		else {
 			player_update(dt);
@@ -104,23 +103,36 @@ int main(){
 		glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
 
 		//Draw terrain
-		glBindVertexArray(terrain_vao);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
+
+		//toggle wireframe
+		static bool wireframe = false;
+		static bool slash_was_pressed = false;
+		if(glfwGetKey(window, GLFW_KEY_SLASH)) {
+			if(!slash_was_pressed) {
+				wireframe = !wireframe;
+				slash_was_pressed = true;
+			}
+		}
+		else slash_was_pressed = false;
+
+		glPolygonMode(GL_FRONT_AND_BACK, wireframe? GL_LINE : GL_FILL);
+		glBindVertexArray(g_terrain.vao);
+        glDrawElements(GL_TRIANGLES, g_terrain.num_indices, GL_UNSIGNED_SHORT, 0);
 
 		glUseProgram(basic_shader.id);
 		glUniformMatrix4fv(basic_shader.V_loc, 1, GL_FALSE, g_camera.V.m);
 		glUniformMatrix4fv(basic_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
 
 		//Draw terrain wireframe
-		//if(edit_mode){
-			//glBindVertexArray(terrain_vao); //Assumed to be still bound from above
+		if(edit_mode && !wireframe){
+			//glBindVertexArray(g_terrain.vao); //Assumed to be still bound from above
 			glUniform4fv(colour_loc, 1, vec4(0,0,0,1).v);
 			glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, translate(identity_mat4(), vec3(0,0.1f,0)).m);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			glDrawElements(GL_TRIANGLES, terrain_num_indices, GL_UNSIGNED_SHORT, 0);
-		//}
-		//Draw player
+        	glDrawElements(GL_TRIANGLES, g_terrain.num_indices, GL_UNSIGNED_SHORT, 0);
+		}
+
+		// //Draw player
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glBindVertexArray(cube_vao);
 		glUniform4fv(colour_loc, 1, player_colour.v);
