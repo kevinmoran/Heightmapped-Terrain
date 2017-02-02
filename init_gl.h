@@ -13,8 +13,8 @@
 		__builtin_trap(); \
 	}} \
 
-#define check_gl_error() checkOglError(__FILE__, __LINE__)
-static int checkOglError(const char *file, int line);
+#define check_gl_error() _checkOglError(__FILE__, __LINE__)
+static int _checkOglError(const char *file, int line);
 // void APIENTRY openglCallbackFunction(GLenum source,  GLenum type, GLuint id, GLenum severity, 
 // 										GLsizei length, const GLchar* message, void* userParam);
 
@@ -88,7 +88,7 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 	return true;
 }
 
-static int checkOglError(const char *file, int line){
+static int _checkOglError(const char *file, int line){
     GLenum glErr = glGetError();
     if (glErr != GL_NO_ERROR) {
         printf("glError in file %s @ line %d:\n%d - ", file, line, glErr);

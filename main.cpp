@@ -23,7 +23,6 @@ float gl_aspect_ratio = (float)gl_width/gl_height;
 int main(){
 
 	if(!init_gl(window, "Terrain", gl_width, gl_height)){ return 1; }
-
 	float* cube_vp = NULL;
 	unsigned short* cube_indices = NULL;
 	int cube_num_indices = 0, cube_num_verts = 0;
@@ -77,7 +76,7 @@ int main(){
 		//Get Input
 		glfwPollEvents();
 		if(glfwGetKey(window, GLFW_KEY_ESCAPE)) {
-			glfwSetWindowShouldClose(window, GL_TRUE);
+			glfwSetWindowShouldClose(window, 1);
 			continue;
 		}
 
@@ -93,7 +92,7 @@ int main(){
 		else tab_was_pressed = false;
 
 		if(edit_mode){
-       	editor_update(dt);
+       		editor_update(dt);
 		}
 		else {
 			player_update(dt);
@@ -134,7 +133,7 @@ int main(){
         	glDrawElements(GL_TRIANGLES, g_terrain.num_indices, GL_UNSIGNED_SHORT, 0);
 		}
 
-		// //Draw player
+		//Draw player
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glBindVertexArray(cube_vao);
 		glUniform4fv(colour_loc, 1, player_colour.v);
