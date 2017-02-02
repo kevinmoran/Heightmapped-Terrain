@@ -330,10 +330,9 @@ void recalculate_normals(Terrain* t)
             b = t->vp[3*(i+t->num_verts_x)+1];
         else b = t->vp[3*i+1];
 
-        vec3 d_x = normalise(vec3(1, r-l, 0));
-        vec3 d_y = normalise(vec3(0, b-a, 1));
-        vec3 norm = cross(d_y,d_x);
-        //assert(CMPF(length(norm),1));
+        vec3 d_x = vec3(1, r-l, 0);
+        vec3 d_y = vec3(0, b-a, 1);
+        vec3 norm = normalise(cross(d_y,d_x));
         t->vn[3*i] = norm.v[0];
         t->vn[3*i + 1] = norm.v[1];
         t->vn[3*i + 2] = norm.v[2];
