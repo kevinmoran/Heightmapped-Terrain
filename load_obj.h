@@ -7,8 +7,8 @@
 bool load_obj(const char* file_name, float** points, int* point_count);
 bool load_obj(const char* file_name, float** points, float** tex_coords, float** normals, int* point_count);
 //indexed
-bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, int* index_count, int* vert_count);
-bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* pindex_count, int* vert_count);
+bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, int* vert_count, int* index_count);
+bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* vert_count, int* index_count);
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -233,7 +233,7 @@ bool load_obj(const char* file_name, float** points, float** tex_coords, float**
 }
 
 //Load vertex points with index buffer, ignore tex coords and normals if present
-bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, int* index_count, int* vert_count){
+bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, int* vert_count, int* index_count){
 	FILE* fp = fopen(file_name, "r");
 	if(!fp) {
 		printf("Error: Failed to open %s\n", file_name);
@@ -313,7 +313,7 @@ bool load_obj_indexed(const char* file_name, float** points, unsigned short** in
 }
 
 //Load points, tex coords and normals with index buffer
-bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* index_count, int* vert_count){
+bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* vert_count, int* index_count){
 	FILE* fp = fopen(file_name, "r");
 	if(!fp) {
 		printf("Error: Failed to open %s\n", file_name);
