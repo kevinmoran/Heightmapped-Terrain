@@ -1,6 +1,6 @@
 #pragma once
-#include <GL/glew.h>
-#include <stdio.h>
+// #include <GL/glew.h>
+// #include <stdio.h>
 #include <cstring> //strcat
 
 #define SHADER_PATH "Shaders/"

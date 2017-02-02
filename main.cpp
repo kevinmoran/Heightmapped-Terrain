@@ -9,17 +9,19 @@ int gl_width = 800;
 int gl_height = 600;
 float gl_aspect_ratio = (float)gl_width/gl_height;
 
-#include "init_gl.h"
 #include "maths_funcs.h"
+#include "input.h"
+#include "Camera3D.h"
+#include "init_gl.h"
 #include "load_obj.h"
 #include "Shader.h"
-#include "Camera3D.h"
 #include "DebugDrawing.h"
 #include "Terrain.h"
 #include "editor.h"
 #include "Player.h"
 
 int main(){
+
 	if(!init_gl(window, "Terrain", gl_width, gl_height)){ return 1; }
 
 	float* cube_vp = NULL;

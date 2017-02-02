@@ -1,6 +1,6 @@
 #pragma once
-#include "maths_funcs.h"
-#include "input.h"
+// #include "maths_funcs.h"
+// #include "input.h"
 
 bool cam_mouse_controls = false;
 
@@ -105,7 +105,7 @@ void Camera3D::update(double dt){
     else {
         static double prev_mouse_x, prev_mouse_y;
         static float mouse_sensitivity = 0.4f; //TODO this shouldn't stay here
-        
+
         yaw   += (prev_mouse_x-g_mouse.xpos) * mouse_sensitivity * turn_speed*dt;
         pitch += (prev_mouse_y-g_mouse.ypos) * mouse_sensitivity * turn_speed*dt;
         prev_mouse_x = g_mouse.xpos;

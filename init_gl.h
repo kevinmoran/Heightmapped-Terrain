@@ -1,9 +1,9 @@
 #pragma once
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <stdio.h>
-#include "input.h"
-#include "Camera3D.h"
+// #include <GL/glew.h>
+// #include <GLFW/glfw3.h>
+// #include <stdio.h>
+// #include "input.h"
+// #include "Camera3D.h"
 
 #define check_gl_error() checkOglError(__FILE__, __LINE__)
 static int checkOglError(const char *file, int line);

@@ -65,7 +65,7 @@ void init_terrain(Terrain* t, const char* file)
                 t->vp[3*i    ] = x_pos;
                 t->vp[3*i + 1] = 0;
                 t->vp[3*i + 2] = z_pos;
-                print(vec3(x_pos,0,z_pos));
+                //print(vec3(x_pos,0,z_pos));
                 x_pos+=t->cell_size;
             }
             z_pos+=t->cell_size;

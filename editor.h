@@ -1,5 +1,5 @@
 #pragma once
-#include "Terrain.h"
+//#include "Terrain.h"
 //#include "slIMGUI.h"
 
 void editor_update(double dt){
