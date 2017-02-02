@@ -23,6 +23,16 @@ bool g_input[NUM_INPUT_COMMANDS] = {0};
 //For custom user key mappings (e.g.  g_key_mapping[DASH_MOVE] returns GLFW_KEY_ENTER)
 //int g_key_mapping[NUM_INPUT_COMMANDS];
 
+struct Mouse {
+    bool click_left;
+    bool click_right;
+    double xpos, ypos;
+    double xscroll, yscroll;
+    // bool is_over_window;
+};
+
+Mouse g_mouse;
+
 //glfwSetKeyCallback(window, key_callback);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -46,6 +56,46 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     // if(key == g_key_mapping[DASH_MOVE]){  g_input[DASH_MOVE] = is_pressed; return; }
     // if(key == g_key_mapping[JUMP_MOVE]){  g_input[JUMP_MOVE] = is_pressed; return; }
 }
+
+//Mouse stuff
+
+//glfwSetMouseButtonCallback(window, mouse_button_callback);
+//Or poll with: if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)))
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
+    if(button == GLFW_MOUSE_BUTTON_LEFT) {
+        if(action == GLFW_PRESS) g_mouse.click_left = true;
+        else g_mouse.click_left = false;
+
+        return;
+    }
+    if(button == GLFW_MOUSE_BUTTON_RIGHT) {
+        if(action == GLFW_PRESS) g_mouse.click_right = true;
+        else g_mouse.click_right = false;
+    }
+}
+
+//glfwSetCursorPosCallback(window, cursor_pos_callback);
+//Just poll with glfwGetCursorPos(window, &xpos, &ypos);
+void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos){
+   g_mouse.xpos = xpos;
+   g_mouse.ypos = ypos;
+}
+
+//glfwSetScrollCallback(window, scroll_callback);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
+    g_mouse.xscroll = xoffset;
+    g_mouse.yscroll = yoffset;
+}
+
+//glfwSetCursorEnterCallback(window, cursor_enter_callback);
+// void cursor_enter_callback(GLFWwindow *window, int entered){
+//     if(entered){
+//         g_mouse.is_over_window = true;
+//     }
+//     else {
+//         g_mouse.is_over_window = false;
+//     }
+// }
 
 //Joystick stuff
 /*
@@ -74,37 +124,6 @@ float* axis_values = glfwGetJoystickAxes (GLFW_JOYSTICK_1, &axis_count);
 
 int button_count;
 unsigned char* controller_buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &button_count);
-*/
-
-//Mouse stuff
-/*
-//glfwSetMouseButtonCallback(window, mouse_button_callback);
-void mouse_button_callback(GLFW* window, int button, int action, int mods){
-    if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
-        //Or poll with: if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)))
-    }
-}
-
-//glfwSetCursorPosCallback(window, cursor_pos_callback);
-void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos){
-    //Don't think this is necessary
-    //Just poll with glfwGetCursorPos(window, &xpos, &ypos);
-}
-
-//glfwSetCursorEnterCallback(window, cursor_enter_callback);
-void cursor_enter_callback(GLFWwindow *window, int entered){
-    if(entered){
-        //cursor has entered window
-    }
-    else {
-        //cursor has left window
-    }
-}
-
-//glfwSetScrollCallback(window, scroll_callback);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-}
 */
 
 //Clipboard Stuff

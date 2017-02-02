@@ -34,8 +34,13 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 		return false;
 	}
 	glfwMakeContextCurrent(window);
+
+	//Setup callbacks
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetWindowSizeCallback(window, window_resize_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
+	glfwSetCursorPosCallback(window, cursor_pos_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 	
 	/* start GLEW extension handler */
 	glewExperimental = GL_TRUE;

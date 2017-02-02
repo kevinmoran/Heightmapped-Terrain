@@ -5,7 +5,7 @@
 void editor_update(double dt){
     //Data
     static int paint_radius = 2;
-    static float edit_speed = 10.0f;
+    static float edit_speed = 5.0f;
 
     //Hotkeys
     static bool M_was_pressed = false;
@@ -23,12 +23,17 @@ void editor_update(double dt){
     }
     else M_was_pressed = false;
 
+    static bool R_was_pressed = false;
     if(glfwGetKey(window, GLFW_KEY_R)) {
-        reload_shader_program("Heightmap.vert", "Heightmap.frag", &heightmap_shader);
-        glUseProgram(heightmap_shader.id);
-        glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
-        glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
+        if(!R_was_pressed) {
+            reload_shader_program("Heightmap.vert", "Heightmap.frag", &heightmap_shader);
+            glUseProgram(heightmap_shader.id);
+            glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
+            glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
+        }
+        R_was_pressed = true;
     }
+    else R_was_pressed = false;
 
     //UI
 
@@ -36,11 +41,8 @@ void editor_update(double dt){
     //Ray picking to raise/lower ground
     //if(glfwGetKey(window, GLFW_KEY_G))
     {
-        double mouse_xpos, mouse_ypos;
-        glfwGetCursorPos(window, &mouse_xpos, &mouse_ypos);
-
-        float x_nds = (cam_mouse_controls) ? 0 :(2*mouse_xpos/gl_width) - 1;
-        float y_nds = (cam_mouse_controls) ? 0 : 1- (2*mouse_ypos)/gl_height;
+        float x_nds = (cam_mouse_controls) ? 0 :(2*g_mouse.xpos/gl_width) - 1;
+        float y_nds = (cam_mouse_controls) ? 0 : 1- (2*g_mouse.ypos)/gl_height;
         //vec3 ray_nds = vec3(x_nds, y_nds, 1.0f);
         vec4 ray_clip = vec4(x_nds, y_nds, -1.0f, 1.0f);
         vec4 ray_eye = inverse(g_camera.P)*ray_clip;
