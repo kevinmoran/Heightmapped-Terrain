@@ -1,5 +1,4 @@
 #pragma once
-#include <assert.h>
 
 #define TERRAIN_FILENAME_SIZE 32
 

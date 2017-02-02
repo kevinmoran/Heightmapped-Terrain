@@ -5,13 +5,20 @@
 // #include "input.h"
 // #include "Camera3D.h"
 
+//TODO put this somewhere sensible!
+#define assert(exp) \
+	if(!(exp)) { \
+		printf("Assertion failed in %s, Line %d:\n%s\n...", __FILE__, __LINE__, #exp); \
+		getchar(); \
+	} \
+
 #define check_gl_error() checkOglError(__FILE__, __LINE__)
 static int checkOglError(const char *file, int line);
 // void APIENTRY openglCallbackFunction(GLenum source,  GLenum type, GLuint id, GLenum severity, 
 // 										GLsizei length, const GLchar* message, void* userParam);
 
 bool init_gl(GLFWwindow* &window, const char* title, int window_width, int window_height) {
-
+	
 	/* start GL context and O/S window using the GLFW helper library */
 	if(!glfwInit()) {
 		fprintf(stderr, "ERROR: could not start GLFW3\n");
