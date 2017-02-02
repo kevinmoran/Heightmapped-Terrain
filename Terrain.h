@@ -223,10 +223,10 @@ float get_height_interp(Terrain &t, float x, float z)
 vec3 get_normal_interp(Terrain &t, float x, float z)
 {
     if(x<-t.width/2 || x>t.width/2 || z<-t.length/2 || z>t.length/2) return vec3(-INFINITY, -INFINITY, -INFINITY);
-
+    
     //Get index of top-left vert of quad containing x,z
-    int row = (z+t.length)/t.cell_size;
-    int col = (x+t.width)/t.cell_size;
+    int row = (z+t.length/2)/t.cell_size;
+    int col = (x+t.width/2)/t.cell_size;
     int i = t.num_verts_x*row+col;
 
     //Get x,z position of top-left vert
