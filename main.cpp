@@ -9,15 +9,15 @@ int gl_width = 800;
 int gl_height = 600;
 float gl_aspect_ratio = (float)gl_width/gl_height;
 
-#include "maths_funcs.h"
-#include "input.h"
+#include "GameMaths.h"
+#include "Input.h"
 #include "Camera3D.h"
 #include "init_gl.h"
 #include "load_obj.h"
 #include "Shader.h"
 #include "DebugDrawing.h"
 #include "Terrain.h"
-#include "editor.h"
+#include "Editor.h"
 #include "Player.h"
 
 int main(){

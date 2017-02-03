@@ -2,7 +2,7 @@
 // #include <GL/glew.h>
 // #include <GLFW/glfw3.h>
 // #include <stdio.h>
-// #include "input.h"
+// #include "Input.h"
 // #include "Camera3D.h"
 
 //TODO put this somewhere sensible!
