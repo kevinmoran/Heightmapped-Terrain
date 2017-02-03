@@ -32,6 +32,15 @@ bool g_input[NUM_INPUT_COMMANDS] = {0};
 //For custom user key mappings (e.g.  g_key_mapping[DASH_MOVE] returns GLFW_KEY_ENTER)
 //int g_key_mapping[NUM_INPUT_COMMANDS];
 
+//Use Command instead of Control on Mac
+#ifdef __APPLE__
+int CTRL_KEY_LEFT = GLFW_KEY_LEFT_SUPER;
+int CTRL_KEY_RIGHT = GLFW_KEY_RIGHT_SUPER;
+#else
+int CTRL_KEY_LEFT = GLFW_KEY_LEFT_CONTROL;
+int CTRL_KEY_RIGHT = GLFW_KEY_RIGHT_CONTROL;
+#endif
+
 //glfwSetKeyCallback(window, key_callback);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {

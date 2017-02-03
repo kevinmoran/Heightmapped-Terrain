@@ -84,11 +84,22 @@ int main(){
 		if(glfwGetKey(window, GLFW_KEY_TAB)) {
 			if(!tab_was_pressed) {
 				edit_mode = !edit_mode;
-				save_terrain(g_terrain);
 				tab_was_pressed = true;
 			}
 		}
 		else tab_was_pressed = false;
+
+		//Save scene
+		static bool s_was_pressed = false;
+		if(glfwGetKey(window, GLFW_KEY_S)) {
+			if(!s_was_pressed){
+				if(glfwGetKey(window, CTRL_KEY_LEFT) || (glfwGetKey(window, CTRL_KEY_RIGHT))) {
+					save_terrain(g_terrain);
+				}
+				s_was_pressed = true;
+			}
+		}
+		else s_was_pressed = false;
 
 		if(edit_mode){
        		editor_update(dt);
