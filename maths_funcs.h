@@ -18,6 +18,16 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+//Suppress anonymous struct warning
+#ifdef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(push, disable: 4201)
+#endif
+
 // const used to convert degrees into radians
 #define TAU 2.0 * M_PI
 #define ONE_DEG_IN_RAD (2.0 * M_PI) / 360.0 // 0.017444444
@@ -32,9 +42,9 @@
 #define CMPF(a,b) (fabs(a-b) < 0.000001f) //NB using fixed epsilon not ideal. Prob ok for cmp with 0
 
 // data structures
-struct vec2;
-struct vec3;
-struct vec4;
+union vec2;
+union vec3;
+union vec4;
 struct mat3;
 struct mat4;
 struct versor;
@@ -97,8 +107,13 @@ versor normalise(versor& q);
 float dot(const versor& q, const versor& r);
 versor slerp(versor& q, versor& r, float t);
 
-struct vec2 {
-	float v[2];
+union vec2 {
+	struct{
+		float v[2];
+	};
+	struct{
+		float x, y;
+	};
 
 	vec2() {}
 	vec2(float x, float y) {
@@ -186,8 +201,13 @@ as far as i can tell from that rambling discourse, to get them to inline
 otherwise we leave the cpp definition as is, but put a SECOND COPY with both
 keywords "extern inline" beforehand. thanks stallman */
 
-struct vec3 {
-	float v[3];
+union vec3 {
+	struct{
+		float v[3];
+	};
+	struct {
+		float x, y, z;
+	};
 	
 	vec3() {}
 	vec3 (float x, float y, float z) {
@@ -283,8 +303,16 @@ struct vec3 {
 	}
 };
 
-struct vec4 {
-	float v[4];
+union vec4 {
+	struct{
+		float v[4];
+	};
+	struct{
+		float x, y, z, w;
+	};
+	struct{
+		float r, g, b, a;
+	};
 
 	vec4() {}
 	vec4(float x, float y, float z, float w) {
@@ -1049,4 +1077,12 @@ inline versor slerp(versor& q, versor& r, float t) {
 	return result;
 }
 
+#ifdef __clang__
+#pragma GCC diagnostic pop
 #endif
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+#endif //_MATHS_FUNCS_H_
