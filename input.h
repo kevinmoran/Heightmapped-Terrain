@@ -1,6 +1,15 @@
 #pragma once
 //Kevin's Input Layer using GLFW 
 
+struct Mouse {
+    bool click_left;
+    bool click_right;
+    double xpos, ypos;
+    double xscroll, yscroll;
+    // bool is_over_window;
+};
+Mouse g_mouse;
+
 //List of all possible commands in the game!
 enum INPUT_COMMANDS{
     MOVE_LEFT,
@@ -22,16 +31,6 @@ bool g_input[NUM_INPUT_COMMANDS] = {0};
 
 //For custom user key mappings (e.g.  g_key_mapping[DASH_MOVE] returns GLFW_KEY_ENTER)
 //int g_key_mapping[NUM_INPUT_COMMANDS];
-
-struct Mouse {
-    bool click_left;
-    bool click_right;
-    double xpos, ypos;
-    double xscroll, yscroll;
-    // bool is_over_window;
-};
-
-Mouse g_mouse;
 
 //glfwSetKeyCallback(window, key_callback);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -62,15 +61,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 //glfwSetMouseButtonCallback(window, mouse_button_callback);
 //Or poll with: if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)))
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
-    if(button == GLFW_MOUSE_BUTTON_LEFT) {
-        if(action == GLFW_PRESS) g_mouse.click_left = true;
-        else g_mouse.click_left = false;
-
-        return;
-    }
-    if(button == GLFW_MOUSE_BUTTON_RIGHT) {
-        if(action == GLFW_PRESS) g_mouse.click_right = true;
-        else g_mouse.click_right = false;
+    bool is_pressed = (action != GLFW_RELEASE);
+    switch(button){
+        case GLFW_MOUSE_BUTTON_LEFT:  g_mouse.click_left = is_pressed;  return;
+        case GLFW_MOUSE_BUTTON_RIGHT: g_mouse.click_right = is_pressed; return;
+        default:
+            printf("How the heck did we get here?\n");
+            printf("Mouse button: %d\n", button);
     }
 }
 

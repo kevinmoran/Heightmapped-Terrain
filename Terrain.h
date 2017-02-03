@@ -14,6 +14,7 @@ struct Terrain{
 
     GLuint vao, points_vbo, norm_vbo, index_vbo;
 };
+Terrain g_terrain;
 
 Shader heightmap_shader;
 
@@ -29,11 +30,9 @@ void save_terrain(Terrain &t);
 void clear_terrain(Terrain *t);
 
 #define DEFAULT_TERRAIN_HEIGHT 20
-#define DEFAULT_TERRAIN_CELL_SIZE 1
+#define DEFAULT_TERRAIN_CELL_SIZE 2
 #define DEFAULT_TERRAIN_NUM_X 8
 #define DEFAULT_TERRAIN_NUM_Z 8
-
-Terrain g_terrain;
 
 void init_terrain(Terrain* t, const char* file)
 {

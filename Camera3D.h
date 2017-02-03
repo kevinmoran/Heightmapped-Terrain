@@ -16,6 +16,7 @@ struct Camera3D {
     void init(vec3 cam_pos, vec3 target_pos);
     void update(double dt);
 };
+Camera3D g_camera;
 
 void Camera3D::init(){
     pos = vec3(0,1,5);
@@ -122,8 +123,6 @@ void Camera3D::update(double dt){
     up  = inverse(R)*vec4(0,1,0,0);  //R to calculate these??? I don't know anymore
     fwd = inverse(R)*vec4(0,0,-1,0);
 }
-
-Camera3D g_camera;
 
 void window_resize_callback(GLFWwindow* window, int width, int height){
     gl_width = width;
