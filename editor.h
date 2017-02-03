@@ -46,7 +46,7 @@ void editor_update(double dt){
         //vec3 ray_nds = vec3(x_nds, y_nds, 1.0f);
         vec4 ray_clip = vec4(x_nds, y_nds, -1.0f, 1.0f);
         vec4 ray_eye = inverse(g_camera.P)*ray_clip;
-        ray_eye = vec4(ray_eye.v[0], ray_eye.v[1], -1.0f, 0.0f);
+        ray_eye = vec4(ray_eye.x, ray_eye.y, -1.0f, 0.0f);
         vec3 ray_world = vec3(inverse(g_camera.V)*ray_eye);
         ray_world = normalise(ray_world);
         
@@ -60,9 +60,9 @@ void editor_update(double dt){
         {
             vec3 ray_pos = g_camera.pos + ray_world * (float)i * ray_step_size;
 
-            int height_index = get_terrain_index(g_terrain, ray_pos.v[0], ray_pos.v[2]);
+            int height_index = get_terrain_index(g_terrain, ray_pos.x, ray_pos.z);
             //float ground_y = (height_index<0)? -INFINITY : g_terrain.height*g_terrain.vp[3*height_index+1]/255.0f; 
-            float ground_y = get_height_interp(g_terrain, ray_pos.v[0], ray_pos.v[2]);
+            float ground_y = get_height_interp(g_terrain, ray_pos.x, ray_pos.z);
 
             // ------------------------------------------------------------
             //DEBUG DRAWING STUFF
@@ -80,7 +80,7 @@ void editor_update(double dt){
             // {
             //     ray_positions[i-10] = ray_pos;
             //     //ground_positions[i-10] = vec3(g_terrain.vp[3*height_index], g_terrain.vp[3*height_index+1], g_terrain.vp[3*height_index+2]);
-            //     ground_positions[i-10] = vec3(ray_pos.v[0], ground_y, ray_pos.v[2]);
+            //     ground_positions[i-10] = vec3(ray_pos.x, ground_y, ray_pos.z);
             //     num_vec_draws = i-10;
             // }
             // ------------------------------------------------------------
@@ -90,16 +90,16 @@ void editor_update(double dt){
             /* \  ___ground___
             //   \
             //     \  <- Like this */
-            if(ray_pos.v[1]<0)
+            if(ray_pos.y<0)
             {
-                if(ray_pos.v[0] < -g_terrain.width/2)  break;
-                if(ray_pos.v[0] >  g_terrain.width/2)  break;
-                if(ray_pos.v[2] < -g_terrain.length/2) break;
-                if(ray_pos.v[2] >  g_terrain.length/2) break;
+                if(ray_pos.x < -g_terrain.width/2)  break;
+                if(ray_pos.x >  g_terrain.width/2)  break;
+                if(ray_pos.z < -g_terrain.length/2) break;
+                if(ray_pos.z >  g_terrain.length/2) break;
             }
             
-            //if(fabs(ray_pos.v[1]-ground_y)<0.1f) 
-            if(ray_pos.v[1]<ground_y)
+            //if(fabs(ray_pos.y-ground_y)<0.1f) 
+            if(ray_pos.y<ground_y)
             {
                 edit_terrain(&g_terrain, height_index, edit_speed, paint_radius, dt);
                 //draw_vec(ray_pos, vec3(0,3,0), vec4(1,0,0,1));

@@ -65,27 +65,27 @@ void Camera3D::init(vec3 cam_pos, vec3 target_pos){
 void Camera3D::update(double dt){
     //WASD Movement (constrained to the x-z plane)
     if(g_input[MOVE_FORWARD]) {
-        vec3 xz_proj = normalise(vec3(fwd.v[0], 0, fwd.v[2]));
+        vec3 xz_proj = normalise(vec3(fwd.x, 0, fwd.z));
         pos += xz_proj*move_speed*dt;
     }
     if(g_input[MOVE_LEFT]) {
-        vec3 xz_proj = normalise(vec3(rgt.v[0], 0, rgt.v[2]));
+        vec3 xz_proj = normalise(vec3(rgt.x, 0, rgt.z));
         pos -= xz_proj*move_speed*dt;
     }
     if(g_input[MOVE_BACK]) {
-        vec3 xz_proj = normalise(vec3(fwd.v[0], 0, fwd.v[2]));
+        vec3 xz_proj = normalise(vec3(fwd.x, 0, fwd.z));
         pos -= xz_proj*move_speed*dt;			
     }
     if(g_input[MOVE_RIGHT]) {
-        vec3 xz_proj = normalise(vec3(rgt.v[0], 0, rgt.v[2]));
+        vec3 xz_proj = normalise(vec3(rgt.x, 0, rgt.z));
         pos += xz_proj*move_speed*dt;			
     }
     //Increase/decrease elevation
     if(g_input[RAISE_CAM]) {
-        pos.v[1] += move_speed*dt;			
+        pos.y += move_speed*dt;			
     }
     if(g_input[LOWER_CAM]) {
-        pos.v[1] -= move_speed*dt;			
+        pos.y -= move_speed*dt;			
     }
     //Rotation
     if(!cam_mouse_controls){

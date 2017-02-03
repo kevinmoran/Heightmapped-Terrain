@@ -24,8 +24,8 @@ void player_update(double dt){
 
     bool player_moved = false;
     //Find player's forward and right movement directions
-    vec3 fwd_xz_proj = normalise(vec3(g_camera.fwd.v[0], 0, g_camera.fwd.v[2]));
-    vec3 rgt_xz_proj = normalise(vec3(g_camera.rgt.v[0], 0, g_camera.rgt.v[2]));
+    vec3 fwd_xz_proj = normalise(vec3(g_camera.fwd.x, 0, g_camera.fwd.z));
+    vec3 rgt_xz_proj = normalise(vec3(g_camera.rgt.x, 0, g_camera.rgt.z));
 
     //WASD Movement (constrained to the x-z plane)
     if(g_input[MOVE_FORWARD]) {
@@ -70,7 +70,7 @@ void player_update(double dt){
 
         if(g_input[JUMP]){
             if(!jump_button_was_pressed){
-                player_vel.v[1] += jump_vel;
+                player_vel.y += jump_vel;
                 player_is_on_ground = false;
                 player_is_jumping = true;
                 jump_button_was_pressed = true;
@@ -84,33 +84,33 @@ void player_update(double dt){
         //TODO: air steering?
         if(player_is_jumping){
             //If you don't hold jump you don't jump as high
-            if(!g_input[JUMP] && player_vel.v[1]>0) player_vel.v[1] += 5*g*dt;
+            if(!g_input[JUMP] && player_vel.y>0) player_vel.y += 5*g*dt;
         }
 
         //Clamp player's xz speed
-        vec3 xz_vel = vec3(player_vel.v[0], 0, player_vel.v[2]);
+        vec3 xz_vel = vec3(player_vel.x, 0, player_vel.z);
         if(length(xz_vel) > player_top_speed) {
             xz_vel = normalise(xz_vel);
             xz_vel *= player_top_speed;
-            player_vel.v[0] = xz_vel.v[0];
-            player_vel.v[2] = xz_vel.v[2];
+            player_vel.x = xz_vel.x;
+            player_vel.z = xz_vel.z;
         }
-        player_vel.v[1] += g*dt;
+        player_vel.y += g*dt;
     }
 
     //Update player position
     player_pos += player_vel*dt;
 
-    float ground_y = get_height_interp(g_terrain, player_pos.v[0], player_pos.v[2]);
-    vec3 ground_norm = get_normal_interp(g_terrain, player_pos.v[0], player_pos.v[2]);
+    float ground_y = get_height_interp(g_terrain, player_pos.x, player_pos.z);
+    vec3 ground_norm = get_normal_interp(g_terrain, player_pos.x, player_pos.z);
     player_colour = vec4(ground_norm, 1.0f);
-    //vec3 displacement = get_displacement(player_pos.v[0], player_pos.v[1], player_pos.v[2]);
+    //vec3 displacement = get_displacement(player_pos.x, player_pos.y, player_pos.z);
 
     //draw_vec(player_pos, ground_norm, vec4(ground_norm,1));
     //draw_vec(player_pos, displacement, vec4(0.8f,0,0,1));
     //print(displacement);
 
-    float player_h_above_ground = player_pos.v[1] - ground_y;
+    float player_h_above_ground = player_pos.y - ground_y;
     //height to differentiate between walking down a slope and walking off an edge:
     const float autosnap_height = 0.5f*player_scale;
 
@@ -121,10 +121,10 @@ void player_update(double dt){
     if(player_h_above_ground< 0) {
         //TODO: push player out of ground along normal?
         //and update velocity by angle of ground?
-         player_pos.v[1] = ground_y;
+         player_pos.y = ground_y;
         //if(glfwGetKey(window, GLFW_KEY_P)) 
         //player_pos -= displacement;
-        player_vel.v[1] = 0.0f;
+        player_vel.y = 0.0f;
         player_is_on_ground = true;
         player_is_jumping = false;
     }
@@ -134,7 +134,7 @@ void player_update(double dt){
     else if(player_is_on_ground){//We're not on ground but less than autosnap_height above it
         //snap player to ground
         //TODO: trying autosnapping along normal?
-        player_pos.v[1] = ground_y;
+        player_pos.y = ground_y;
     }
 
     //Slope checking
@@ -143,12 +143,12 @@ void player_update(double dt){
         // if(slope>45) {
             //player_pos = prev_pos;
             // player_colour = vec4(0.8f, 0.8f, 0.2f, 1);
-            // int i = get_height_index(player_pos.v[0], player_pos.v[1]);
+            // int i = get_height_index(player_pos.x, player_pos.y);
             // float cell_size = 2*heightmap_size/(heightmap_n-1);
             // float x_tl = terrain_vp[3*i];
             // float z_tl = terrain_vp[3*i + 2];
-            // float x_t = (player_pos.v[0]-x_tl)/cell_size; // % along cell point is on x-axis
-            // float z_t = (player_pos.v[1]-z_tl)/cell_size; // % along cell point is on z-axis
+            // float x_t = (player_pos.x-x_tl)/cell_size; // % along cell point is on x-axis
+            // float z_t = (player_pos.y-z_tl)/cell_size; // % along cell point is on z-axis
 
             // vec3 tri_v[3];
             // tri_v[0] = vec3(terrain_vp[3*(i+1)], terrain_vp[3*(i+1)+1], terrain_vp[3*(i+1)+2]);
@@ -156,10 +156,10 @@ void player_update(double dt){
             // if(x_t+z_t>1.0f) tri_v[2] = vec3(terrain_vp[3*(i+heightmap_size_x+1)], terrain_vp[3*(i+heightmap_size_x+1)+1], terrain_vp[3*(i+heightmap_size_x+1)+2]);
             // else tri_v[2] = vec3(terrain_vp[3*i], terrain_vp[3*i+1], terrain_vp[3*i+2]);
 
-            // vec3 v_max = (tri_v[0].v[1]>tri_v[1].v[1]) ? tri_v[0] : tri_v[1];
-            // v_max = (v_max.v[1]>tri_v[2].v[1]) ? v_max : tri_v[2];
-            // vec3 v_min = (tri_v[0].v[1]<tri_v[1].v[1]) ? tri_v[0] : tri_v[1];
-            // v_min = (v_min.v[1]<tri_v[2].v[1]) ? v_min : tri_v[2];
+            // vec3 v_max = (tri_v[0].y>tri_v[1].y) ? tri_v[0] : tri_v[1];
+            // v_max = (v_max.y>tri_v[2].y) ? v_max : tri_v[2];
+            // vec3 v_min = (tri_v[0].y<tri_v[1].y) ? tri_v[0] : tri_v[1];
+            // v_min = (v_min.y<tri_v[2].y) ? v_min : tri_v[2];
 
             // vec3 gradient = normalise(v_max - v_min);
             
@@ -170,17 +170,17 @@ void player_update(double dt){
     
     //Constrain player_pos to map bounds
     {
-        if(player_pos.v[0] < -g_terrain.width/2) {
-            player_pos.v[0] = -g_terrain.width/2;
+        if(player_pos.x < -g_terrain.width/2) {
+            player_pos.x = -g_terrain.width/2;
         }
-        if(player_pos.v[0] > g_terrain.width/2) {
-            player_pos.v[0] = g_terrain.width/2;
+        if(player_pos.x > g_terrain.width/2) {
+            player_pos.x = g_terrain.width/2;
         }
-        if(player_pos.v[2] < -g_terrain.length/2) {
-            player_pos.v[2] = -g_terrain.length/2;
+        if(player_pos.z < -g_terrain.length/2) {
+            player_pos.z = -g_terrain.length/2;
         }
-        if(player_pos.v[2] > g_terrain.length/2) {
-            player_pos.v[2] = g_terrain.length/2;
+        if(player_pos.z > g_terrain.length/2) {
+            player_pos.z = g_terrain.length/2;
         }
     }
 

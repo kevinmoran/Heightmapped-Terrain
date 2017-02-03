@@ -296,14 +296,14 @@ vec3 get_displacement(Terrain &t, float x, float y, float z)
 
     vec3 norm = normalise(norm_a*u + norm_b*v + norm_c*w);
     vec3 top_rgt = a;
-    top_rgt.v[1] = t.vp[3*(i+1)+1];
+    top_rgt.y = t.vp[3*(i+1)+1];
     float disp = dot(vec3(x,y,z)-top_rgt, norm);
 
     //DEBUG: Draw tri's normals
-    // a.v[1] = t.vp[3*(i+1) + 1];
-    // b.v[1] = t.vp[3*(i+t_num_verts_x) + 1];
-    // if(x_t+z_t > t.cell_size) c.v[1] = t.vp[3*(i+t.num_verts_x+1) + 1]; //br
-    // else c.v[1] = t.vp[3*i + 1];; //tl
+    // a.y = t.vp[3*(i+1) + 1];
+    // b.y = t.vp[3*(i+t_num_verts_x) + 1];
+    // if(x_t+z_t > t.cell_size) c.y = t.vp[3*(i+t.num_verts_x+1) + 1]; //br
+    // else c.y = t.vp[3*i + 1];; //tl
 
     // draw_vec(a, norm_a, vec4(0.8f, 0.7f, 0.1f, 1));
     // draw_vec(b, norm_b, vec4(0.8f, 0.7f, 0.1f, 1));
@@ -333,9 +333,9 @@ void recalculate_normals(Terrain* t)
         vec3 d_x = vec3(1, r-l, 0);
         vec3 d_y = vec3(0, b-a, 1);
         vec3 norm = normalise(cross(d_y,d_x));
-        t->vn[3*i] = norm.v[0];
-        t->vn[3*i + 1] = norm.v[1];
-        t->vn[3*i + 2] = norm.v[2];
+        t->vn[3*i] = norm.x;
+        t->vn[3*i + 1] = norm.y;
+        t->vn[3*i + 2] = norm.z;
     }
     glBindBuffer(GL_ARRAY_BUFFER, t->norm_vbo);
 	glBufferData(GL_ARRAY_BUFFER, t->point_count*3*sizeof(float), t->vn, GL_STATIC_DRAW);
