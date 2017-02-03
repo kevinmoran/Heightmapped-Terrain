@@ -1,3 +1,9 @@
+#pragma once
+//Kevin's game maths library header
+//Based off simple maths library included with online source for 'Anton's OpenGL Tutorials' book by Anton Gerdelan
+//Modified and added to by me over the years
+
+//Original header:
 /******************************************************************************\
 | Anton's Maths Library                                                        |
 | Email: anton at antongerdelan dot net                                        |
@@ -11,8 +17,6 @@
 | A versor is the proper name for a unit quaternion.                           |
 | This is C++ because it's sort-of convenient to be able to use maths operators|
 \******************************************************************************/
-#ifndef _MATHS_FUNCS_H_
-#define _MATHS_FUNCS_H_
 
 #include <stdio.h>
 #define _USE_MATH_DEFINES
@@ -1084,5 +1088,3 @@ inline versor slerp(versor& q, versor& r, float t) {
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-
-#endif //_MATHS_FUNCS_H_
