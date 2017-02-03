@@ -204,15 +204,15 @@ float get_height_interp(Terrain &t, float x, float z)
     vec3 b = vec3(x_tl, 0, z_tl+t.cell_size); //bl
     vec3 c; //will be tl or br depending on x,z
     vec3 p = vec3(x,0,z);
-    if(x_t+z_t > t.cell_size) c = vec3(x_tl+t.cell_size, 0, z_tl+t.cell_size); //br
+    if(x_t+z_t > 1) c = vec3(x_tl+t.cell_size, 0, z_tl+t.cell_size); //br
     else c = vec3(x_tl, 0, z_tl); //tl
     float tri_area = t.cell_size/2;
 
-    float u = (length(cross(b-p,c-p))/2)/tri_area; //weight of a
-    float v = (length(cross(a-p,c-p))/2)/tri_area; //weight of b
-    float w = (length(cross(a-p,b-p))/2)/tri_area; //weight of c
+    float u = (length(cross(b-p,c-p))/(2*t.cell_size))/tri_area; //weight of a
+    float v = (length(cross(a-p,c-p))/(2*t.cell_size))/tri_area; //weight of b
+    float w = (length(cross(a-p,b-p))/(2*t.cell_size))/tri_area; //weight of c
 
-    if(x_t+z_t > t.cell_size) 
+    if(x_t+z_t > 1) 
         return u*y_tr + v*y_bl + w*y_br;
     
     return u*y_tr + v*y_bl + w*y_tl;
