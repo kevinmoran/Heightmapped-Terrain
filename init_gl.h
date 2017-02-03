@@ -49,6 +49,7 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetCursorEnterCallback(window, cursor_enter_callback);
 	
 	/* start GLEW extension handler */
 	glewExperimental = GL_TRUE;

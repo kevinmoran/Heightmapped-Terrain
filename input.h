@@ -6,7 +6,7 @@ struct Mouse {
     bool click_right;
     double xpos, ypos;
     double xscroll, yscroll;
-    // bool is_over_window;
+    bool is_in_window;
 };
 Mouse g_mouse;
 
@@ -85,14 +85,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
 }
 
 //glfwSetCursorEnterCallback(window, cursor_enter_callback);
-// void cursor_enter_callback(GLFWwindow *window, int entered){
-//     if(entered){
-//         g_mouse.is_over_window = true;
-//     }
-//     else {
-//         g_mouse.is_over_window = false;
-//     }
-// }
+void cursor_enter_callback(GLFWwindow *window, int entered){
+    g_mouse.is_in_window = entered;
+    printf("enter callback: %d\n", entered);
+}
 
 //Joystick stuff
 /*

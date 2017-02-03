@@ -39,7 +39,7 @@ void editor_update(double dt){
 
     //Update stuff
     //Ray picking to raise/lower ground
-    //if(glfwGetKey(window, GLFW_KEY_G))
+    if(g_mouse.is_in_window)
     {
         float x_nds = (cam_mouse_controls) ? 0 :(2*g_mouse.xpos/gl_width) - 1;
         float y_nds = (cam_mouse_controls) ? 0 : 1- (2*g_mouse.ypos)/gl_height;
@@ -115,7 +115,7 @@ void editor_update(double dt){
         // }
         // ------------------------------------------------------------
 
-    }//end glfw_key_G
+    }
     g_camera.update(dt);
 
 }
