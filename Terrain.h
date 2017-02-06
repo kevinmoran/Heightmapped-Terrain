@@ -13,6 +13,7 @@ struct Terrain{
     int point_count, num_indices;
 
     GLuint vao, points_vbo, norm_vbo, index_vbo;
+    int pgm_res; //resolution of height data for pgm storage
 };
 Terrain g_terrain;
 
@@ -33,6 +34,7 @@ void clear_terrain(Terrain *t);
 #define DEFAULT_TERRAIN_CELL_SIZE 2
 #define DEFAULT_TERRAIN_NUM_X 8
 #define DEFAULT_TERRAIN_NUM_Z 8
+#define DEFAULT_TERRAIN_PGM_RES 255
 
 void init_terrain(Terrain* t, const char* file)
 {
@@ -49,7 +51,7 @@ void init_terrain(Terrain* t, const char* file)
         t->num_verts_z = DEFAULT_TERRAIN_NUM_Z;
         t->width = DEFAULT_TERRAIN_CELL_SIZE*(DEFAULT_TERRAIN_NUM_X-1); 
         t->length = DEFAULT_TERRAIN_CELL_SIZE*(DEFAULT_TERRAIN_NUM_Z-1);
-
+        t->pgm_res = DEFAULT_TERRAIN_PGM_RES;
         t->point_count = t->num_verts_x * t->num_verts_z;
         t->vp = (float*)malloc(t->point_count*3*sizeof(float));
 
@@ -311,6 +313,16 @@ void recalculate_normals(Terrain* t)
 	glBufferData(GL_ARRAY_BUFFER, t->point_count*3*sizeof(float), t->vn, GL_STATIC_DRAW);
 }
 
+//Utility function: reads past comments, spaces and newlines in a pgm file
+void _pgm_skip_fluff(FILE* fp)
+{
+    char c;
+    while((c = fgetc(fp)) && ((c==' ') || (c=='#') || (c=='\n')) )
+        if(c=='#') while((c = fgetc(fp)) && (c!='\n'));
+
+    fseek(fp, -1, SEEK_CUR); //rewind 1 char
+}
+
 //Read height data from file
 bool load_terrain(Terrain* t){
     FILE* fp = fopen(t->filename, "r");
@@ -321,20 +333,48 @@ bool load_terrain(Terrain* t){
 
     //Read header
     {
-        char line[1024];
-        line[0] = '\0';
-        fgets(line, 1024, fp); 
-        assert(line[0]=='P' && line[1]=='2');
-        fgets(line, 1024, fp);
-        int w, l;
-        if(sscanf(line, "%d %d", &w, &l) != 2) printf("Error reading width, length from pgm file\n");
+        //Preamble (comments, spaces etc)
+        _pgm_skip_fluff(fp);
+
+        //Magic number (should be P2)
+        char type[2];
+        type[0] = fgetc(fp); 
+        type[1] = fgetc(fp);
+        assert(type[0]=='P' && type[1]=='2');
+        _pgm_skip_fluff(fp);
+
+        //Dimensions
+        int w;
+        {
+            char c[16]; int i=0;
+            while((c[i]=fgetc(fp)) && (c[i]!=' ') && (c[i]!='\n')) ++i;
+            sscanf(c, "%d", &w);
+            printf("width: %d\n", w);
+            _pgm_skip_fluff(fp);
+        }
+        int l;
+        {
+            char c[16]; int i=0;
+            while((c[i]=fgetc(fp)) && (c[i]!=' ') && (c[i]!='\n')) ++i;
+            sscanf(c, "%d", &l);
+            printf("length: %d\n", l);
+            _pgm_skip_fluff(fp);
+        }
         
         t->num_verts_x = w;
         t->num_verts_z = l;
         t->point_count = t->num_verts_x * t->num_verts_z;
 
-        fgets(line, 1024, fp);
-        assert(line[0]=='2' && line[1]=='5' && line[2]=='5');
+        //Colour resolution
+        int res;
+        {
+            char c[16]; int i=0;
+            while((c[i]=fgetc(fp)) && (c[i]!=' ') && (c[i]!='\n')) ++i;
+            sscanf(c, "%d", &res);
+            printf("res: %d\n", res);
+            _pgm_skip_fluff(fp);
+        }
+        t->pgm_res = res;
     }
 
     t->vp = (float*)malloc(t->point_count*3*sizeof(float));
@@ -353,7 +393,7 @@ bool load_terrain(Terrain* t){
             int height_value;
             fscanf(fp, "%d", &height_value);
             t->vp[3*i    ] = x_pos;
-            t->vp[3*i + 1] = t->height*(float)height_value/255.0f;
+            t->vp[3*i + 1] = t->height*(float)height_value/t->pgm_res;
             t->vp[3*i + 2] = z_pos;
             x_pos+=t->cell_size;
         }
@@ -369,12 +409,12 @@ void save_terrain(Terrain &t){
     FILE* fp = fopen(t.filename, "w");
     fprintf(fp, "P2\n");
     fprintf(fp, "%d %d \n", t.num_verts_x, t.num_verts_z);
-    fprintf(fp, "255\n"); //Colour resolution
+    fprintf(fp, "%d\n", t.pgm_res); //Colour resolution
 
     for(int i=0; i<t.num_verts_z; i++){
         for(int j=0; j<t.num_verts_x; j++){
             int index = t.num_verts_x*i+j;
-            fprintf(fp, "%d ", int(255*t.vp[3*index+1]/t.height));
+            fprintf(fp, "%d ", int(t.pgm_res*t.vp[3*index+1]/t.height));
         }
         fprintf(fp, "\n");
     }
