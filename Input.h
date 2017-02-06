@@ -96,7 +96,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
 //glfwSetCursorEnterCallback(window, cursor_enter_callback);
 void cursor_enter_callback(GLFWwindow *window, int entered){
     g_mouse.is_in_window = entered;
-    printf("enter callback: %d\n", entered);
 }
 
 //Joystick stuff
