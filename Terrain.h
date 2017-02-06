@@ -351,7 +351,7 @@ bool load_terrain(Terrain* t){
             char c[16]; int i=0;
             while((c[i]=fgetc(fp)) && (c[i]!=' ') && (c[i]!='\n')) ++i;
             sscanf(c, "%d", &w);
-            printf("width: %d\n", w);
+            //printf("width: %d\n", w);
             _pgm_skip_fluff(fp);
         }
         int l;
@@ -359,7 +359,7 @@ bool load_terrain(Terrain* t){
             char c[16]; int i=0;
             while((c[i]=fgetc(fp)) && (c[i]!=' ') && (c[i]!='\n')) ++i;
             sscanf(c, "%d", &l);
-            printf("length: %d\n", l);
+            //printf("length: %d\n", l);
             _pgm_skip_fluff(fp);
         }
         
@@ -373,7 +373,7 @@ bool load_terrain(Terrain* t){
             char c[16]; int i=0;
             while((c[i]=fgetc(fp)) && (c[i]!=' ') && (c[i]!='\n')) ++i;
             sscanf(c, "%d", &res);
-            printf("res: %d\n", res);
+            //printf("res: %d\n", res);
             _pgm_skip_fluff(fp);
         }
         t->pgm_res = res;
@@ -393,7 +393,7 @@ bool load_terrain(Terrain* t){
         x_pos = -t->width/2.0f;
         for(int c=0; c<t->num_verts_x; c++, i++){
             assert(i<t->point_count);
-            
+
             int height_value;
             fscanf(fp, "%d", &height_value);
             t->vp[3*i    ] = x_pos;
