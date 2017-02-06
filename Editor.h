@@ -2,6 +2,9 @@
 //#include "Terrain.h"
 //#include "slIMGUI.h"
 
+void editor_update(double dt);
+void paint_terrain(Terrain* t, int terrain_index, float edit_speed, float paint_radius, double dt);
+
 void editor_update(double dt){
     //Data
     static int paint_radius = 2;
@@ -60,8 +63,8 @@ void editor_update(double dt){
         {
             vec3 ray_pos = g_camera.pos + ray_world * (float)i * ray_step_size;
 
-            int height_index = get_terrain_index(g_terrain, ray_pos.x, ray_pos.z);
-            //float ground_y = (height_index<0)? -INFINITY : g_terrain.height*g_terrain.vp[3*height_index+1]/255.0f; 
+            int terrain_index = get_terrain_index(g_terrain, ray_pos.x, ray_pos.z);
+            //float ground_y = (terrain_index<0)? -INFINITY : g_terrain.height*g_terrain.vp[3*terrain_index+1]/255.0f; 
             float ground_y = get_height_interp(g_terrain, ray_pos.x, ray_pos.z);
 
             // ------------------------------------------------------------
@@ -79,7 +82,7 @@ void editor_update(double dt){
             // if(i>=10 && !freeze_ray_vis) 
             // {
             //     ray_positions[i-10] = ray_pos;
-            //     //ground_positions[i-10] = vec3(g_terrain.vp[3*height_index], g_terrain.vp[3*height_index+1], g_terrain.vp[3*height_index+2]);
+            //     //ground_positions[i-10] = vec3(g_terrain.vp[3*terrain_index], g_terrain.vp[3*terrain_index+1], g_terrain.vp[3*terrain_index+2]);
             //     ground_positions[i-10] = vec3(ray_pos.x, ground_y, ray_pos.z);
             //     num_vec_draws = i-10;
             // }
@@ -101,7 +104,7 @@ void editor_update(double dt){
             //if(fabs(ray_pos.y-ground_y)<0.1f) 
             if(ray_pos.y<ground_y)
             {
-                edit_terrain(&g_terrain, height_index, edit_speed, paint_radius, dt);
+                level_terrain(&g_terrain, terrain_index, edit_speed, paint_radius, dt);
                 //draw_vec(ray_pos, vec3(0,3,0), vec4(1,0,0,1));
                 break;
             }
@@ -118,4 +121,33 @@ void editor_update(double dt){
     }
     g_camera.update(dt);
 
+}
+
+void paint_terrain(Terrain* t, int terrain_index, float edit_speed, float paint_radius, double dt)
+{
+    assert(paint_radius>=0);
+    assert(terrain_index>=0);
+    //Paint terrain
+    for(int j = -paint_radius; j<=paint_radius; j++)
+    {
+        for(int k = -paint_radius; k<=paint_radius; k++)
+        {
+            int idx = terrain_index+k + j*t->num_verts_x;
+            if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)){
+                t->vp[3*idx+1] = MIN(t->vp[3*idx+1]+edit_speed*dt, DEFAULT_TERRAIN_HEIGHT);
+            }
+            if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)){
+                t->vp[3*idx+1] = MAX(t->vp[3*idx+1]-edit_speed*dt, 0);
+            }
+
+            //Draw vertices
+            float x = float(paint_radius-abs(j))/paint_radius;
+            float z = float(paint_radius-abs(k))/paint_radius;
+            float factor = (x+z)/2;
+            draw_point(vec3(t->vp[3*idx], t->vp[3*idx+1], t->vp[3*idx+2]), (1+factor)*0.05f, vec4(0.8,factor*0.8,0,1));
+        }
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, t->points_vbo);
+	glBufferData(GL_ARRAY_BUFFER, t->point_count*3*sizeof(float), t->vp, GL_STATIC_DRAW);
+    recalculate_normals(t);
 }

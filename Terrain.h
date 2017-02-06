@@ -119,35 +119,6 @@ void init_terrain(Terrain* t, const char* file)
     glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
 }
 
-void edit_terrain(Terrain* t, int height_index, float edit_speed, float paint_radius, double dt)
-{
-    assert(paint_radius>=0);
-    assert(height_index>=0);
-    //Paint terrain
-    for(int j = -paint_radius; j<=paint_radius; j++)
-    {
-        for(int k = -paint_radius; k<=paint_radius; k++)
-        {
-            int idx = height_index+k + j*t->num_verts_x;
-            if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)){
-                t->vp[3*idx+1] = MIN(t->vp[3*idx+1]+edit_speed*dt, DEFAULT_TERRAIN_HEIGHT);
-            }
-            if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)){
-                t->vp[3*idx+1] = MAX(t->vp[3*idx+1]-edit_speed*dt, 0);
-            }
-
-            //Draw vertices
-            float x = float(paint_radius-abs(j))/paint_radius;
-            float z = float(paint_radius-abs(k))/paint_radius;
-            float factor = (x+z)/2;
-            draw_point(vec3(t->vp[3*idx], t->vp[3*idx+1], t->vp[3*idx+2]), (1+factor)*0.05f, vec4(0.8,factor*0.8,0,1));
-        }
-    }
-    glBindBuffer(GL_ARRAY_BUFFER, t->points_vbo);
-	glBufferData(GL_ARRAY_BUFFER, t->point_count*3*sizeof(float), t->vp, GL_STATIC_DRAW);
-    recalculate_normals(t);
-}
-
 //Returns index for closest terrain point to world pos x,z
 int get_terrain_index(Terrain &t, float x, float z)
 {
