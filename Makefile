@@ -3,7 +3,7 @@
 #i.e. assumes only source file is main.cpp
 
 BIN = terrain
-BUILD_DIR = build/
+BUILD_DIR = 
 
 CXX = g++
 #General compiler flags
@@ -43,7 +43,9 @@ ifeq ($(OS),Windows_NT)
     $INCLUDE_DIRS += $(INCLUDE_DIRS_WIN32)
     LIBS = $(LIBS_WIN32)
     SYS_LIBS = $(WIN_SYS_LIBS)
-    PREBUILD = @if not exist "$(BUILD_DIR)" mkdir $(BUILD_DIR)
+	ifneq ($(BUILD_DIR),) #Check if build dir was specified, don't try to create one if not
+    	PREBUILD = @if not exist "$(BUILD_DIR)" mkdir $(BUILD_DIR)
+	endif
 else
 #--- UNIX ---
 	UNAME_S := $(shell uname -s)
@@ -53,7 +55,9 @@ else
         $INCLUDE_DIRS += $(INCLUDE_DIRS_MAC)
         LIBS = $(LIBS_MAC)
         SYS_LIBS = $(FRAMEWORKS)
-        PREBUILD = @mkdir -p $(BUILD_DIR)
+		ifneq ($(BUILD_DIR),) #Check if build dir was specified, don't try to create one if not
+        	PREBUILD = @mkdir -p $(BUILD_DIR)
+		endif
 	else
 		#--- LINUX --- TODO?
 		$(error ERROR: Unsupported build platform)
@@ -61,7 +65,7 @@ else
 endif
 
 #------------TARGETS------------
-all: DEBUG
+all: Debug
 
 #Prebuild task: Just makes a build directory before compiling!
 #All other tasks depend on this so it always runs
@@ -69,14 +73,14 @@ all: DEBUG
 prebuild:
 	$(PREBUILD)
 
-DEBUG: prebuild
+Debug: prebuild
 	${CXX} ${FLAGS} ${DEBUG_FLAGS} -o $(BUILD_DIR)${BIN}${BIN_EXT} ${SRC} ${INCLUDE_DIRS} ${LIBS} ${SYS_LIBS}
 
-RELEASE: prebuild
+Release: prebuild
 	${CXX} ${FLAGS} ${RELEASE_FLAGS} -o $(BUILD_DIR)${BIN}${BIN_EXT} ${SRC} ${INCLUDE_DIRS} ${LIBS} ${SYS_LIBS}
 
-TIMED_DEBUG: prebuild
+Debug_timed: prebuild
 	${CXX} ${FLAGS} -ftime-report ${DEBUG_FLAGS} -o $(BUILD_DIR)${BIN}${BIN_EXT} ${SRC} ${INCLUDE_DIRS} ${LIBS} ${SYS_LIBS}
 
-TIMED_RELEASE: prebuild
+Release_timed: prebuild
 	${CXX} ${FLAGS} -ftime-report ${RELEASE_FLAGS} -o $(BUILD_DIR)${BIN}${BIN_EXT} ${SRC} ${INCLUDE_DIRS} ${LIBS} ${SYS_LIBS}
