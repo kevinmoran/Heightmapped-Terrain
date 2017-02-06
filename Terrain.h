@@ -2,8 +2,7 @@
 
 struct Terrain;
 void  init_terrain        (Terrain* t);
-void  edit_terrain        (Terrain* t, float paint_radius, int height_index, double dt);
-int   get_height_index    (Terrain &t, float x, float z);
+int   get_terrain_index    (Terrain &t, float x, float z);
 float get_height_interp   (Terrain &t, float x, float z);
 vec3  get_normal_interp   (Terrain &t, float x, float z);
 vec3  get_displacement    (Terrain &t, float x, float y, float z);
