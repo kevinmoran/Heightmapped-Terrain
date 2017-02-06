@@ -1,8 +1,19 @@
 #pragma once
 
-#define TERRAIN_FILENAME_SIZE 32
+struct Terrain;
+void  init_terrain        (Terrain* t);
+void  edit_terrain        (Terrain* t, float paint_radius, int height_index, double dt);
+int   get_height_index    (Terrain &t, float x, float z);
+float get_height_interp   (Terrain &t, float x, float z);
+vec3  get_normal_interp   (Terrain &t, float x, float z);
+vec3  get_displacement    (Terrain &t, float x, float y, float z);
+void  recalculate_normals (Terrain* t);
+bool  load_terrain        (Terrain* t);
+void  save_terrain        (Terrain &t);
+void  clear_terrain       (Terrain *t);
 
-struct Terrain{
+#define TERRAIN_FILENAME_SIZE 32
+struct Terrain {
     char filename[TERRAIN_FILENAME_SIZE];
     //vec3 pos;
     float width, length, height;
@@ -18,17 +29,6 @@ struct Terrain{
 Terrain g_terrain;
 
 Shader heightmap_shader;
-
-void init_terrain(Terrain* terrain);
-void edit_terrain(Terrain* t, float paint_radius, int height_index, double dt);
-int get_height_index(Terrain &t, float x, float z);
-float get_height_interp(Terrain &t, float x, float z);
-vec3 get_normal_interp(Terrain &t, float x, float z);
-vec3 get_displacement(Terrain &t, float x, float y, float z);
-void recalculate_normals(Terrain* t);
-bool load_terrain(Terrain* terrain);
-void save_terrain(Terrain &t);
-void clear_terrain(Terrain *t);
 
 #define DEFAULT_TERRAIN_HEIGHT 20
 #define DEFAULT_TERRAIN_CELL_SIZE 2
@@ -177,8 +177,10 @@ float get_height_interp(Terrain &t, float x, float z)
     vec3 b = vec3(x_tl, 0, z_tl+t.cell_size); //bl
     vec3 c; //will be tl or br depending on x,z
     vec3 p = vec3(x,0,z);
-    if(x_t+z_t > 1) c = vec3(x_tl+t.cell_size, 0, z_tl+t.cell_size); //br
-    else c = vec3(x_tl, 0, z_tl); //tl
+    if(x_t+z_t > 1) 
+        c = vec3(x_tl+t.cell_size, 0, z_tl+t.cell_size); //br
+    else 
+        c = vec3(x_tl, 0, z_tl); //tl
     float tri_area = t.cell_size/2;
 
     float u = (length(cross(b-p,c-p))/(2*t.cell_size))/tri_area; //weight of a
@@ -390,6 +392,8 @@ bool load_terrain(Terrain* t){
     for(int r=0; r<t->num_verts_z; r++){
         x_pos = -t->width/2.0f;
         for(int c=0; c<t->num_verts_x; c++, i++){
+            assert(i<t->point_count);
+            
             int height_value;
             fscanf(fp, "%d", &height_value);
             t->vp[3*i    ] = x_pos;

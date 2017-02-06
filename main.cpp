@@ -5,8 +5,8 @@
 #include <string.h>
 
 GLFWwindow* window = NULL;
-int gl_width = 800;
-int gl_height = 600;
+int gl_width = 400;
+int gl_height = 300;
 float gl_aspect_ratio = (float)gl_width/gl_height;
 
 #include "GameMaths.h"
