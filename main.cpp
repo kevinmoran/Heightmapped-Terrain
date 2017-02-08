@@ -73,6 +73,9 @@ int main(){
 		if(dt > 0.1) dt = 0.1;
 
 		//Get Input
+		g_mouse.prev_xpos = g_mouse.xpos;
+    	g_mouse.prev_ypos = g_mouse.ypos;
+		
 		glfwPollEvents();
 		if(glfwGetKey(window, GLFW_KEY_ESCAPE)) {
 			glfwSetWindowShouldClose(window, 1);

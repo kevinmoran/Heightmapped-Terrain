@@ -104,13 +104,8 @@ void Camera3D::update(double dt){
         }
     }
     else {
-        static double prev_mouse_x, prev_mouse_y;
-        static float mouse_sensitivity = 0.4f; //TODO this shouldn't stay here
-
-        yaw   += (prev_mouse_x-g_mouse.xpos) * mouse_sensitivity * turn_speed*dt;
-        pitch += (prev_mouse_y-g_mouse.ypos) * mouse_sensitivity * turn_speed*dt;
-        prev_mouse_x = g_mouse.xpos;
-        prev_mouse_y = g_mouse.ypos;
+        yaw   += (g_mouse.prev_xpos-g_mouse.xpos) * g_mouse.sensitivity * turn_speed*dt;
+        pitch += (g_mouse.prev_ypos-g_mouse.ypos) * g_mouse.sensitivity * turn_speed*dt;
     }
     //Update matrices
     pitch = MIN(MAX(pitch, -89), 80); //Clamp pitch 

@@ -5,10 +5,14 @@ struct Mouse {
     bool click_left;
     bool click_right;
     double xpos, ypos;
+    double prev_xpos, prev_ypos;
     double xscroll, yscroll;
+    float sensitivity;
     bool is_in_window;
 };
-Mouse g_mouse;
+Mouse g_mouse = {
+    false, false, 0, 0, 0, 0, 0, 0, 0.4f, false
+};
 
 //List of all possible commands in the game!
 enum INPUT_COMMANDS{
@@ -83,8 +87,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 //glfwSetCursorPosCallback(window, cursor_pos_callback);
 //Just poll with glfwGetCursorPos(window, &xpos, &ypos);
 void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos){
-   g_mouse.xpos = xpos;
-   g_mouse.ypos = ypos;
+    g_mouse.xpos = xpos;
+    g_mouse.ypos = ypos;
 }
 
 //glfwSetScrollCallback(window, scroll_callback);
