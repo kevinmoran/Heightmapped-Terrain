@@ -1,19 +1,6 @@
 #pragma once
 //Kevin's Input Layer using GLFW 
 
-struct Mouse {
-    bool click_left;
-    bool click_right;
-    double xpos, ypos;
-    double prev_xpos, prev_ypos;
-    double xscroll, yscroll;
-    float sensitivity;
-    bool is_in_window;
-};
-Mouse g_mouse = {
-    false, false, 0, 0, 0, 0, 0, 0, 0.4f, false
-};
-
 //List of all possible commands in the game!
 enum INPUT_COMMANDS{
     MOVE_LEFT,
@@ -28,6 +15,20 @@ enum INPUT_COMMANDS{
     TURN_CAM_LEFT,
     TURN_CAM_RIGHT,
     NUM_INPUT_COMMANDS
+};
+
+#define MOUSE_DEFAULT_SENSITIVITY 0.4f
+struct Mouse {
+    bool click_left;
+    bool click_right;
+    double xpos, ypos;
+    double prev_xpos, prev_ypos;
+    double xscroll, yscroll;
+    float sensitivity;
+    bool is_in_window;
+};
+Mouse g_mouse = {
+    false, false, 0, 0, 0, 0, 0, 0, MOUSE_DEFAULT_SENSITIVITY, false
 };
 
 //Global input state for game code to query (e.g.   if(g_input[MOVE_LEFT]) move_left(); )
@@ -104,24 +105,14 @@ void cursor_enter_callback(GLFWwindow *window, int entered){
 
 //Joystick stuff
 /*
-
 bool controller_is_connected = false;
 
-if(glfwJoystickPresent(GLFW_JOYSTICK_1) == GLFW_TRUE){
-    controller_is_connected = true;
-}
+if(glfwJoystickPresent(GLFW_JOYSTICK_1) == GLFW_TRUE){ controller_is_connected = true; }
 
 //glfwSetJoystickCallback(joystick_callback);
-void joystick_callback(int joy, int event)
-{
-    if(event == GLFW_CONNECTED)
-    {
-        controller_is_connected = true;
-    }
-    else if(event == GLFW_DISCONNECTED)
-    {
-        controller_is_connected = false;
-    }
+void joystick_callback(int joy, int event){
+    if(event == GLFW_CONNECTED){ controller_is_connected = true; }
+    else if(event == GLFW_DISCONNECTED){ controller_is_connected = false; }
 }
 
 int axis_count;
@@ -132,23 +123,17 @@ unsigned char* controller_buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &but
 */
 
 //Clipboard Stuff
-/*
-//COPY
+/* //COPY
 glfwSetClipboardString(window, "A string with words in it");
 
 //PASTE
 const char* text = glfwGetClipboardString(window);
-if(text)
-    insert_text(text);
-
+if(text) insert_text(text);
 */
 
-//File/Path Drop
-/*
+/* //File/Path Drop
 //glfwSetDropCallback(window, drop_callback);
-void drop_callback(GLFWwindow* window, int count, const char** paths)
-{
-    for(int i = 0;  i < count;  i++)
-        handle_dropped_file(paths[i]);
+void drop_callback(GLFWwindow* window, int count, const char** paths){
+    for(int i = 0;  i < count;  i++) handle_dropped_file(paths[i]);
 }
 */
