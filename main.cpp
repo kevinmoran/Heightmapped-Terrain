@@ -36,8 +36,8 @@ int main(){
 		glGenBuffers(1, &cube_points_vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, cube_points_vbo);
 		glBufferData(GL_ARRAY_BUFFER, cube_num_verts*3*sizeof(float), cube_vp, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+		glEnableVertexAttribArray(VP_ATTRIB_LOC);
+		glVertexAttribPointer(VP_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		free(cube_vp);
 
 		glGenBuffers(1, &cube_index_vbo);
