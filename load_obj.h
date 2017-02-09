@@ -56,7 +56,7 @@ bool load_obj(const char* file_name, float** points, int* point_count){
 	int vp_index = 0; //for unsorted points
 	int points_index = 0; //for sorted points
 
-	while(fgets(line, 1024, fp)){\
+	while(fgets(line, 1024, fp)){
 		if(line[0]=='v' && line[1]==' '){
 			sscanf(line, "v %f %f %f", &vp_unsorted[vp_index], &vp_unsorted[vp_index+1], &vp_unsorted[vp_index+2]);
 			vp_index+=3;
@@ -148,7 +148,7 @@ bool load_obj(const char* file_name, float** points, float** tex_coords, float**
 	int tex_coords_index = 0; //for sorted tex coords
 	int normals_index = 0; //for sorted normals
 
-	while(fgets(line, 1024, fp)){\
+	while(fgets(line, 1024, fp)){
 		if(line[0]=='v'){
 			//Read in unsorted data (vp, vt, vn)
 			if(line[1]==' '){
@@ -282,7 +282,7 @@ bool load_obj_indexed(const char* file_name, float** points, unsigned short** in
 	int vp_index = 0;
 	int idxs_i = 0; //iterator for index buffer
 
-	while(fgets(line, 1024, fp)){\
+	while(fgets(line, 1024, fp)){
 		if(line[0]=='v'){
 			if(line[1]==' '){
 				sscanf(line, "v %f %f %f", &(*points)[vp_index], &(*points)[vp_index+1], &(*points)[vp_index+2]);
@@ -375,7 +375,7 @@ bool load_obj_indexed(const char* file_name, float** points, float** tex_coords,
 	int vn_index = 0;
 	int idxs_i = 0; //iterator for index buffer
 
-	while(fgets(line, 1024, fp)){\
+	while(fgets(line, 1024, fp)){
 		if(line[0]=='v'){
 			if(line[1]==' '){
 				sscanf(line, "v %f %f %f", &(*points)[vp_index], &(*points)[vp_index+1], &(*points)[vp_index+2]);
