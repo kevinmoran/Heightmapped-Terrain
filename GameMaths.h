@@ -1,7 +1,8 @@
 #pragma once
-//Kevin's game maths library header
+//Kevin's header-only game maths library
 //Based off simple maths library included with online source for 'Anton's OpenGL Tutorials' book by Anton Gerdelan
 //Modified and added to by me over the years
+// TODO: Maybe SIMD if it'll help, never needed it so far
 
 //Original header:
 /******************************************************************************\
@@ -22,33 +23,17 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-//Suppress anonymous struct warning
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#endif
-
-#ifdef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push, disable: 4201)
-#endif
-
-// const used to convert degrees into radians
-#define TAU 2.0 * M_PI
-#define ONE_DEG_IN_RAD (2.0 * M_PI) / 360.0 // 0.017444444
-#define ONE_RAD_IN_DEG 360.0 / (2.0 * M_PI) //57.2957795
-#define DEG2RAD(a) ((a)*(M_PI/180.0))
-#define RAD2DEG(a) ((a)*(180.0/M_PI))
-
 #define MIN(a,b) (((a)<(b)) ? a : b)
 #define MAX(a,b) (((a)>(b)) ? a : b)
-#define CLAMP(x ,lo, hi) (MIN (hi, MAX (lo, x)))
+#define CLAMP(x,lo,hi) (MIN ((hi), MAX ((lo), (x))))
+
 //Compare two floats for equality
-#define CMPF(a,b) (fabs(a-b) < 0.000001f) //NB using fixed epsilon not ideal. Prob ok for cmp with 0
+bool cmpf(float a, float b) {
+	return (fabs(a-b) < 0.000001f); //NB using fixed epsilon not ideal. Prob ok for smallish a,b
+}
+bool cmpf_e(float a, float b, float eps) {
+	return (fabs(a-b) < eps);
+}
 
 // data structures
 union vec2;
@@ -57,14 +42,6 @@ union vec4;
 struct mat3;
 struct mat4;
 struct versor;
-
-// print functions
-void print(const vec2& v);
-void print(const vec3& v);
-void print(const vec4& v);
-void print(const mat3& m);
-void print(const mat4& m);
-void print(const versor& q);
 
 // vector functions
 float length(const vec2& v);
@@ -94,10 +71,15 @@ mat4 translate(const mat4& m, const vec3& v);
 mat4 rotate_x_deg(const mat4& m, float deg);
 mat4 rotate_y_deg(const mat4& m, float deg);
 mat4 rotate_z_deg(const mat4& m, float deg);
-mat4 rotate_axis_deg(const vec3& v, float a);
-mat4 rotate_align(const vec3& v1, const vec3& v2);
+mat4 rotate_axis_deg(const vec3& u, float a);
+mat4 rotate_align(const vec3& u1, const vec3& u2);
 mat4 scale(const mat4& m, const vec3& v);
 mat4 scale(const mat4& m, float s);
+
+//Precaution; <windows.h> defines near and far, sigh. 
+#undef near
+#undef far
+#undef wherever_you_are
 
 // camera functions
 mat4 look_at(const vec3& cam_pos, vec3 targ_pos, const vec3& up);
@@ -115,6 +97,39 @@ versor slerp(const versor& q, const versor& r);
 versor normalise(versor& q);
 float dot(const versor& q, const versor& r);
 versor slerp(versor& q, versor& r, float t);
+
+// print functions
+void print(const vec2& v);
+void print(const vec3& v);
+void print(const vec4& v);
+void print(const mat3& m);
+void print(const mat4& m);
+void print(const versor& q);
+
+// const used to convert degrees into radians
+#define TAU 2.0 * M_PI
+#define ONE_DEG_IN_RAD (2.0 * M_PI) / 360.0 // 0.017444444
+#define ONE_RAD_IN_DEG 360.0 / (2.0 * M_PI) //57.2957795
+#define DEG2RAD(a) ((a)*(M_PI/180.0))
+#define RAD2DEG(a) ((a)*(180.0/M_PI))
+
+//------------------------------------------------------------------------------
+//Suppress anonymous struct warning
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+//This is awful but ignoring "-Wgnu-anonymous-struct" doesn't work on MinGW :(
+#pragma GCC diagnostic ignored "-Wpedantic" 
+#endif
+
+#ifdef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(push, disable: 4201)
+#endif
+//------------------------------------------------------------------------------
 
 union vec2 {
 	struct{
@@ -306,9 +321,9 @@ union vec3 {
 		return vc;
 	}
 	bool operator== (const vec3& rhs) {
-		return (CMPF(v[0], rhs.v[0]) && 
-				CMPF(v[1], rhs.v[1]) &&
-				CMPF(v[2],rhs.v[2]));
+		return (cmpf(v[0], rhs.v[0]) && 
+				cmpf(v[1], rhs.v[1]) &&
+				cmpf(v[2],rhs.v[2]));
 	}
 };
 
@@ -489,38 +504,6 @@ struct versor {
 		return normalise(result);
 	}
 };
-
-/*-----------------------------PRINT FUNCTIONS--------------------------------*/
-inline void print(const vec2& v) {
-	printf("[%.2f, %.2f]\n", v.v[0], v.v[1]);
-}
-
-inline void print(const vec3& v) {
-	printf("[%.2f, %.2f, %.2f]\n", v.v[0], v.v[1], v.v[2]);
-}
-
-inline void print(const vec4& v) {
-	printf("[%.2f, %.2f, %.2f, %.2f]\n", v.v[0], v.v[1], v.v[2], v.v[3]);
-}
-
-inline void print(const mat3& m) {
-	printf("\n");
-	printf("[%.2f][%.2f][%.2f]\n", m.m[0], m.m[3], m.m[6]);
-	printf("[%.2f][%.2f][%.2f]\n", m.m[1], m.m[4], m.m[7]);
-	printf("[%.2f][%.2f][%.2f]\n", m.m[2], m.m[5], m.m[8]);
-}
-
-inline void print(const mat4& m) {
-	printf("\n");
-	printf("[%.2f][%.2f][%.2f][%.2f]\n", m.m[0], m.m[4], m.m[8], m.m[12]);
-	printf("[%.2f][%.2f][%.2f][%.2f]\n", m.m[1], m.m[5], m.m[9], m.m[13]);
-	printf("[%.2f][%.2f][%.2f][%.2f]\n", m.m[2], m.m[6], m.m[10], m.m[14]);
-	printf("[%.2f][%.2f][%.2f][%.2f]\n", m.m[3], m.m[7], m.m[11], m.m[15]);
-}
-
-inline void print(const versor& q) {
-	printf("[%.2f ,%.2f, %.2f, %.2f]\n", q.q[0], q.q[1], q.q[2], q.q[3]);
-}
 
 /*------------------------------VECTOR FUNCTIONS------------------------------*/
 //---vec2---//
@@ -881,7 +864,7 @@ inline mat4 rotate_align(const vec3& u1, const vec3& u2){
 	float cos_a = dot(u1,u2);
     float k = 1.0f/(1.0f+cos_a);
 
-	if(CMPF(cos_a,-1)) //vectors are opposite
+	if(cmpf(cos_a,-1)) //vectors are opposite
 		return scale(identity_mat4(),-1);
 
 	return mat4(
@@ -1084,6 +1067,38 @@ inline versor slerp(versor& q, versor& r, float t) {
 		result.q[i] = q.q[i] * a + r.q[i] * b;
 	}
 	return result;
+}
+
+/*-----------------------------PRINT FUNCTIONS--------------------------------*/
+inline void print(const vec2& v) {
+	printf("[%.2f, %.2f]\n", v.v[0], v.v[1]);
+}
+
+inline void print(const vec3& v) {
+	printf("[%.2f, %.2f, %.2f]\n", v.v[0], v.v[1], v.v[2]);
+}
+
+inline void print(const vec4& v) {
+	printf("[%.2f, %.2f, %.2f, %.2f]\n", v.v[0], v.v[1], v.v[2], v.v[3]);
+}
+
+inline void print(const mat3& m) {
+	printf("\n");
+	printf("[%.2f][%.2f][%.2f]\n", m.m[0], m.m[3], m.m[6]);
+	printf("[%.2f][%.2f][%.2f]\n", m.m[1], m.m[4], m.m[7]);
+	printf("[%.2f][%.2f][%.2f]\n", m.m[2], m.m[5], m.m[8]);
+}
+
+inline void print(const mat4& m) {
+	printf("\n");
+	printf("[%.2f][%.2f][%.2f][%.2f]\n", m.m[0], m.m[4], m.m[8], m.m[12]);
+	printf("[%.2f][%.2f][%.2f][%.2f]\n", m.m[1], m.m[5], m.m[9], m.m[13]);
+	printf("[%.2f][%.2f][%.2f][%.2f]\n", m.m[2], m.m[6], m.m[10], m.m[14]);
+	printf("[%.2f][%.2f][%.2f][%.2f]\n", m.m[3], m.m[7], m.m[11], m.m[15]);
+}
+
+inline void print(const versor& q) {
+	printf("[%.2f ,%.2f, %.2f, %.2f]\n", q.q[0], q.q[1], q.q[2], q.q[3]);
 }
 
 #ifdef __clang__
