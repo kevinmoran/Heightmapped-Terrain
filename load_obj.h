@@ -9,7 +9,9 @@ bool load_obj(const char* file_name, float** points, int* point_count);
 bool load_obj(const char* file_name, float** points, float** tex_coords, float** normals, int* point_count);
 //indexed
 bool load_obj_indexed(const char* file_name, float** points, unsigned short** indices, int* vert_count, int* index_count);
-bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* vert_count, int* index_count);
+
+//CURRENTLY BROKEN
+// bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* vert_count, int* index_count);
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -314,6 +316,8 @@ bool load_obj_indexed(const char* file_name, float** points, unsigned short** in
 }
 
 //Load points, tex coords and normals with index buffer
+//CURRENTLY BROKEN
+/*
 bool load_obj_indexed(const char* file_name, float** points, float** tex_coords, float** normals, unsigned short** indices, int* vert_count, int* index_count){
 	FILE* fp = fopen(file_name, "r");
 	if(!fp) {
@@ -357,12 +361,12 @@ bool load_obj_indexed(const char* file_name, float** points, float** tex_coords,
 	*points = (float*)malloc(num_vps*3*sizeof(float));
 	*indices = (unsigned short*)malloc(*index_count*sizeof(unsigned short));
 	//vt and vn arrays that will be sorted based on index buffer
-	if(num_vts>0) *tex_coords = (float*)malloc(*index_count * 2*sizeof(float));
-	if(num_vns>0) *normals = (float*)malloc(*index_count * 3*sizeof(float));
+	if(num_vts>0) *tex_coords = (float*)malloc(num_vps*2*sizeof(float));
+	if(num_vns>0) *normals = (float*)malloc(num_vps*3*sizeof(float));
 	
 	unsigned int mem_alloced = num_vps*3*sizeof(float) + (*index_count)*sizeof(unsigned short);
-	if(num_vts>0) mem_alloced += *index_count * 2*sizeof(float);
-	if(num_vns>0) mem_alloced += *index_count * 3*sizeof(float);
+	if(num_vts>0) mem_alloced += num_vps*2*sizeof(float);
+	if(num_vns>0) mem_alloced += num_vps*3*sizeof(float);
 	printf("(Allocated %u bytes)\n", mem_alloced);
 
 	//Arrays to hold the unsorted data from the obj
@@ -393,7 +397,7 @@ bool load_obj_indexed(const char* file_name, float** points, float** tex_coords,
 		else if(line[0]=='f'){
 			//Scan the line depending on what parameters are included for faces
 			if(num_vts==0 && num_vns==0){ //Just vertex positions
-				sscanf(line, "f %hu %hu %hu",  &(*indices)[idxs_i],
+				sscanf(line, "f %hu %hu %hu", &(*indices)[idxs_i],
 											&(*indices)[idxs_i+1],
 											&(*indices)[idxs_i+2]);
 				//wavefront doesn't use zero indexing
@@ -401,54 +405,66 @@ bool load_obj_indexed(const char* file_name, float** points, float** tex_coords,
 				idxs_i+=3;
 			}
 			else if(num_vts==0){ //vertex positions and normals
-				int vn[3];
-				sscanf(line, "f %hu//%i %hu//%i %hu//%i",  &(*indices)[idxs_i],	&vn[0], 
-														&(*indices)[idxs_i+1],	&vn[1], 
-														&(*indices)[idxs_i+2],	&vn[2]);
+				int norm_index[3];
+				sscanf(line, "f %hu//%i %hu//%i %hu//%i", &(*indices)[idxs_i],	&norm_index[0], 
+														&(*indices)[idxs_i+1],	&norm_index[1], 
+														&(*indices)[idxs_i+2],	&norm_index[2]);
 				for(int i=0; i<3; i++){ //add normals for the 3 verts in this face
 					(*indices)[idxs_i+i]--; //wavefront doesn't use zero indexing
-					vn[i]--;
+					norm_index[i]--;
 
-					(*normals)[3*(idxs_i+i)]   = vn_unsorted[3*vn[i]];
-					(*normals)[3*(idxs_i+i)+1] = vn_unsorted[3*vn[i]+1];
-					(*normals)[3*(idxs_i+i)+2] = vn_unsorted[3*vn[i]+2];
+					if(num_vns>0){
+						(*normals)[3*((*indices)[idxs_i+i])]   = vn_unsorted[3*norm_index[i]];
+						(*normals)[3*((*indices)[idxs_i+i])+1] = vn_unsorted[3*norm_index[i]+1];
+						(*normals)[3*((*indices)[idxs_i+i])+2] = vn_unsorted[3*norm_index[i]+2];
+						// printf("%hu: ", (*indices)[idxs_i+i]);
+						// printf("%f %f %f\n", (*normals)[3*((*indices)[idxs_i+i])],
+						// 					(*normals)[3*((*indices)[idxs_i+i])+1],
+						// 					(*normals)[3*((*indices)[idxs_i+i])+2]);
+					}
 				}
 				idxs_i+=3;
 			}
 			else if(num_vns==0){ //vertex positions and tex coords
-				int vt[3];
-				sscanf(line, "f %hu/%i %hu/%i %hu/%i",	&(*indices)[idxs_i], 	&vt[0], 
-														&(*indices)[idxs_i+1],	&vt[1], 
-														&(*indices)[idxs_i+2],	&vt[2]);
+				int uv_index[3];
+				sscanf(line, "f %hu/%i %hu/%i %hu/%i",	&(*indices)[idxs_i], 	&uv_index[0], 
+														&(*indices)[idxs_i+1],	&uv_index[1], 
+														&(*indices)[idxs_i+2],	&uv_index[2]);
 				for(int i=0; i<3; i++){ //add tex coords for the 3 verts in this face
 					(*indices)[idxs_i+i]--; //wavefront doesn't use zero indexing
-					vt[i]--;
+					uv_index[i]--;
 
-					(*tex_coords)[2*(idxs_i+i)]   = vt_unsorted[2*vt[i]];
-					(*tex_coords)[2*(idxs_i+i)+1] = vt_unsorted[2*vt[i]+1];
+					if(num_vts>0){
+						(*tex_coords)[2*((*indices)[idxs_i+i])]   = vt_unsorted[2*uv_index[i]];
+						(*tex_coords)[2*((*indices)[idxs_i+i])+1] = vt_unsorted[2*uv_index[i]+1];
+					}
 				}
 				idxs_i+=3;
 			}
 			else{ //vertex positions and tex coords and normals
-				int vt[3], vn[3];
-				sscanf(line, "f %hu/%i/%i %hu/%i/%i %hu/%i/%i",	&(*indices)[idxs_i],	&vt[0], &vn[0], 
-																&(*indices)[idxs_i+1],	&vt[1], &vn[1], 
-																&(*indices)[idxs_i+2],	&vt[2], &vn[2]);
+				int uv_index[3], norm_index[3];
+				sscanf(line, "f %hu/%i/%i %hu/%i/%i %hu/%i/%i",	&(*indices)[idxs_i],	&uv_index[0], &norm_index[0], 
+																&(*indices)[idxs_i+1],	&uv_index[1], &norm_index[1], 
+																&(*indices)[idxs_i+2],	&uv_index[2], &norm_index[2]);
 				for(int i=0; i<3; i++){ //add normals and tex coords for the 3 verts in this face
 					(*indices)[idxs_i+i]--; //wavefront doesn't use zero indexing
-					vt[i]--;
-					vn[i]--;
+					uv_index[i]--;
+					norm_index[i]--;
 
-					(*tex_coords)[2*(idxs_i+i)]   = vt_unsorted[2*vt[i]];
-					(*tex_coords)[2*(idxs_i+i)+1] = vt_unsorted[2*vt[i]+1];
-
-					(*normals)[3*(idxs_i+i)]   = vn_unsorted[3*vn[i]];
-					(*normals)[3*(idxs_i+i)+1] = vn_unsorted[3*vn[i]+1];
-					(*normals)[3*(idxs_i+i)+2] = vn_unsorted[3*vn[i]+2];
+					if(num_vts>0){
+						(*tex_coords)[2*((*indices)[idxs_i+i])]   = vt_unsorted[2*uv_index[i]];
+						(*tex_coords)[2*((*indices)[idxs_i+i])+1] = vt_unsorted[2*uv_index[i]+1];
+					}
+					if(num_vns>0){
+						(*normals)[3*((*indices)[idxs_i+i])]   = vn_unsorted[3*norm_index[i]];
+						(*normals)[3*((*indices)[idxs_i+i])+1] = vn_unsorted[3*norm_index[i]+1];
+						(*normals)[3*((*indices)[idxs_i+i])+2] = vn_unsorted[3*norm_index[i]+2];
+					}
 				}
 				idxs_i+=3;
 			}
 		}
+
 	}
 	fclose(fp);
 
@@ -457,3 +473,4 @@ bool load_obj_indexed(const char* file_name, float** points, float** tex_coords,
 
 	return true;
 }
+*/
