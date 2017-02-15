@@ -1,5 +1,4 @@
 #pragma once
-// #include <GL/glew.h>
 // #include <GLFW/glfw3.h>
 // #include <stdio.h>
 // #include "Input.h"
@@ -51,10 +50,10 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetCursorEnterCallback(window, cursor_enter_callback);
 	
-	/* start GLEW extension handler */
-	glewExperimental = GL_TRUE;
-	glewInit();
-	glGetError();
+	if(!gl_lite_init()){
+		printf("Error in gl_lite_init\n");
+		return false;
+	}
 
 	const GLubyte* renderer = glGetString(GL_RENDERER);
 	const GLubyte* version = glGetString(GL_VERSION);

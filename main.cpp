@@ -1,4 +1,5 @@
-#include <GL/glew.h>
+#define GL_LITE_IMPLEMENTATION
+#include "gl_lite.h"
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>

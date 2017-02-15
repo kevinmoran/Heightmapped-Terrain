@@ -28,6 +28,12 @@
 #ifndef GL_LITE_H
 #define GL_LITE_H
 
+#if defined(__APPLE__)
+#define __gl_h_
+#define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
+#include <OpenGL/gl3.h>
+#else //LINUX & WIN32
+
 #include <stddef.h>
 
 //This doesn't work for some reason :/
@@ -136,17 +142,24 @@ PAPAYA_GL_LIST
 PAPAYA_GL_LIST_WIN32
 #undef GLE
 
-bool gl_lite_init();
-
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
+
+#endif //__APPLE__
+
+bool gl_lite_init();
 
 #endif //GL_LITE_H
 
 // =============================================================================
 
 #ifdef GL_LITE_IMPLEMENTATION
+
+#if defined(__APPLE__)
+bool gl_lite_init() {return true;} //Don't need to load function pointers
+
+#else
 
 //This doesn't work for some reason :/
 #ifdef __GNUC__
@@ -209,5 +222,7 @@ bool gl_lite_init()
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
+
+#endif //__APPLE__
 
 #endif //GL_LITE_IMPLEMENTATION
