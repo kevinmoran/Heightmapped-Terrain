@@ -98,13 +98,13 @@ bool load_obj(const char* file_name, float** vp, uint32_t* vert_count){
 				sscanf(line, "f %hu %hu %hu", &indices[0], &indices[1], &indices[2]);
 			}
 			else if(num_vts==0){ //vertex vp and vn
-				sscanf(line, "f %hu//%*hu %hu//%*hu %hu//%*hu", &indices[0], &indices[1], &indices[2]);
+				sscanf(line, "f %hu//%*u %hu//%*u %hu//%*u", &indices[0], &indices[1], &indices[2]);
 			}
 			else if(num_vns==0){ //vertex vp and tex coords
-				sscanf(line, "f %hu/%*hu %hu/%*hu %hu/%*hu", &indices[0], &indices[1], &indices[2]);
+				sscanf(line, "f %hu/%*u %hu/%*u %hu/%*u", &indices[0], &indices[1], &indices[2]);
 			}
 			else{ //vertex vp and tex coords and vn
-				sscanf(line, "f %hu/%*hu/%*hu %hu/%*hu/%*hu %hu/%*hu/%*hu", &indices[0], &indices[1], &indices[2]);
+				sscanf(line, "f %hu/%*u/%*u %hu/%*u/%*u %hu/%*u/%*u", &indices[0], &indices[1], &indices[2]);
 			}
 			for(int i=0; i<3; ++i){
 				indices[i]-=1; //wavefront obj doesn't use zero indexing
@@ -644,7 +644,7 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 	printf("(Allocated %u bytes)\n", mem_alloced);
 
 	//Normalise vn
-	for(int i=0; i<*vert_count*3; i+=3){
+	for(unsigned int i=0; i<*vert_count*3; i+=3){
 		vec3 temp = vec3((*vn)[i], (*vn)[i+1], (*vn)[i+2]);
 		temp = normalise(temp);
 		(*vn)[i]   = temp.x;
