@@ -643,9 +643,8 @@ bool load_obj_indexed(const char* file_name, float** vp, float** vt, float** vn,
 	if(num_vns>0) mem_alloced += *vert_count*3*sizeof(float);
 	printf("(Allocated %u bytes)\n", mem_alloced);
 
-
 	//Normalise vn
-	for(int i=0; i<3*num_vps; i+=3){
+	for(int i=0; i<*vert_count*3; i+=3){
 		vec3 temp = vec3((*vn)[i], (*vn)[i+1], (*vn)[i+2]);
 		temp = normalise(temp);
 		(*vn)[i]   = temp.x;
