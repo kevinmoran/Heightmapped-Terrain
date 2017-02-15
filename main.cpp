@@ -25,7 +25,7 @@ int main(){
 	if(!init_gl(window, "Terrain", gl_width, gl_height)){ return 1; }
 	float* cube_vp = NULL;
 	unsigned short* cube_indices = NULL;
-	int cube_num_indices = 0, cube_num_verts = 0;
+	uint32_t cube_num_indices = 0, cube_num_verts = 0;
 	load_obj_indexed("cube.obj", &cube_vp, &cube_indices, &cube_num_verts, &cube_num_indices);
 
 	GLuint cube_vao;

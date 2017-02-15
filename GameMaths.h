@@ -217,6 +217,10 @@ union vec2 {
 		vc.v[1] = v[1] * (-1);
 		return vc;
 	}
+	bool operator== (const vec2& rhs) {
+		return (cmpf(v[0], rhs.v[0]) &&
+				cmpf(v[1],rhs.v[1]));
+	}
 };
 
 /* putting method definitions in the header inside the struct forces them to
