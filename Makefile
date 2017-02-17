@@ -7,7 +7,7 @@ BUILD_DIR =
 
 CXX = g++
 #General compiler flags
-FLAGS = -Wall -pedantic
+COMPILER_FLAGS = -Wall -pedantic
 
 #Debug/Release build flags
 DEBUG_FLAGS = -g -DDEBUG
@@ -18,7 +18,7 @@ FLAGS_WIN32 =
 FLAGS_MAC = -mmacosx-version-min=10.9 -arch x86_64 -fmessage-length=0 -UGLFW_CDECL
 
 #Additional include directories (common/platform-specific)
-INCLUDE_DIRS = -I include
+INCLUDE_COMMON = -I include
 INCLUDE_DIRS_WIN32 = 
 INCLUDE_DIRS_MAC = -I/sw/include -I/usr/local/include
 
@@ -39,8 +39,8 @@ SRC = main.cpp
 #--- WINDOWS ---
 ifeq ($(OS),Windows_NT)
     BIN_EXT = .exe
-    $FLAGS += $(FLAGS_WIN32)
-    $INCLUDE_DIRS += $(INCLUDE_DIRS_WIN32)
+    FLAGS = $(COMPILER_FLAGS) $(FLAGS_WIN32)
+    INCLUDE_DIRS = $(INCLUDE_COMMON) $(INCLUDE_DIRS_WIN32)
     LIBS = $(LIBS_WIN32)
     SYS_LIBS = $(WIN_SYS_LIBS)
 	ifneq ($(BUILD_DIR),) #Check if build dir was specified, don't try to create one if not
@@ -51,8 +51,8 @@ else
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S),Darwin)
 		#--- MAC OS ---
-        $FLAGS += $(FLAGS_MAC)
-        $INCLUDE_DIRS += $(INCLUDE_DIRS_MAC)
+        FLAGS = $(COMPILER_FLAGS) $(FLAGS_MAC)
+        INCLUDE_DIRS = $(INCLUDE_COMMON) $(INCLUDE_DIRS_MAC)
         LIBS = $(LIBS_MAC)
         SYS_LIBS = $(FRAMEWORKS)
 		ifneq ($(BUILD_DIR),) #Check if build dir was specified, don't try to create one if not
