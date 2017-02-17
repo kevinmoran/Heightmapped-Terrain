@@ -27,21 +27,6 @@ void editor_update(double dt){
     }
     else M_was_pressed = false;
 
-    static bool R_was_pressed = false;
-    if(glfwGetKey(window, GLFW_KEY_R)) {
-        if(!R_was_pressed) {
-            reload_shader_program("Heightmap.vert", "Heightmap.frag", &heightmap_shader);
-            glUseProgram(heightmap_shader.id);
-            glUniformMatrix4fv(heightmap_shader.P_loc, 1, GL_FALSE, g_camera.P.m);
-            glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
-        }
-        R_was_pressed = true;
-    }
-    else R_was_pressed = false;
-
-    //UI
-
-    //Update stuff
     //Ray picking to raise/lower ground
     if(g_mouse.is_in_window)
     {

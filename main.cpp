@@ -107,10 +107,26 @@ int main(){
 		if(glfwGetKey(window, GLFW_KEY_TAB)) {
 			if(!tab_was_pressed) {
 				edit_mode = !edit_mode;
-				tab_was_pressed = true;
 			}
+			tab_was_pressed = true;
 		}
 		else tab_was_pressed = false;
+
+		//Reload shaders
+		static bool R_was_pressed = false;
+		if(glfwGetKey(window, GLFW_KEY_R)) {
+			if(!R_was_pressed) {
+				reload_shader_program("Heightmap.vert", "Heightmap.frag", &heightmap_shader);
+				glUseProgram(heightmap_shader.id);
+				glUniformMatrix4fv(heightmap_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
+
+				reload_shader_program("MVP.vert", "uniform_colour.frag", &basic_shader);
+				glUseProgram(basic_shader.id);
+				glUniformMatrix4fv(basic_shader.M_loc, 1, GL_FALSE, identity_mat4().m);
+			}
+			R_was_pressed = true;
+		}
+		else R_was_pressed = false;
 
 		//Save scene
 		static bool s_was_pressed = false;
@@ -119,8 +135,8 @@ int main(){
 				if(glfwGetKey(window, CTRL_KEY_LEFT) || (glfwGetKey(window, CTRL_KEY_RIGHT))) {
 					save_terrain(g_terrain);
 				}
-				s_was_pressed = true;
 			}
+			s_was_pressed = true;
 		}
 		else s_was_pressed = false;
 
@@ -144,8 +160,8 @@ int main(){
 		if(glfwGetKey(window, GLFW_KEY_SLASH)) {
 			if(!slash_was_pressed) {
 				wireframe = !wireframe;
-				slash_was_pressed = true;
 			}
+			slash_was_pressed = true;
 		}
 		else slash_was_pressed = false;
 
