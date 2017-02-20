@@ -62,14 +62,11 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 	printf("OpenGL version supported %s\n", version);
 	printf("GLSL version supported: %s\n", glsl_version);
 
-	// unsigned char v_major = *(unsigned char*)version;
-	// unsigned char v_minor = *(unsigned char*)(version+2);
-	// if(v_major=='4' && v_minor>='3'){
-	// 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	// 	glDebugMessageCallback(openglCallbackFunction, (void*)NULL);
-	// 	GLuint unusedIds = 0;
-	// 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unusedIds, true);
-	// }
+	//Setup OpenGL Error callback (version 4.3)
+	// glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	// glDebugMessageCallback(openglCallbackFunction, (void*)NULL);
+	// GLuint unusedIds = 0;
+	// glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unusedIds, true);
 
 	//NOTE: For certain displays (e.g. Retina) window coords != pixels
 	//http://stackoverflow.com/questions/25230841/how-to-find-display-scaling-factor-on-retina-4k-displays
