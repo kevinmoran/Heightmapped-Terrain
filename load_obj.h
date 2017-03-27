@@ -40,7 +40,7 @@ bool load_obj_indexed(const char* 	file_name,
 														  // normal will be duplicated, making the indexing less effective
 //----------------------------------------------------------------------------------------------------------------------
 
-#define OBJ_PATH "Meshes/"
+#define OBJ_PATH ""
 #define OBJLOAD_LINE_SIZE 256
 
 //Load unindexed vertex positions (i.e. returns a triangulated points array), ignore tex coords and normals if present
