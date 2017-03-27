@@ -2,20 +2,6 @@
 // #include <GLFW/glfw3.h>
 // #include <stdio.h>
 // #include "Input.h"
-// #include "Camera3D.h"
-
-//TODO put this somewhere sensible!
-//Note: for MSVC, change __builtin_trap() to __debugbreak()
-#define assert(exp) \
-	{if(!(exp)) { \
-		printf("Assertion failed in %s, Line %d:\n%s\n...", __FILE__, __LINE__, #exp); \
-		__builtin_trap(); \
-	}} \
-
-#define check_gl_error() _checkOglError(__FILE__, __LINE__)
-static int _checkOglError(const char *file, int line);
-// void APIENTRY openglCallbackFunction(GLenum source,  GLenum type, GLuint id, GLenum severity, 
-// 										GLsizei length, const GLchar* message, void* userParam);
 
 bool init_gl(GLFWwindow* &window, const char* title, int window_width, int window_height) {
 
@@ -40,6 +26,8 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 		getchar();
 		return false;
 	}
+	const char* glfw_version = glfwGetVersionString();
+	printf("GLFW Version %s\n", glfw_version);
 	glfwMakeContextCurrent(window);
 
 	//Setup callbacks
@@ -50,6 +38,7 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetCursorEnterCallback(window, cursor_enter_callback);
 	
+	//Load OpenGL functions
 	if(!gl_lite_init()){
 		printf("Error in gl_lite_init\n");
 		return false;
@@ -62,21 +51,6 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 	printf("OpenGL version supported %s\n", version);
 	printf("GLSL version supported: %s\n", glsl_version);
 
-	// unsigned char v_major = *(unsigned char*)version;
-	// unsigned char v_minor = *(unsigned char*)(version+2);
-	// if(v_major=='4' && v_minor>='3'){
-	// 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	// 	glDebugMessageCallback(openglCallbackFunction, (void*)NULL);
-	// 	GLuint unusedIds = 0;
-	// 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unusedIds, true);
-	// }
-
-	//NOTE: For certain displays (e.g. Retina) window coords != pixels
-	//http://stackoverflow.com/questions/25230841/how-to-find-display-scaling-factor-on-retina-4k-displays
-	int fb_w, fb_h;
-	glfwGetFramebufferSize(window,&fb_w,&fb_h);
-	glViewport(0,0,fb_w,fb_h);
-
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
@@ -88,9 +62,26 @@ bool init_gl(GLFWwindow* &window, const char* title, int window_width, int windo
 	return true;
 }
 
+//Custom assert function which pauses program in debugger instead of crashing
+//TODO put this somewhere sensible!
+#if defined(__clang__) || defined(__GNUC__)
+#define _BREAKPOINT_CALL __asm__ volatile("int $0x03")
+#elif defined(_MSC_VER_)
+#define _BREAKPOINT_CALL __debugbreak()
+#endif
+
+#define assert(exp) \
+	{if(!(exp)) { \
+		printf("Assertion failed in %s, Line %d:\n%s\n...", __FILE__, __LINE__, #exp); \
+		_BREAKPOINT_CALL; \
+	}} \
+
+//OpenGL Error checking (very limited but all you have for versions below 4.3)
+#define check_gl_error() _checkOglError(__FILE__, __LINE__)
+
 static int _checkOglError(const char *file, int line){
     GLenum glErr = glGetError();
-    if (glErr != GL_NO_ERROR) {
+    if(glErr != GL_NO_ERROR) {
         printf("glError in file %s @ line %d:\n%d - ", file, line, glErr);
 		switch(glErr) {
 			case GL_INVALID_OPERATION:				printf("INVALID_OPERATION\n");				return 1;
@@ -103,54 +94,3 @@ static int _checkOglError(const char *file, int line){
     }
     return 0;
 }
-
-//OpenGL error callback: Core in 4.3
-// void APIENTRY openglCallbackFunction(GLenum source,
-//                                            GLenum type,
-//                                            GLuint id,
-//                                            GLenum severity,
-//                                            GLsizei length,
-//                                            const GLchar* message,
-//                                            void* userParam){
- 
-//     printf("---------------------opengl-callback-start------------");;
-//     printf("message: %s\n", message);
-//     printf("type: ");
-//     switch (type) {
-//     case GL_DEBUG_TYPE_ERROR:
-//         printf("ERROR");
-//         break;
-//     case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-//         printf("DEPRECATED_BEHAVIOR");
-//         break;
-//     case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-//         printf("UNDEFINED_BEHAVIOR");
-//         break;
-//     case GL_DEBUG_TYPE_PORTABILITY:
-//         printf("PORTABILITY");
-//         break;
-//     case GL_DEBUG_TYPE_PERFORMANCE:
-//         printf("PERFORMANCE");
-//         break;
-//     case GL_DEBUG_TYPE_OTHER:
-//         printf("OTHER");
-//         break;
-//     }
-//     printf("\n");
- 
-//     printf("id: %u", id);
-//     printf("severity: ");
-//     switch (severity){
-//     case GL_DEBUG_SEVERITY_LOW:
-//         printf("LOW");
-//         break;
-//     case GL_DEBUG_SEVERITY_MEDIUM:
-//         printf("MEDIUM");
-//         break;
-//     case GL_DEBUG_SEVERITY_HIGH:
-//         printf("HIGH");
-//         break;
-//     }
-//     printf("\n");
-//     printf("---------------------opengl-callback-end--------------");
-// }

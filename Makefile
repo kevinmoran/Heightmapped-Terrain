@@ -15,7 +15,7 @@ RELEASE_FLAGS = -O3
 
 #Platform-specific flags
 FLAGS_WIN32 = 
-FLAGS_MAC = -mmacosx-version-min=10.9 -arch x86_64 -fmessage-length=0 -UGLFW_CDECL
+FLAGS_MAC = -mmacosx-version-min=10.9 -arch x86_64 -fmessage-length=0
 
 #Additional include directories (common/platform-specific)
 INCLUDE_COMMON = -I include
