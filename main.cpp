@@ -23,47 +23,50 @@ float gl_aspect_ratio = (float)gl_width/gl_height;
 
 int main(){
 	if(!init_gl(window, "Terrain", gl_width, gl_height)){ return 1; }
-	float* cube_vp = NULL;
-	float* cube_vt = NULL;
-    float* cube_vn = NULL;
-	unsigned short* cube_indices = NULL;
-	uint32_t cube_num_indices = 0, cube_num_verts = 0;
-	load_obj_indexed("cube.obj", &cube_vp, &cube_vt, &cube_vn, &cube_indices, &cube_num_verts, &cube_num_indices, false);
-
+	
+	//Load cube mesh
 	GLuint cube_vao;
-	{ //Setup cube geometry
+	unsigned int cube_num_indices = 0;
+	{
+		float* vp = NULL;
+		float* vn = NULL;
+		float* vt = NULL;
+		uint16_t* indices = NULL;
+		unsigned int num_verts = 0;
+		load_obj_indexed("cube.obj", &vp, &vt, &vn, &indices, &num_verts, &cube_num_indices);
+
 		glGenVertexArrays(1, &cube_vao);
 		glBindVertexArray(cube_vao);
-
-		GLuint cube_points_vbo;
-		glGenBuffers(1, &cube_points_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, cube_points_vbo);
-		glBufferData(GL_ARRAY_BUFFER, cube_num_verts*3*sizeof(float), cube_vp, GL_STATIC_DRAW);
+		
+		GLuint points_vbo;
+		glGenBuffers(1, &points_vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+		glBufferData(GL_ARRAY_BUFFER, num_verts*3*sizeof(float), vp, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(VP_ATTRIB_LOC);
 		glVertexAttribPointer(VP_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		free(cube_vp);
+		free(vp);
 
-		GLuint cube_tex_coords_vbo;
-		glGenBuffers(1, &cube_tex_coords_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, cube_tex_coords_vbo);
-		glBufferData(GL_ARRAY_BUFFER, cube_num_verts*2*sizeof(float), cube_vt, GL_STATIC_DRAW);
+		GLuint tex_coords_vbo;
+		glGenBuffers(1, &tex_coords_vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, tex_coords_vbo);
+		glBufferData(GL_ARRAY_BUFFER, num_verts*2*sizeof(float), vt, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(VT_ATTRIB_LOC);
 		glVertexAttribPointer(VT_ATTRIB_LOC, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-		free(cube_vt);
-
-		GLuint cube_vn_vbo;
-		glGenBuffers(1, &cube_vn_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, cube_vn_vbo);
-		glBufferData(GL_ARRAY_BUFFER, cube_num_verts*3*sizeof(float), cube_vn, GL_STATIC_DRAW);
+		free(vt);
+		
+		GLuint normals_vbo;
+		glGenBuffers(1, &normals_vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, normals_vbo);
+		glBufferData(GL_ARRAY_BUFFER, num_verts*3*sizeof(float), vn, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(VN_ATTRIB_LOC);
 		glVertexAttribPointer(VN_ATTRIB_LOC, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		free(cube_vn);
+		free(vn);
 
-		GLuint cube_index_vbo;
-		glGenBuffers(1, &cube_index_vbo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_num_indices*sizeof(unsigned short), cube_indices, GL_STATIC_DRAW);
-		free(cube_indices);
+		GLuint index_vbo;
+		glGenBuffers(1, &index_vbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_vbo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube_num_indices*sizeof(unsigned short), indices, GL_STATIC_DRAW);
+		free(indices);
 	}
 
     g_camera.init(vec3(0,2,5));
