@@ -2,6 +2,13 @@
 //#include "Terrain.h"
 //#include "slIMGUI.h"
 
+enum EDIT_MODE_CURRENT_BRUSH {
+    BRUSH_PAINT,
+    BRUSH_FLATTEN,
+    EDIT_MODE_NUM_BRUSHES
+};
+EDIT_MODE_CURRENT_BRUSH g_current_brush = BRUSH_PAINT;
+
 void editor_update(double dt);
 void paint_terrain(Terrain* t, int terrain_index, float edit_speed, float paint_radius, double dt);
 void flatten_terrain(Terrain* t, int terrain_index, float edit_speed, float paint_radius, double dt);
@@ -12,20 +19,28 @@ void editor_update(double dt){
     static float edit_speed = 5.0f;
 
     //Hotkeys
-    static bool M_was_pressed = false;
-    if(glfwGetKey(window, GLFW_KEY_M)) {
-        if(!M_was_pressed) {
-            if(!cam_mouse_controls){
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+    {
+        static bool M_was_pressed = false;
+        if(glfwGetKey(window, GLFW_KEY_M)) {
+            if(!M_was_pressed) {
+                if(!cam_mouse_controls){
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+                }
+                else{
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
+                }
+                cam_mouse_controls = !cam_mouse_controls;
+                M_was_pressed = true;
             }
-            else{
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
-            }
-            cam_mouse_controls = !cam_mouse_controls;
-            M_was_pressed = true;
+        }
+        else M_was_pressed = false;
+
+        //Number keys to choose brush
+        for(int i=0; i<EDIT_MODE_NUM_BRUSHES;i++){
+            if(glfwGetKey(window, GLFW_KEY_1 + i))
+                g_current_brush = (EDIT_MODE_CURRENT_BRUSH)(BRUSH_PAINT + i);
         }
     }
-    else M_was_pressed = false;
 
     //Ray picking to raise/lower ground
     if(g_mouse.is_in_window)
@@ -90,7 +105,19 @@ void editor_update(double dt){
             //if(fabs(ray_pos.y-ground_y)<0.1f) 
             if(ray_pos.y<ground_y)
             {
-                flatten_terrain(&g_terrain, terrain_index, edit_speed, paint_radius, dt);
+                switch(g_current_brush){
+                    case BRUSH_PAINT:
+                        paint_terrain(&g_terrain, terrain_index, edit_speed, paint_radius, dt);
+                        break;
+
+                    case BRUSH_FLATTEN: 
+                        flatten_terrain(&g_terrain, terrain_index, edit_speed, paint_radius, dt);
+                        break;
+
+                    default:
+                        printf("Warning in editor_update, unknown brush type: %u\n", g_current_brush);
+                        break;
+                }
                 //draw_vec(ray_pos, vec3(0,3,0), vec4(1,0,0,1));
                 break;
             }
@@ -105,8 +132,8 @@ void editor_update(double dt){
         // ------------------------------------------------------------
 
     }
-    g_camera.update(dt);
 
+    g_camera.update(dt);
 }
 
 void paint_terrain(Terrain* t, int terrain_index, float edit_speed, float paint_radius, double dt)
